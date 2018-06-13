@@ -12,13 +12,17 @@ export interface ResourceParameters {
     contentType?: string;
 }
 
-export class Resource<DataModel, ResponseModel> {
+export class Resource<DataModel> {
+    recordType: string;
     url: string;
     method: string;
     environment: Environment;
-    constructor(props: ResourceProps, environment: Environment) {
+    constructor(recordType: string, props: ResourceProps, environment: Environment) {
+        this.recordType = recordType;
         this.url = props.url;
         this.method = props.method;
+
+        environment.store.registerRecordType(recordType);
         this.environment = environment;
     }
 
@@ -28,15 +32,15 @@ export class Resource<DataModel, ResponseModel> {
             const fetchInit = this.requestInitReslover(params);
 
             const response = await this.environment.fetch(url, fetchInit);
-            
+
             if (!response.ok) {
                 const responseText = await response.text();
                 throw new Error(responseText);
             }
 
-            const json: ResponseModel = await response.json();
-            const data = this.dataResolver(json) as DataModel;
-            return data;
+            const json: DataModel = await response.json();
+            await this.mapRecordToStore(json);
+            return json;
         } catch (error) {
             throw new Error(error);
         }
@@ -82,7 +86,13 @@ export class Resource<DataModel, ResponseModel> {
         return requestInit;
     }
 
-    dataResolver(data: ResponseModel): DataModel | ResponseModel {
-        return data;
+    mapRecordToStore(data: DataModel) {
+        if (Array.isArray(data)) {
+            for (const dataItem of data) {
+                this.environment.store.mapRecord(this.recordType, dataItem);
+            }
+        } else {
+            this.environment.store.mapRecord(this.recordType, data);
+        }
     }
 }
