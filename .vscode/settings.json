@@ -1,0 +1,4 @@
+{
+    "typescript.extension.sortImports.sortOnSave": true,
+    "typescript.extension.sortImports.omitSemicolon": false
+}
