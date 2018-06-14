@@ -1,6 +1,7 @@
 import { Environment } from './Environment';
 
 export interface ResourceProps {
+    resourceType: string;
     url: string;
     method: string;
 }
@@ -12,17 +13,20 @@ export interface ResourceParameters {
     contentType?: string;
 }
 
-export class Resource<DataModel> {
+export class Resource<DataModel = {}> {
     recordType: string;
     url: string;
     method: string;
-    environment: Environment;
-    constructor(recordType: string, props: ResourceProps, environment: Environment) {
-        this.recordType = recordType;
+    environment!: Environment;
+
+    constructor(props: ResourceProps) {
+        this.recordType = props.resourceType;
         this.url = props.url;
         this.method = props.method;
+    }
 
-        environment.store.registerRecordType(recordType);
+    setEnvironment(environment: Environment) {
+        environment.store.registerRecordType(this.recordType);
         this.environment = environment;
     }
 

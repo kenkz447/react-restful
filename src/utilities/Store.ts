@@ -16,7 +16,7 @@ export class Store {
 
     registerRecordType(recordType: string) {
         if (this.store[recordType]) {
-            throw new Error('Record type exist!');
+            return;
         }
 
         this.store[recordType] = new RecordTable(this.recordKeyProperty);
