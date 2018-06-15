@@ -11,26 +11,32 @@ export interface Record {
 export class RecordTable<T = Record> {
     keyProperty: keyof Record;
 
-    table: Table<T> = {};
+    records: Table<T>;
 
-    static encodedRecordKeyValue(keyPropertyValue: string) {
-        const encoded = Base64.encode(keyPropertyValue);
+    static encodeKey(keyPropertyValue: string | number) {
+        const encoded = Base64.encode(String(keyPropertyValue));
         return encoded;
     }
 
-    constructor(keyProperty: string) {
+    constructor(keyProperty: string = 'id') {
         this.keyProperty = keyProperty;
+        this.records = {};
+    }
+
+    getByKey(key: string | number) {
+        const encoded = RecordTable.encodeKey(key);
+        return this.records[encoded];
     }
 
     upsert(record: T) {
         const keyPropertyValue = record[this.keyProperty];
-        const encoded = RecordTable.encodedRecordKeyValue(keyPropertyValue);
-        this.table[encoded] = record;
+        const encoded = RecordTable.encodeKey(keyPropertyValue);
+        this.records[encoded] = record;
     }
 
     remove(record: T) {
         const keyPropertyValue = record[this.keyProperty];
-        const encoded = RecordTable.encodedRecordKeyValue(keyPropertyValue);
-        delete this.table[encoded];
+        const encoded = RecordTable.encodeKey(keyPropertyValue);
+        delete this.records[encoded];
     }
 }
