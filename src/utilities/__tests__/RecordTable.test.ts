@@ -1,35 +1,47 @@
 import { RecordTable } from '../RecordTable';
+interface User {
+    _id: number;
+    username: string;
+}
 
 describe('RecordTable', () => {
-    const table = new RecordTable();
-    let record = {
-        id: 1,
+    const table = new RecordTable<User>();
+
+    let testUser: User = {
+        _id: 1,
         username: 'test'
     };
-    const encodeKey = RecordTable.encodeKey(1);
 
     it('add a record', () => {
-        table.upsert(record);
-        expect(table.records[encodeKey]).toBe(record);
+        table.upsert(testUser);
+        expect(table.findByKey(testUser._id)).toBe(testUser);
     });
 
     it('update the record', () => {
-        record = {
-            id: 1,
+        testUser = {
+            _id: 1,
             username: 'username has been changed'
         };
-        table.upsert(record);
-        expect(table.records[encodeKey]).toBe(record);
+        table.upsert(testUser);
+        expect(table.findByKey(testUser._id)).toBe(testUser);
     });
 
     it('get the record by `primary_key(id)`', () => {
-        const recordGetByKey = table.getByKey(record.id);
-        expect(recordGetByKey).toBe(record);
+        const recordGetByKey = table.findByKey(testUser._id);
+        expect(recordGetByKey).toBe(testUser);
+    });
+
+    it('find the record by predicate', () => {
+        const foundedRecord = table.records.find((record) => {
+            console.log(record)
+           return record.username.includes('changed');
+        });
+        expect(foundedRecord).toBe(testUser);
     });
 
     it('remove the record', () => {
-        table.remove(record);
-        const recordGetByKey = table.getByKey(record.id);
+        table.remove(testUser);
+        const recordGetByKey = table.findByKey(testUser._id);
         expect(recordGetByKey).toBe(undefined);
     });
 });

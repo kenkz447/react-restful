@@ -1,5 +1,10 @@
 import React from 'react';
-import { Resource, ResourceParameters, State, Environment } from '../utilities';
+import {
+    Environment,
+    RecordTables,
+    Resource,
+    ResourceParameter
+    } from '../utilities';
 
 export interface RestfulComponentRenderProps<DataModel> {
     data?: DataModel | null;
@@ -9,7 +14,7 @@ export interface RestfulComponentRenderProps<DataModel> {
 export interface RestfulRenderProps<DataModel = {}> {
     environment: Environment;
     resource: Resource<DataModel>;
-    parameters: Array<ResourceParameters>;
+    parameters: Array<ResourceParameter>;
     render(props: RestfulComponentRenderProps<DataModel>): React.ReactNode;
 }
 export interface RestfulRenderState<DataModel = {}> extends RestfulRenderProps<DataModel> {
@@ -55,7 +60,7 @@ export class RestfulRender extends React.PureComponent<RestfulRenderProps, Restf
         return this.props.render(this.state.componentRenderProps);
     }
 
-    async refresh(resource: Resource, parameters: ResourceParameters[]): Promise<void> {
+    async refresh(resource: Resource, parameters: ResourceParameter[]): Promise<void> {
         try {
             this.setState({
                 componentRenderProps: {

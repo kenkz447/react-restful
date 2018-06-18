@@ -4,39 +4,50 @@ interface Table<T> {
     [key: string]: T;
 }
 
-export interface Record {
-    [key: string]: string | number | boolean;
+type RecordTypeValue = string | number | boolean;
+
+export type findPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
+
+export interface RecordType {
+    [key: string]: RecordTypeValue;
 }
 
-export class RecordTable<T = Record> {
-    keyProperty: keyof Record;
+export class RecordTable<T> {
+    keyProperty: keyof RecordType;
+    recordMap: Map<string, T>;
+    get records() {
+        const recordValue = this.recordMap.values();
+        return Array.from(recordValue);
+    }
 
-    records: Table<T>;
-
-    static encodeKey(keyPropertyValue: string | number) {
+    static encodeKey(keyPropertyValue: RecordTypeValue) {
         const encoded = Base64.encode(String(keyPropertyValue));
         return encoded;
     }
 
     constructor(keyProperty: string = 'id') {
         this.keyProperty = keyProperty;
-        this.records = {};
+        this.recordMap = new Map();
     }
 
-    getByKey(key: string | number) {
+    find(predicate: findPredicate<T>): T | undefined {
+        return this.records.find(predicate);
+    }
+
+    findByKey(key: string | number) {
         const encoded = RecordTable.encodeKey(key);
-        return this.records[encoded];
+        return this.recordMap.get(encoded);
     }
 
     upsert(record: T) {
         const keyPropertyValue = record[this.keyProperty];
         const encoded = RecordTable.encodeKey(keyPropertyValue);
-        this.records[encoded] = record;
+        this.recordMap.set(encoded, record);
     }
 
     remove(record: T) {
         const keyPropertyValue = record[this.keyProperty];
         const encoded = RecordTable.encodeKey(keyPropertyValue);
-        delete this.records[encoded];
+        this.recordMap.delete(encoded);
     }
 }

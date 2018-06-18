@@ -1,17 +1,17 @@
 import { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
-const ReactTestRenderer = require('react-test-renderer');
-
 import * as TestUtils from 'react-dom/test-utils';
 import {
     createEnvironment,
+    Environment,
     Resource,
-    ResourceParameters,
-    ResourceProps,
-    Environment
-} from '../../utilities';
-import { RestfulRender, RestfulRenderProps, RestfulComponentRenderProps } from '../RestfulRender';
+    ResourceParameter,
+    ResourceProps
+    } from '../../utilities';
 import { Store } from '../../utilities/Store';
+import { RestfulComponentRenderProps, RestfulRender, RestfulRenderProps } from '../RestfulRender';
+const ReactTestRenderer = require('react-test-renderer');
+
 
 class PropsSetter extends React.PureComponent {
     state: {
@@ -53,7 +53,7 @@ describe('RestfulRender', () => {
         method: 'GET',
     });
 
-    let testParameter: Array<ResourceParameters> = [{
+    let testParameter: Array<ResourceParameter> = [{
         type: 'path',
         parameter: 'branchId',
         value: 1

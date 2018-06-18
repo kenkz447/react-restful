@@ -1,56 +1,35 @@
-import { Environment } from './Environment';
+import { RecordType } from './RecordTable';
+import { ResourceType } from './ResourceType';
+import { Store } from './Store';
 
-export interface ResourceProps {
-    resourceType: string;
+export interface ResourceProps<DataModel> {
+    resourceType: ResourceType;
     url: string;
     method: string;
+    mapRecordToStore?: (data: DataModel, store: Store) => void;
 }
 
-export interface ResourceParameters {
-    parameter: string;
+export interface ResourceParameter {
+    parameter?: string;
     value: Object | string | number;
     type: 'body' | 'path' | 'query';
     contentType?: string;
 }
 
-export class Resource<DataModel = {}> {
-    recordType: string;
+export class Resource<DataModel = RecordType> {
+    recordType: ResourceType;
     url: string;
     method: string;
-    environment!: Environment;
+    mapRecordToStore: ResourceProps<DataModel>['mapRecordToStore'];
 
-    constructor(props: ResourceProps) {
+    constructor(props: ResourceProps<DataModel>) {
         this.recordType = props.resourceType;
         this.url = props.url;
         this.method = props.method;
+        this.mapRecordToStore = props.mapRecordToStore;
     }
 
-    setEnvironment(environment: Environment) {
-        environment.store.registerRecordType(this.recordType);
-        this.environment = environment;
-    }
-
-    async fetch(params: Array<ResourceParameters>): Promise<DataModel> {
-        try {
-            const url = this.urlReslover(params);
-            const fetchInit = this.requestInitReslover(params);
-
-            const response = await this.environment.fetch(url, fetchInit);
-
-            if (!response.ok) {
-                const responseText = await response.text();
-                throw new Error(responseText);
-            }
-
-            const json: DataModel = await response.json();
-            await this.mapRecordToStore(json);
-            return json;
-        } catch (error) {
-            throw new Error(error);
-        }
-    }
-
-    urlReslover(params: Array<ResourceParameters>): string {
+    urlReslover(params: Array<ResourceParameter>): string {
         let uRL: string = this.url;
         const searchs: URLSearchParams = new URLSearchParams();
         for (const param of params) {
@@ -61,19 +40,19 @@ export class Resource<DataModel = {}> {
             if (param.type === 'path') {
                 uRL = uRL.replace(`{${param.parameter}}`, param.value as string);
             } else {
-                searchs.append(param.parameter, param.value as string);
+                searchs.append(param.parameter as string, param.value as string);
             }
         }
 
         return `${uRL}?${searchs.toString()}`;
     }
 
-    requestInitReslover(params: Array<ResourceParameters>): RequestInit | null {
+    requestInitReslover(params: Array<ResourceParameter>): RequestInit | null {
         if (!params) {
             return null;
         }
 
-        const body: ResourceParameters = params.find(param => param.type === 'body') as ResourceParameters;
+        const body: ResourceParameter = params.find(param => param.type === 'body') as ResourceParameter;
 
         if (!body) {
             return null;
@@ -83,20 +62,14 @@ export class Resource<DataModel = {}> {
             headers: new Headers({
                 'Content-Type': body.contentType as string
             }),
-            body: body.value as string,
+            body: JSON.stringify(body.value),
             method: this.method
         };
 
-        return requestInit;
-    }
-
-    mapRecordToStore(data: DataModel) {
-        if (Array.isArray(data)) {
-            for (const dataItem of data) {
-                this.environment.store.mapRecord(this.recordType, dataItem);
-            }
-        } else {
-            this.environment.store.mapRecord(this.recordType, data);
+        if (!body.contentType) {
+            (requestInit.headers as Headers).set('Content-Type', 'application/json');
         }
+
+        return requestInit;
     }
 }
