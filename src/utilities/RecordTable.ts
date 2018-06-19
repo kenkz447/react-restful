@@ -30,19 +30,17 @@ export class RecordTable<T> {
         this.recordMap = new Map();
     }
 
-    find(predicate: findPredicate<T>): T | undefined {
-        return this.records.find(predicate);
-    }
-
     findByKey(key: string | number) {
         const encoded = RecordTable.encodeKey(key);
-        return this.recordMap.get(encoded);
+        const result = this.recordMap.get(encoded);
+        return result;
     }
 
     upsert(record: T) {
         const keyPropertyValue = record[this.keyProperty];
         const encoded = RecordTable.encodeKey(keyPropertyValue);
         this.recordMap.set(encoded, record);
+        return true;
     }
 
     remove(record: T) {

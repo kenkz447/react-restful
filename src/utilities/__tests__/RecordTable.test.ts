@@ -5,7 +5,7 @@ interface User {
 }
 
 describe('RecordTable', () => {
-    const table = new RecordTable<User>();
+    const table = new RecordTable<User>('_id');
 
     let testUser: User = {
         _id: 1,
@@ -13,8 +13,8 @@ describe('RecordTable', () => {
     };
 
     it('add a record', () => {
-        table.upsert(testUser);
-        expect(table.findByKey(testUser._id)).toBe(testUser);
+        const added = table.upsert(testUser);
+        expect(added).toBe(true);
     });
 
     it('update the record', () => {
@@ -22,8 +22,8 @@ describe('RecordTable', () => {
             _id: 1,
             username: 'username has been changed'
         };
-        table.upsert(testUser);
-        expect(table.findByKey(testUser._id)).toBe(testUser);
+        const updateResult = table.upsert(testUser);
+        expect(updateResult).toBe(true);
     });
 
     it('get the record by `primary_key(id)`', () => {
@@ -33,7 +33,6 @@ describe('RecordTable', () => {
 
     it('find the record by predicate', () => {
         const foundedRecord = table.records.find((record) => {
-            console.log(record)
            return record.username.includes('changed');
         });
         expect(foundedRecord).toBe(testUser);

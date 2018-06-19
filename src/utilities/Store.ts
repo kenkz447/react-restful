@@ -11,8 +11,6 @@ interface SubscribeEvent<T extends RecordType = RecordType> {
     record: RecordType;
 }
 
-type findOnePredicate<T> = (value: T, index: number) => boolean;
-
 type subscribeCallback = (event: SubscribeEvent) => void;
 
 interface StoreProps {
@@ -80,6 +78,10 @@ export class Store {
         return true;
     }
 
+    findRecordByKey<T>(resourceType: ResourceType<T>, key: string | number) {
+
+    }
+
     findOneRecord<T>(resourceType: ResourceType<T>, specs: FindRecordSpec[] | findPredicate<T>): T | undefined {
         const table = this.getRecordTable<T>(resourceType);
         if (Array.isArray(specs)) {
@@ -92,7 +94,7 @@ export class Store {
                 }
             }
         } else {
-            return table.find(specs);
+            return table.records.find(specs);
         }
     }
 
