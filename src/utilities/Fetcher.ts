@@ -4,7 +4,7 @@ import { Store } from './Store';
 interface FetcherProps {
     store: Store;
 }
-export class Fetcher {
+export class Fetcher<T> {
     store: Store;
 
     constructor(props: FetcherProps) {
@@ -15,7 +15,7 @@ export class Fetcher {
         return fetch(url, requestInit);
     }
 
-    async fetchResource(resource: Resource, params: ResourceParameter[]) {
+    async fetchResource(resource: Resource<T>, params: ResourceParameter[]) {
         try {
             const url = resource.urlReslover(params);
             const fetchInit = resource.requestInitReslover(params);
@@ -28,11 +28,15 @@ export class Fetcher {
             }
 
             if (response.status === 200) {
-                const json = await response.json();
-                if (resource.mapRecordToStore !== undefined) {
-                    resource.mapRecordToStore(json, this.store);
+                if (response.headers.get('content-type') === 'application/json') {
+                    const json = await response.json();
+                    const recordType = this.store.getRegisteredResourceType(resource.recordType.name);
+                    if (resource.mapDataToStore) {
+                        resource.mapDataToStore(json, recordType, this.store);
+                    }
+                    return json;
                 }
-                return json;
+                return await response.text();
             }
         } catch (error) {
             throw new Error(error);

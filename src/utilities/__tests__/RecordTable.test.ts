@@ -41,6 +41,6 @@ describe('RecordTable', () => {
     it('remove the record', () => {
         table.remove(testUser);
         const recordGetByKey = table.findByKey(testUser._id);
-        expect(recordGetByKey).toBe(undefined);
+        expect(recordGetByKey).toBe(null);
     });
 });

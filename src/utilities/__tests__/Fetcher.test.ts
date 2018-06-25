@@ -5,29 +5,33 @@ import { ResourceType } from '../ResourceType';
 import { Store } from '../Store';
 
 describe('Fetcher', () => {
-    const store = new Store({
-        recordKeyProperty: '_id'
-    });
 
-    const fetcher = new Fetcher({ store });
     const newUser = { _id: 1 };
 
-    const mapRecordToStore = jest.fn(() => {
+    const mapDataToStore = jest.fn(() => {
         // do something...
     });
 
+    const resourceType = new ResourceType({
+        name: 'user',
+        schema: [{
+            field: '_id',
+            type: 'PK',
+        }]
+    });
+
     const createUserResource = new Resource({
-        resourceType: new ResourceType({
-            name: 'user',
-            schema: [{
-                property: '_id',
-                type: 'PK',
-            }]
-        }),
+        resourceType: resourceType,
         method: 'POST',
         url: '/api/users',
-        mapRecordToStore: mapRecordToStore
+        mapDataToStore: mapDataToStore
     });
+
+    const store = new Store();
+
+    store.registerRecordType(resourceType);
+
+    const fetcher = new Fetcher({ store });
 
     describe('instance', () => {
         it('fetch', async () => {
@@ -45,7 +49,9 @@ describe('Fetcher', () => {
         it('fetch resource', async () => {
             const mockResponseData = newUser;
             const mockResponseDataStr = JSON.stringify(mockResponseData);
-            mockResponseOnce(mockResponseDataStr);
+            mockResponseOnce(mockResponseDataStr, {
+                headers: { 'content-type': 'application/json' }
+            });
 
             const fetchParam: ResourceParameter = {
                 type: 'body',
@@ -59,7 +65,7 @@ describe('Fetcher', () => {
 
     describe('data mapping', () => {
         it('after fetch', () => {
-            expect(mapRecordToStore).toBeCalledWith(newUser, store);
+            expect(mapDataToStore).toBeCalled();
         });
     });
 });

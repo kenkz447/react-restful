@@ -8,7 +8,7 @@ interface User extends RecordType {
 
 describe('Resource', () => {
     const commonPK: SchemaField = {
-        property: '_id',
+        field: '_id',
         type: 'PK'
     };
 
@@ -16,7 +16,7 @@ describe('Resource', () => {
         name: 'branch',
         schema: [commonPK, {
             type: 'MANY',
-            property: 'users',
+            field: 'users',
             resourceType: 'user'
         }]
     });
@@ -25,7 +25,7 @@ describe('Resource', () => {
         name: 'booking',
         schema: [commonPK, {
             type: 'FK',
-            property: 'user',
+            field: 'user',
             resourceType: 'user'
         }]
     });
@@ -35,17 +35,17 @@ describe('Resource', () => {
         schema: [
             commonPK, {
                 type: 'FK',
-                property: 'branch',
+                field: 'branch',
                 resourceType: branchResourceType.name
             }, {
                 type: 'MANY',
-                property: 'bookings',
+                field: 'bookings',
                 resourceType: bookingResourceType.name
             }
         ]
     });
 
-    const mapRecordToStore = jest.fn((record, store) => {
+    const mapDataToStore = jest.fn((record, store) => {
         store.mapRecord('user', record);
     });
 
@@ -53,7 +53,7 @@ describe('Resource', () => {
         resourceType: userResourceType,
         method: 'POST',
         url: '/api/users/{branch}',
-        mapRecordToStore: mapRecordToStore
+        mapDataToStore: mapDataToStore
     });
 
     const pathParam: ResourceParameter = {

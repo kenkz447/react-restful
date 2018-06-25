@@ -6,7 +6,7 @@ interface Table<T> {
 
 type RecordTypeValue = string | number | boolean;
 
-export type findPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
+export type findRecordPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
 export interface RecordType {
     [key: string]: RecordTypeValue;
@@ -25,7 +25,7 @@ export class RecordTable<T> {
         return encoded;
     }
 
-    constructor(keyProperty: string = 'id') {
+    constructor(keyProperty: string) {
         this.keyProperty = keyProperty;
         this.recordMap = new Map();
     }
@@ -33,7 +33,7 @@ export class RecordTable<T> {
     findByKey(key: string | number) {
         const encoded = RecordTable.encodeKey(key);
         const result = this.recordMap.get(encoded);
-        return result;
+        return result || null;
     }
 
     upsert(record: T) {

@@ -1,4 +1,4 @@
-import { findPredicate, RecordTable, RecordType } from './RecordTable';
+import { findRecordPredicate, RecordTable, RecordType } from './RecordTable';
 import { ResourceType } from './ResourceType';
 
 export interface RecordTables {
@@ -7,34 +7,26 @@ export interface RecordTables {
 
 interface SubscribeEvent<T extends RecordType = RecordType> {
     type: 'mapping' | 'remove';
-    resourceType: ResourceType;
-    record: RecordType;
+    resourceType: ResourceType<T>;
+    record: T;
 }
 
 type subscribeCallback = (event: SubscribeEvent) => void;
-
-interface StoreProps {
-    recordKeyProperty: string;
-}
 
 interface SubscribeStack {
     resourceTypes: ResourceType[];
     callback: subscribeCallback;
 }
 
-export interface FindRecordSpec {
-    property: string;
-    // tslint:disable-next-line:no-any
-    value: any;
-}
-
 export class Store {
-    private recordKeyProperty: string;
-    private recordTables: RecordTables = {};
-    private subscribeStacks: SubscribeStack[] = [];
+    private recordTypes: Array<ResourceType>;
+    private recordTables: RecordTables;
+    private subscribeStacks: Array<SubscribeStack>;
 
-    constructor(props: StoreProps) {
-        this.recordKeyProperty = props.recordKeyProperty;
+    constructor() {
+        this.recordTypes = [];
+        this.recordTables = {};
+        this.subscribeStacks = [];
     }
 
     subscribe(resourceTypes: ResourceType[], callback: subscribeCallback) {
@@ -42,6 +34,14 @@ export class Store {
             resourceTypes: resourceTypes,
             callback: callback
         });
+    }
+
+    getRegisteredResourceType(resourceTypeName: string) {
+        const resourceType = this.recordTypes.find(o => o.name === resourceTypeName);
+        if (!resourceType) {
+            throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
+        }
+        return resourceType;
     }
 
     getRecordTable<T = RecordType>(resourceType: ResourceType) {
@@ -52,18 +52,33 @@ export class Store {
         if (this.recordTables[resourceType.name]) {
             return;
         }
-        const newRecordTable = new RecordTable(this.recordKeyProperty);
+        const recordKeyProperty = resourceType.schema.find(o => o.type === 'PK');
+        if (recordKeyProperty === undefined) {
+            throw new Error(`${resourceType.name} has no PK field!`);
+        }
+        const newRecordTable = new RecordTable(recordKeyProperty.field);
+
         this.recordTables[resourceType.name] = newRecordTable;
+        
+        resourceType.store = this;
+        this.recordTypes.push(resourceType);
     }
 
-    mapRecord(resourceType: ResourceType, record: RecordType) {
+    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T) {
+
         const table = this.recordTables[resourceType.name];
-        table.upsert(record);
+
+        const upsertResult = table.upsert(record);
+        if (!upsertResult) {
+            throw new Error('upsert not working!');
+        }
+
         this.doSubcribleCallbacks({
             type: 'mapping',
             resourceType: resourceType,
             record: record
         });
+
         return true;
     }
 
@@ -78,24 +93,15 @@ export class Store {
         return true;
     }
 
-    findRecordByKey<T>(resourceType: ResourceType<T>, key: string | number) {
-
+    findRecordByKey<T extends RecordType>(resourceType: ResourceType<T>, key: string | number) {
+        const table = this.getRecordTable<T>(resourceType);
+        const resultByKey = table.findByKey(key);
+        return resultByKey;
     }
 
-    findOneRecord<T>(resourceType: ResourceType<T>, specs: FindRecordSpec[] | findPredicate<T>): T | undefined {
+    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null {
         const table = this.getRecordTable<T>(resourceType);
-        if (Array.isArray(specs)) {
-            for (const spec of specs) {
-                if (spec.property === resourceType.keyProperty) {
-                    const resultByKey = table.findByKey(spec.value);
-                    if (resultByKey) {
-                        return resultByKey;
-                    }
-                }
-            }
-        } else {
-            return table.records.find(specs);
-        }
+        return table.records.find(specs) || null;
     }
 
     private doSubcribleCallbacks(event: SubscribeEvent) {

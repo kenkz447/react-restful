@@ -1,9 +1,10 @@
 import { ResourceType, SchemaField } from '../ResourceType';
 import { Store } from '../Store';
+import { RecordTable } from '../RecordTable';
 
 describe('ResourceType', () => {
     const commonPK: SchemaField = {
-        property: '_id',
+        field: '_id',
         type: 'PK'
     };
 
@@ -11,7 +12,7 @@ describe('ResourceType', () => {
         name: 'branch',
         schema: [commonPK, {
             type: 'MANY',
-            property: 'users',
+            field: 'users',
             resourceType: 'user'
         }]
     });
@@ -20,7 +21,7 @@ describe('ResourceType', () => {
         name: 'booking',
         schema: [commonPK, {
             type: 'FK',
-            property: 'user',
+            field: 'user',
             resourceType: 'user'
         }]
     });
@@ -30,19 +31,23 @@ describe('ResourceType', () => {
         schema: [
             commonPK, {
                 type: 'FK',
-                property: 'branch',
+                field: 'branch',
                 resourceType: branchResourceType.name
             }, {
                 type: 'MANY',
-                property: 'bookings',
+                field: 'bookings',
                 resourceType: bookingResourceType.name
             }
         ]
     });
 
-    const store = new Store({
-        recordKeyProperty: '_id'
-    });
+    const store = new Store();
+
+    store.mapRecord = jest.fn(store.mapRecord);
+
+    store.registerRecordType(branchResourceType);
+    store.registerRecordType(userResourceType);
+    store.registerRecordType(bookingResourceType);
 
     const testUser = {
         _id: 1,
@@ -55,16 +60,39 @@ describe('ResourceType', () => {
             _id: 56,
             branchName: 'branch'
         },
-        booking: [{
+        bookings: [{
+            _id: 1,
             date: '1970-01-01',
             time: '01:00'
         }, {
+            _id: 2,
             date: '1970-01-02',
             time: '16:30'
         }]
     };
+    describe('instance', () => {
+        beforeAll(() => {
+            userResourceType.dataMapping(testData);
+        });
 
-    it('instance', () => {
-        userResourceType.dataMapping(testData, store);
+        it('store mapRecord toBeCalled', () => {
+            expect(store.mapRecord).toBeCalledWith(branchResourceType, testData.branch);
+        });
+
+        it('dataMapping', () => {
+            expect.assertions(4);
+            const storedBranch = store.findRecordByKey(branchResourceType, testData.branch._id);
+            const storeUser = store.findRecordByKey(userResourceType, testData._id);
+
+            const bookingTable = store.getRecordTable(bookingResourceType);
+
+            expect(storedBranch).toEqual(testData.branch);
+            expect(storeUser).toEqual(testUser);
+
+            bookingTable.recordMap.forEach((booking, encodedKey) => {
+                const testBooking = testData.bookings.find(o => RecordTable.encodeKey(o._id) === encodedKey);
+                expect(booking).toEqual(testBooking);
+            });
+        });
     });
 });

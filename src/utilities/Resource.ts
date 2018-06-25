@@ -6,7 +6,7 @@ export interface ResourceProps<DataModel> {
     resourceType: ResourceType;
     url: string;
     method: string;
-    mapRecordToStore?: (data: DataModel, store: Store) => void;
+    mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
 }
 
 export interface ResourceParameter {
@@ -16,17 +16,17 @@ export interface ResourceParameter {
     contentType?: string;
 }
 
-export class Resource<DataModel = RecordType> {
+export class Resource<DataModel> {
     recordType: ResourceType;
     url: string;
     method: string;
-    mapRecordToStore: ResourceProps<DataModel>['mapRecordToStore'];
+    mapDataToStore: ResourceProps<DataModel>['mapDataToStore'];
 
     constructor(props: ResourceProps<DataModel>) {
         this.recordType = props.resourceType;
         this.url = props.url;
         this.method = props.method;
-        this.mapRecordToStore = props.mapRecordToStore;
+        this.mapDataToStore = props.mapDataToStore;
     }
 
     urlReslover(params: Array<ResourceParameter>): string {

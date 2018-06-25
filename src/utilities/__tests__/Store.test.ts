@@ -1,18 +1,17 @@
 import { RecordTable } from '../RecordTable';
 import { ResourceType } from '../ResourceType';
-import { FindRecordSpec, Store } from '../Store';
+import { Store } from '../Store';
 
 describe('Store', () => {
-    const store = new Store({
-        recordKeyProperty: '_id'
-    });
+    const store = new Store();
+    
     const userResourceType = new ResourceType<{
         _id: number
         username: string
     }>({
         name: 'user',
         schema: [{
-            property: '_id',
+            field: '_id',
             type: 'PK',
         }]
     });
@@ -33,16 +32,14 @@ describe('Store', () => {
         username: 'test'
     };
 
-    const findUserByIdSpec: FindRecordSpec = {
-        property: '_id',
-        value: testUser._id
-    };
-
     describe('instance', () => {
         it('register record type', () => {
             store.registerRecordType(userResourceType);
             table = store.getRecordTable(userResourceType);
+            const registeredResourceType = store.getRegisteredResourceType(userResourceType.name);
+            
             expect(table instanceof RecordTable).toBe(true);
+            expect(registeredResourceType).toBe(userResourceType);
         });
 
         it('map record to table', () => {
@@ -51,7 +48,7 @@ describe('Store', () => {
         });
 
         it('find one record by key', () => {
-            const storedUser = store.findOneRecord(userResourceType, [findUserByIdSpec]);
+            const storedUser = store.findRecordByKey(userResourceType, testUser._id);
             expect(storedUser).toEqual(testUser);
         });
 
@@ -64,10 +61,10 @@ describe('Store', () => {
 
         it('remove record from table', () => {
             const removeResult = store.removeRecord(userResourceType, testUser);
+            const storedUser = store.findRecordByKey(userResourceType, testUser._id);
 
-            const storedUser = store.findOneRecord(userResourceType, [findUserByIdSpec]);
             expect(removeResult).toBe(true);
-            expect(storedUser).toBe(undefined);
+            expect(storedUser).toBe(null);
         });
     });
 
