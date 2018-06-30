@@ -5,6 +5,12 @@ export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
 
+interface RecordMetaItem {
+    type: 'FK' | 'MANY';
+    // tslint:disable-next-line:no-any
+    value: any;
+}
+
 interface SubscribeEvent<T extends RecordType = RecordType> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
@@ -59,12 +65,11 @@ export class Store {
         const newRecordTable = new RecordTable(recordKeyProperty.field);
 
         this.recordTables[resourceType.name] = newRecordTable;
-        
-        resourceType.store = this;
+
         this.recordTypes.push(resourceType);
     }
 
-    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T) {
+    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T, meta: Map<string, RecordMetaItem>) {
 
         const table = this.recordTables[resourceType.name];
 
@@ -102,6 +107,56 @@ export class Store {
     findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null {
         const table = this.getRecordTable<T>(resourceType);
         return table.records.find(specs) || null;
+    }
+
+    /**
+     * Map a fetched data of type to store
+     * * For FK, we only update primitive fields of FK record
+     */
+    dataMapping<T extends RecordType>(resourceType: ResourceType, record: T) {
+        const recordToMapping = Object.assign({}, record) as T;
+        const recordToMappingMeta = new Map<string, RecordMetaItem>();
+
+        for (const schemaField of resourceType.schema) {
+            const resourceTypeName = schemaField.resourceType as string;
+            const relatedField = recordToMapping[schemaField.field] as {};
+
+            if (!relatedField) {
+                continue;
+            }
+
+            switch (schemaField.type) {
+                case 'FK':
+                    const fkResourceType = this.getRegisteredResourceType(resourceTypeName);
+                    this.dataMapping(fkResourceType, relatedField);
+                    const fkKey = relatedField[fkResourceType.keyProperty];
+                    recordToMappingMeta.set(schemaField.field, {
+                        type: 'FK',
+                        value: fkKey
+                    });
+                    delete recordToMapping[schemaField.field];
+                    break;
+                case 'MANY':
+                    if (!Array.isArray(relatedField)) {
+                        throw new Error('MANY related but received something is not an array!');
+                    }
+                    const manyResourceType = this.getRegisteredResourceType(resourceTypeName);
+                    for (const relatedRecord of relatedField) {
+                        this.dataMapping(manyResourceType, relatedRecord);
+                    }
+                    const manyKeys = relatedField.map(o => o[schemaField.field]);
+                    recordToMappingMeta.set(schemaField.field, {
+                        type: 'FK',
+                        value: manyKeys
+                    });
+                    delete recordToMapping[schemaField.field];
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        this.mapRecord(resourceType, recordToMapping, recordToMappingMeta);
     }
 
     private doSubcribleCallbacks(event: SubscribeEvent) {

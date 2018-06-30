@@ -1,6 +1,6 @@
+import { RecordTable } from '../RecordTable';
 import { ResourceType, SchemaField } from '../ResourceType';
 import { Store } from '../Store';
-import { RecordTable } from '../RecordTable';
 
 describe('ResourceType', () => {
     const commonPK: SchemaField = {
@@ -72,7 +72,7 @@ describe('ResourceType', () => {
     };
     describe('instance', () => {
         beforeAll(() => {
-            userResourceType.dataMapping(testData);
+            store.dataMapping(userResourceType, testData);
         });
 
         it('store mapRecord toBeCalled', () => {

@@ -4,7 +4,7 @@ interface Table<T> {
     [key: string]: T;
 }
 
-type RecordTypeValue = string | number | boolean;
+type RecordTypeValue = string | number | boolean | {};
 
 export type findRecordPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
