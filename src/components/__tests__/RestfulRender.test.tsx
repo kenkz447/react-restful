@@ -71,7 +71,7 @@ describe('RestfulRender', () => {
 
     const testUserData = {
         content: [{
-            _id: 2
+            _id: 1
         }, {
             _id: 2
         }]

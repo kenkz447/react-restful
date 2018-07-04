@@ -87,7 +87,7 @@ describe('ResourceType', () => {
             const bookingTable = store.getRecordTable(bookingResourceType);
 
             expect(storedBranch).toEqual(testData.branch);
-            expect(storeUser).toEqual(testUser);
+            expect(storeUser).toEqual(testData);
 
             bookingTable.recordMap.forEach((booking, encodedKey) => {
                 const testBooking = testData.bookings.find(o => RecordTable.encodeKey(o._id) === encodedKey);

@@ -9,9 +9,6 @@ interface RestfulPaginationProps {
 
 export interface PaginationProps<DataModel> {
     data: Array<DataModel>;
-    totalItems: number;
-    currentPage: number;
-    pageSize: number;
 }
 
 interface PaginationState<DataModel> {

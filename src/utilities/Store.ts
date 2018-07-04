@@ -5,12 +5,6 @@ export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
 
-interface RecordMetaItem {
-    type: 'FK' | 'MANY';
-    // tslint:disable-next-line:no-any
-    value: any;
-}
-
 interface SubscribeEvent<T extends RecordType = RecordType> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
@@ -69,7 +63,7 @@ export class Store {
         this.recordTypes.push(resourceType);
     }
 
-    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T, meta: Map<string, RecordMetaItem>) {
+    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T) {
 
         const table = this.recordTables[resourceType.name];
 
@@ -115,7 +109,6 @@ export class Store {
      */
     dataMapping<T extends RecordType>(resourceType: ResourceType, record: T) {
         const recordToMapping = Object.assign({}, record) as T;
-        const recordToMappingMeta = new Map<string, RecordMetaItem>();
 
         for (const schemaField of resourceType.schema) {
             const resourceTypeName = schemaField.resourceType as string;
@@ -129,12 +122,7 @@ export class Store {
                 case 'FK':
                     const fkResourceType = this.getRegisteredResourceType(resourceTypeName);
                     this.dataMapping(fkResourceType, relatedField);
-                    const fkKey = relatedField[fkResourceType.keyProperty];
-                    recordToMappingMeta.set(schemaField.field, {
-                        type: 'FK',
-                        value: fkKey
-                    });
-                    delete recordToMapping[schemaField.field];
+                    // delete recordToMapping[schemaField.field];
                     break;
                 case 'MANY':
                     if (!Array.isArray(relatedField)) {
@@ -144,19 +132,13 @@ export class Store {
                     for (const relatedRecord of relatedField) {
                         this.dataMapping(manyResourceType, relatedRecord);
                     }
-                    const manyKeys = relatedField.map(o => o[schemaField.field]);
-                    recordToMappingMeta.set(schemaField.field, {
-                        type: 'FK',
-                        value: manyKeys
-                    });
-                    delete recordToMapping[schemaField.field];
+                    // delete recordToMapping[schemaField.field];
                     break;
                 default:
                     break;
             }
         }
-
-        this.mapRecord(resourceType, recordToMapping, recordToMappingMeta);
+        this.mapRecord(resourceType, recordToMapping);
     }
 
     private doSubcribleCallbacks(event: SubscribeEvent) {
