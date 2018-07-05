@@ -4,7 +4,6 @@ import * as ReactTestRenderer from 'react-test-renderer';
 import { Resource, ResourceParameter, Store } from '../../utilities';
 import { RecordType } from '../../utilities/RecordTable';
 import { ResourceType, SchemaField } from '../../utilities/ResourceType';
-import { PropsSetter } from '../PropsSetter';
 import { RestfulEntry } from '../RestfulEntry';
 import { PaginationProps, restfulPagination } from '../restfulPagination';
 import { RestfulRender } from '../RestfulRender';
@@ -90,28 +89,23 @@ describe('Full', () => {
     store.registerRecordType(userResourceType);
     store.registerRecordType(bookingResourceType);
 
-    const restfulEntryRender = jest.fn((restfulEntryProps) => {
+    const restfulEntryRender = jest.fn(() => {
         return null;
-    });
-
-    const paginationRender = jest.fn((paginationRenderProps: PaginationProps<User>) => {
-        return paginationRenderProps.data.map(o => {
-            return (
-                <RestfulEntry<User>
-                    key={o._id}
-                    store={store}
-                    recordkey={o._id}
-                    resourceType={userResourceType}
-                >
-                    {restfulEntryRender}
-                </RestfulEntry>
-            );
-        });
     });
 
     class Pagination extends React.Component<PaginationProps<User>> {
         render() {
-            return paginationRender(this.props);
+            return this.props.data.map(o => {
+                return (
+                    <RestfulEntry<User>
+                        key={o._id}
+                        store={store}
+                        recordkey={o._id}
+                        resourceType={userResourceType}
+                        render={restfulEntryRender}
+                    />
+                );
+            });
         }
     }
 
@@ -120,32 +114,29 @@ describe('Full', () => {
         resourceType: userResourceType,
     })(Pagination);
 
-    let render = jest.fn((renderProps: DataModel) => {
-        return <PaginationHOC data={renderProps.content} />;
-    });
-
     const mockResponseDataStr = JSON.stringify(testUserData);
     mockResponse(mockResponseDataStr, {
         headers: { 'content-type': 'application/json' }
     });
 
     const restfulRender = ReactTestRenderer.create(
-        <PropsSetter>
-            <RestfulRender<DataModel>
-                store={store}
-                resource={getUserByBranchResource}
-                parameters={paramsProps}
-                render={render}
-            />
-        </PropsSetter>
+        <RestfulRender<DataModel>
+            store={store}
+            resource={getUserByBranchResource}
+            parameters={paramsProps}
+            render={(renderProps) => {
+                if (renderProps.data && Array.isArray(renderProps.data.content)) {
+                    return <PaginationHOC data={renderProps.data.content} />;
+                }
+                return null;
+            }}
+        />
     );
-
-    const restfulRenderInstance = restfulRender.getInstance() as ReactTestRenderer.ReactTestInstance;
 
     it('render entries after fetch', () => {
         expect(restfulEntryRender.mock.calls).toEqual([
-            [testUserData[0]],
-            [testUserData[1]],
-          ]);
+            [{record: testUserData.content[0], recordKey: testUserData.content[0]._id}],
+            [{record: testUserData.content[1], recordKey: testUserData.content[1]._id}],
+        ]);
     });
 });

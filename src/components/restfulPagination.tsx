@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Store } from '../utilities';
-import { ResourceType } from '../utilities/ResourceType';
+import { ResourceType, Store } from '../utilities';
 
 interface RestfulPaginationProps {
     store: Store;
@@ -12,13 +11,14 @@ export interface PaginationProps<DataModel> {
 }
 
 interface PaginationState<DataModel> {
-    pagination: PaginationProps<DataModel>;
+    data: Array<DataModel>;
 }
 
 export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationProps) {
     return (Component: React.ComponentType<PaginationProps<T>>) =>
         class RestfulPaginationComponent extends React.Component<
-            PaginationProps<T>, PaginationState<T>> {
+            PaginationProps<T>,
+            PaginationState<T>> {
 
             constructor(props: PaginationProps<T>) {
                 super(props);
@@ -29,9 +29,8 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                         //
                     }
                 });
-
                 this.state = {
-                    pagination: props
+                    data: props.data
                 };
             }
 
@@ -39,13 +38,10 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                 //
             }
 
-            render() {
+            render() {                
                 return (
                     <Component
-                        data={this.state.pagination.data}
-                        pageSize={this.state.pagination.pageSize}
-                        currentPage={this.state.pagination.currentPage}
-                        totalItems={this.state.pagination.totalItems}
+                        data={this.state.data}
                     />
                 );
             }

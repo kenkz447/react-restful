@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { ResourceType, Store } from '../utilities';
-import { RecordType } from '../utilities/RecordTable';
+import { RecordType, ResourceType, Store } from '../utilities';
 
 interface RestfulEntryRenderProps<T extends RecordType> {
     record: T | null;
@@ -10,7 +9,7 @@ interface RestfulEntryRenderProps<T extends RecordType> {
 interface RestfulEntryProps<T extends RecordType> {
     store: Store;
     resourceType: ResourceType<T>;
-    children: React.ComponentType<RestfulEntryRenderProps<T>>;
+    render: React.ComponentType<RestfulEntryRenderProps<T>>;
     recordkey: string | number;
 }
 
@@ -30,12 +29,10 @@ export class RestfulEntry<T extends RecordType> extends React.Component<
     }
 
     render() {
-        const Component = this.props.children;
-        return (
-            <Component
-                recordKey={this.props.recordkey}
-                record={this.state.record}
-            />
-        );
+        const Component = this.props.render;
+        return this.props.render({
+            recordKey: this.props.recordkey,
+            record: this.state.record
+        })
     }
 }
