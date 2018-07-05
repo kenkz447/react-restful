@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { Store } from '../utilities';
-import { ResourceType } from '../utilities/ResourceType';
-import { RecordType } from '../utilities/RecordTable';
+import { Store, ResourceType, RecordType } from '../utilities';
 
 interface RestfulPaginationProps {
     store: Store;
@@ -34,10 +32,8 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                             if (isRecordExit) {
                                 const updatedStateRecords = this.updateStateRecords(e.record);
                                 this.setState({
-                                    pagination: {
-                                        ...this.state.pagination,
-                                        data: updatedStateRecords
-                                    }
+                                    ...this.state,
+                                    data: updatedStateRecords
                                 });
                             }
                             break;
@@ -45,14 +41,12 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                             if (isRecordExit) {
                                 const deletedRecordKey = resourceType.getRecordKey(e.record);
 
-                                const updatedStateRecords = this.state.pagination.data.filter(o =>
+                                const updatedStateRecords = this.state.data.filter(o =>
                                     resourceType.getRecordKey(o) !== deletedRecordKey);
 
                                 this.setState({
-                                    pagination: {
-                                        ...this.state.pagination,
-                                        data: updatedStateRecords
-                                    }
+                                    ...this.state,
+                                    data: updatedStateRecords
                                 });
                             }
                             break;
@@ -69,7 +63,7 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                 //
             }
 
-            render() {                
+            render() {
                 return (
                     <Component
                         data={this.state.data}
@@ -81,7 +75,7 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                 const { resourceType } = restfulPaginationProps;
 
                 const checkingRecordKey = resourceType.getRecordKey(record);
-                for (const stateRecord of this.state.pagination.data) {
+                for (const stateRecord of this.state.data) {
                     const inStateRecordKey = resourceType.getRecordKey(stateRecord);
                     if (checkingRecordKey === inStateRecordKey) {
                         return true;
@@ -92,11 +86,11 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
             }
 
             updateStateRecords(record: T | RecordType) {
-                const { pagination } = this.state;
+                const { data } = this.state;
                 const { resourceType } = restfulPaginationProps;
                 const mappingRecordKey = resourceType.getRecordKey(record);
 
-                return pagination.data.map(o => {
+                return data.map(o => {
                     if (mappingRecordKey === resourceType.getRecordKey(o)) {
                         return record as T;
                     }

@@ -35,7 +35,7 @@ describe('restfulPagination', () => {
     }];
 
     const paginationData = {
-        data: userData,
+        data: testData,
         currentPage: 1,
         totalItems: 50,
         pageSize: 10
