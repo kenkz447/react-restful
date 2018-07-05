@@ -59,8 +59,7 @@ export class Store {
         const newRecordTable = new RecordTable(recordKeyProperty.field);
 
         this.recordTables[resourceType.name] = newRecordTable;
-        
-        resourceType.store = this;
+
         this.recordTypes.push(resourceType);
     }
 
@@ -102,6 +101,44 @@ export class Store {
     findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null {
         const table = this.getRecordTable<T>(resourceType);
         return table.records.find(specs) || null;
+    }
+
+    /**
+     * Map a fetched data of type to store
+     * * For FK, we only update primitive fields of FK record
+     */
+    dataMapping<T extends RecordType>(resourceType: ResourceType, record: T) {
+        const recordToMapping = Object.assign({}, record) as T;
+
+        for (const schemaField of resourceType.schema) {
+            const resourceTypeName = schemaField.resourceType as string;
+            const relatedField = recordToMapping[schemaField.field] as {};
+
+            if (!relatedField) {
+                continue;
+            }
+
+            switch (schemaField.type) {
+                case 'FK':
+                    const fkResourceType = this.getRegisteredResourceType(resourceTypeName);
+                    this.dataMapping(fkResourceType, relatedField);
+                    // delete recordToMapping[schemaField.field];
+                    break;
+                case 'MANY':
+                    if (!Array.isArray(relatedField)) {
+                        throw new Error('MANY related but received something is not an array!');
+                    }
+                    const manyResourceType = this.getRegisteredResourceType(resourceTypeName);
+                    for (const relatedRecord of relatedField) {
+                        this.dataMapping(manyResourceType, relatedRecord);
+                    }
+                    // delete recordToMapping[schemaField.field];
+                    break;
+                default:
+                    break;
+            }
+        }
+        this.mapRecord(resourceType, recordToMapping);
     }
 
     private doSubcribleCallbacks(event: SubscribeEvent) {

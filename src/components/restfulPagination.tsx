@@ -10,19 +10,17 @@ interface RestfulPaginationProps {
 
 export interface PaginationProps<DataModel> {
     data: Array<DataModel>;
-    totalItems: number;
-    currentPage: number;
-    pageSize: number;
 }
 
 interface PaginationState<DataModel> {
-    pagination: PaginationProps<DataModel>;
+    data: Array<DataModel>;
 }
 
 export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationProps) {
     return (Component: React.ComponentType<PaginationProps<T>>) =>
         class RestfulPaginationComponent extends React.Component<
-            PaginationProps<T>, PaginationState<T>> {
+            PaginationProps<T>,
+            PaginationState<T>> {
 
             constructor(props: PaginationProps<T>) {
                 super(props);
@@ -62,19 +60,19 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                             break;
                     }
                 });
-
                 this.state = {
-                    pagination: props
+                    data: props.data
                 };
             }
 
-            render() {
+            componentDidMount() {
+                //
+            }
+
+            render() {                
                 return (
                     <Component
-                        data={this.state.pagination.data}
-                        pageSize={this.state.pagination.pageSize}
-                        currentPage={this.state.pagination.currentPage}
-                        totalItems={this.state.pagination.totalItems}
+                        data={this.state.data}
                     />
                 );
             }

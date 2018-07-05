@@ -1,6 +1,6 @@
+import { RecordTable } from '../RecordTable';
 import { ResourceType, SchemaField } from '../ResourceType';
 import { Store } from '../Store';
-import { RecordTable } from '../RecordTable';
 
 describe('ResourceType', () => {
     const commonPK: SchemaField = {
@@ -72,7 +72,7 @@ describe('ResourceType', () => {
     };
     describe('instance', () => {
         beforeAll(() => {
-            userResourceType.dataMapping(testData);
+            store.dataMapping(userResourceType, testData);
         });
 
         it('store mapRecord toBeCalled', () => {
@@ -87,7 +87,7 @@ describe('ResourceType', () => {
             const bookingTable = store.getRecordTable(bookingResourceType);
 
             expect(storedBranch).toEqual(testData.branch);
-            expect(storeUser).toEqual(testUser);
+            expect(storeUser).toEqual(testData);
 
             bookingTable.recordMap.forEach((booking, encodedKey) => {
                 const testBooking = testData.bookings.find(o => RecordTable.encodeKey(o._id) === encodedKey);

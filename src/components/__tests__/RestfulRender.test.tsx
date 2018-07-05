@@ -1,18 +1,18 @@
-import * as React from 'react';
 import { mockResponse } from 'jest-fetch-mock';
+import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-
-import { RestfulRender } from '../RestfulRender';
-import { SchemaField, ResourceType } from '../../utilities/ResourceType';
 import { Resource, ResourceParameter, Store } from '../../utilities';
+import { RecordType } from '../../utilities/RecordTable';
+import { ResourceType, SchemaField } from '../../utilities/ResourceType';
 import { PropsSetter } from '../PropsSetter';
+import { RestfulRender } from '../RestfulRender';
 
-interface User {
+interface User extends RecordType {
     _id: number;
     username: string;
 }
 
-interface Pagination<T> {
+interface Pagination<T extends RecordType> {
     content: T[];
     total: number;
     currentPage: number;
@@ -64,14 +64,14 @@ describe('RestfulRender', () => {
         url: '/api/users/{branch}',
         mapDataToStore: (data, resourceType, storeX) => {
             for (const user of data.content) {
-                resourceType.dataMapping(user);
+                storeX.dataMapping(resourceType, user);
             }
         }
     });
 
     const testUserData = {
         content: [{
-            _id: 2
+            _id: 1
         }, {
             _id: 2
         }]

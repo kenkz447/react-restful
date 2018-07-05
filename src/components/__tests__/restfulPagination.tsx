@@ -1,9 +1,8 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-
-import { restfulPagination, PaginationProps } from '../restfulPagination';
-import { Store, ResourceType } from '../../utilities';
+import { ResourceType, Store } from '../../utilities';
 import { PropsSetter } from '../PropsSetter';
+import { PaginationProps, restfulPagination } from '../restfulPagination';
 
 interface User {
     _id: number;
@@ -27,13 +26,12 @@ describe('restfulPagination', () => {
     });
 
     store.registerRecordType(userResourceType);
-
-    let userData = [{
+    const testData = [{
         _id: 1,
-        username: 'user_1'
+        username: 'user1'
     }, {
         _id: 2,
-        username: 'user_2'
+        username: 'user2'
     }];
 
     const paginationData = {
@@ -50,51 +48,48 @@ describe('restfulPagination', () => {
 
     const pagination = ReactTestRenderer.create(
         <PropsSetter>
-            <PaginationHOC {...paginationData} />
+            <PaginationHOC data={testData} />
         </PropsSetter>
     );
 
     it('initial render', () => {
-        expect(render).toBeCalledWith(paginationData);
+        expect(render).toBeCalledWith({
+            data: testData
+        });
     });
     describe('store', () => {
-        it('new record mapping to store', () => {
+        it('new record mapping', () => {
             render.mockClear();
-            userResourceType.dataMapping({
+            store.dataMapping(userResourceType, {
                 _id: 3
             });
             expect(render).not.toBeCalled();
         });
-        it('update exist record', () => {
+        it('existing record mapping', () => {
             render.mockClear();
-            const testUser = userData.find(o => o._id === 1);
-            if (testUser) {
-                testUser.username = 'update';
-            }
-
-            userResourceType.dataMapping({
-                _id: 1,
+            store.dataMapping(userResourceType, {
+                _id: 2,
                 username: 'update'
             });
 
-            expect(render).toBeCalledWith({
-                ...paginationData,
-                data: userData
-            });
+            const updatedUser = testData.find(o => o._id === 2);
+            if (updatedUser) {
+                updatedUser.username = 'update';
+            }
+
+            expect(render).toBeCalledWith(testData);
         });
-        it('remove record in the list', () => {
+        it('nothing happen when a record(not in `data`) remove', () => {
             render.mockClear();
+            store.removeRecord(userResourceType, { _id: 3 });
+            expect(render).not.toBeCalled();
+        });
+        it('rerender when existing record remove', () => {
+            render.mockClear();
+            store.removeRecord(userResourceType, { _id: 2 });
 
-            userData = userData.filter(o => o._id !== 1);
-
-            store.removeRecord(userResourceType, {
-                _id: 1,
-            });
-
-            expect(render).toBeCalledWith({
-                ...paginationData,
-                data: userData
-            });
+            testData.pop();
+            expect(render).toBeCalledWith(testData);
         });
     });
 });

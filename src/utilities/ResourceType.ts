@@ -1,10 +1,16 @@
-import { Store } from './Store';
 import { RecordType } from './RecordTable';
+import { Store } from './Store';
 
 export interface SchemaField {
     field: string;
     type: 'PK' | 'FK' | 'MANY';
     resourceType?: string;
+}
+
+interface RecordRelatedItem {
+    type: 'FK' | 'MANY';
+    // tslint:disable-next-line:no-any
+    value: any;
 }
 
 interface ResourceTypeProps {
@@ -16,10 +22,7 @@ export class ResourceType<T extends RecordType = {}> {
     name: string;
     schema: ResourceTypeProps['schema'];
     keyProperty: string;
-
-    // * store will inject when this register with store
-    store!: Store;
-
+    
     static findPKField(schema: ResourceTypeProps['schema']) {
         return schema.find(o => o.type === 'PK') as SchemaField;
     }
@@ -33,16 +36,12 @@ export class ResourceType<T extends RecordType = {}> {
         this.keyProperty = fKField.field;
     }
 
-    /**
-     * Map a fetched data of type to store
-     * * For FK, we only update primitive fields of FK record
-     */
-    dataMapping(record: T) {
+    getRecordRelated(resourceType: ResourceType, record: T) {
         const recordToMapping = Object.assign({}, record) as T;
+        const recordToMappingMeta: { [key: string]: RecordRelatedItem } = {};
 
-        for (const schemaField of this.schema) {
-            const resourceTypeName = schemaField.resourceType as string;
-            const relatedField = recordToMapping[schemaField.field];
+        for (const schemaField of resourceType.schema) {
+            const relatedField = recordToMapping[schemaField.field] as {};
 
             if (!relatedField) {
                 continue;
@@ -50,26 +49,27 @@ export class ResourceType<T extends RecordType = {}> {
 
             switch (schemaField.type) {
                 case 'FK':
-                    const fkResourceType = this.store.getRegisteredResourceType(resourceTypeName);
-                    fkResourceType.dataMapping(relatedField);
-                    delete recordToMapping[schemaField.field];
+                    const fkKey = relatedField[this.keyProperty];
+                    recordToMappingMeta[schemaField.field] = {
+                        type: 'FK',
+                        value: fkKey
+                    };
                     break;
                 case 'MANY':
                     if (!Array.isArray(relatedField)) {
                         throw new Error('MANY related but received something is not an array!');
                     }
-                    const manyResourceType = this.store.getRegisteredResourceType(resourceTypeName);
-                    for (const relatedRecord of relatedField) {
-                        manyResourceType.dataMapping(relatedRecord);
-                    }
-                    delete recordToMapping[schemaField.field];
+                    const manyKeys = relatedField.map(o => o[schemaField.field]);
+                    recordToMappingMeta[schemaField.field] = {
+                        type: 'FK',
+                        value: manyKeys
+                    };
                     break;
                 default:
                     break;
             }
         }
-
-        this.store.mapRecord(this, recordToMapping);
+        return recordToMappingMeta;
     }
 
     getRecordKey(record: T) {
