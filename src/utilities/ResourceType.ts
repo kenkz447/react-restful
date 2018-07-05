@@ -15,8 +15,8 @@ interface ResourceTypeProps {
 export class ResourceType<T extends RecordType = {}> {
     name: string;
     schema: ResourceTypeProps['schema'];
-    keyProperty?: string;
-    
+    keyProperty: string;
+
     // * store will inject when this register with store
     store!: Store;
 
@@ -70,5 +70,9 @@ export class ResourceType<T extends RecordType = {}> {
         }
 
         this.store.mapRecord(this, recordToMapping);
+    }
+
+    getRecordKey(record: T) {
+        return record[this.keyProperty] || null;
     }
 }

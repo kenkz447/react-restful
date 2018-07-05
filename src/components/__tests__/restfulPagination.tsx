@@ -27,11 +27,21 @@ describe('restfulPagination', () => {
     });
 
     store.registerRecordType(userResourceType);
-    const testData = [{
-        _id: 1
+
+    let userData = [{
+        _id: 1,
+        username: 'user_1'
     }, {
-        _id: 2
+        _id: 2,
+        username: 'user_2'
     }];
+
+    const paginationData = {
+        data: userData,
+        currentPage: 1,
+        totalItems: 50,
+        pageSize: 10
+    };
 
     const PaginationHOC = restfulPagination<User>({
         store: store,
@@ -40,28 +50,51 @@ describe('restfulPagination', () => {
 
     const pagination = ReactTestRenderer.create(
         <PropsSetter>
-            <PaginationHOC data={testData} currentPage={1} totalItems={50} pageSize={10} />
+            <PaginationHOC {...paginationData} />
         </PropsSetter>
     );
 
     it('initial render', () => {
-        expect(render).toBeCalledWith({
-            data: testData,
-            currentPage: 1,
-            totalItems: 50,
-            pageSize: 10
-        });
+        expect(render).toBeCalledWith(paginationData);
     });
     describe('store', () => {
-        it('record mapping', () => {
+        it('new record mapping to store', () => {
             render.mockClear();
             userResourceType.dataMapping({
                 _id: 3
             });
-            //
+            expect(render).not.toBeCalled();
         });
-        it('record remove', () => {
-            //
+        it('update exist record', () => {
+            render.mockClear();
+            const testUser = userData.find(o => o._id === 1);
+            if (testUser) {
+                testUser.username = 'update';
+            }
+
+            userResourceType.dataMapping({
+                _id: 1,
+                username: 'update'
+            });
+
+            expect(render).toBeCalledWith({
+                ...paginationData,
+                data: userData
+            });
+        });
+        it('remove record in the list', () => {
+            render.mockClear();
+
+            userData = userData.filter(o => o._id !== 1);
+
+            store.removeRecord(userResourceType, {
+                _id: 1,
+            });
+
+            expect(render).toBeCalledWith({
+                ...paginationData,
+                data: userData
+            });
         });
     });
 });

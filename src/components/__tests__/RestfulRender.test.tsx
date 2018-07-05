@@ -91,7 +91,7 @@ describe('RestfulRender', () => {
     store.registerRecordType(userResourceType);
     store.registerRecordType(bookingResourceType);
 
-    let render = jest.fn((renderProps) => {
+    let render = jest.fn((renderProps: Pagination<User>) => {
         return 'loading';
     });
 
@@ -102,7 +102,7 @@ describe('RestfulRender', () => {
 
     const restfulRender = ReactTestRenderer.create(
         <PropsSetter>
-            <RestfulRender<Pagination<User>>
+            <RestfulRender
                 store={store}
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
