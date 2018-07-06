@@ -100,7 +100,7 @@ describe('Full', () => {
                     <RestfulEntry<User>
                         key={o._id}
                         store={store}
-                        recordkey={o._id}
+                        recordKey={o._id}
                         resourceType={userResourceType}
                         render={restfulEntryRender}
                     />
@@ -134,9 +134,28 @@ describe('Full', () => {
     );
 
     it('render entries after fetch', () => {
+        expect.assertions(3);
+
+        let syncWithStoreEntries = [];
+        for (const call of restfulEntryRender.mock.calls) {
+            const syncFunc = call[0].syncWithStore;
+            expect(typeof syncFunc).toBe('function');
+            syncWithStoreEntries.push(syncFunc);
+        }
+
         expect(restfulEntryRender.mock.calls).toEqual([
-            [{record: testUserData.content[0], recordKey: testUserData.content[0]._id}],
-            [{record: testUserData.content[1], recordKey: testUserData.content[1]._id}],
+            [{
+                record: testUserData.content[0],
+                recordKey: testUserData.content[0]._id,
+                status: 'synced',
+                syncWithStore: syncWithStoreEntries[0]
+            }, {}],
+            [{
+                record: testUserData.content[1],
+                recordKey: testUserData.content[1]._id,
+                status: 'synced',
+                syncWithStore: syncWithStoreEntries[1]
+            }, {}],
         ]);
     });
 });

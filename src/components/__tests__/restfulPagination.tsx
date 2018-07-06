@@ -26,19 +26,15 @@ describe('restfulPagination', () => {
     });
 
     store.registerRecordType(userResourceType);
-    const testData = [{
-        _id: 1,
-        username: 'user1'
-    }, {
-        _id: 2,
-        username: 'user2'
-    }];
 
-    const paginationData = {
-        data: testData,
-        currentPage: 1,
-        totalItems: 50,
-        pageSize: 10
+    const testData = {
+        data: [{
+            _id: 1,
+            username: 'user1'
+        }, {
+            _id: 2,
+            username: 'user2'
+        }]
     };
 
     const PaginationHOC = restfulPagination<User>({
@@ -48,36 +44,20 @@ describe('restfulPagination', () => {
 
     const pagination = ReactTestRenderer.create(
         <PropsSetter>
-            <PaginationHOC data={testData} />
+            <PaginationHOC data={testData.data} />
         </PropsSetter>
     );
 
     it('initial render', () => {
-        expect(render).toBeCalledWith({
-            data: testData
-        });
+        expect(render).toBeCalledWith(testData);
     });
     describe('store', () => {
-        it('new record mapping', () => {
+        it('record mapping', () => {
             render.mockClear();
             store.dataMapping(userResourceType, {
                 _id: 3
             });
             expect(render).not.toBeCalled();
-        });
-        it('existing record mapping', () => {
-            render.mockClear();
-            store.dataMapping(userResourceType, {
-                _id: 2,
-                username: 'update'
-            });
-
-            const updatedUser = testData.find(o => o._id === 2);
-            if (updatedUser) {
-                updatedUser.username = 'update';
-            }
-
-            expect(render).toBeCalledWith(testData);
         });
         it('nothing happen when a record(not in `data`) remove', () => {
             render.mockClear();
@@ -88,7 +68,7 @@ describe('restfulPagination', () => {
             render.mockClear();
             store.removeRecord(userResourceType, { _id: 2 });
 
-            testData.pop();
+            testData.data.pop();
             expect(render).toBeCalledWith(testData);
         });
     });

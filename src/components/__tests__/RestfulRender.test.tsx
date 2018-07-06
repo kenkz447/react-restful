@@ -5,14 +5,14 @@ import { Resource, ResourceParameter, Store } from '../../utilities';
 import { RecordType } from '../../utilities/RecordTable';
 import { ResourceType, SchemaField } from '../../utilities/ResourceType';
 import { PropsSetter } from '../PropsSetter';
-import { RestfulRender } from '../RestfulRender';
+import { RestfulRender, RestfulRenderProps } from '../RestfulRender';
 
 interface User extends RecordType {
     _id: number;
     username: string;
 }
 
-interface Pagination<T extends RecordType> {
+interface Pagination<T extends RecordType = User> {
     content: T[];
     total: number;
     currentPage: number;
@@ -111,7 +111,8 @@ describe('RestfulRender', () => {
         </PropsSetter>
     );
 
-    const restfulRenderInstance = restfulRender.getInstance() as ReactTestRenderer.ReactTestInstance;
+    // tslint:disable-next-line:no-any
+    const restfulRenderInstance: PropsSetter<RestfulRenderProps<Pagination>> = restfulRender.getInstance() as any;
 
     describe('init', () => {
         it('render with initial renderProps', () => {

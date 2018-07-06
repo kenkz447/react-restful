@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Store, ResourceType, RecordType } from '../utilities';
+import { RecordType, ResourceType, Store } from '../utilities';
 
 interface RestfulPaginationProps {
     store: Store;
@@ -28,15 +28,6 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                     const isRecordExit = this.checkRecordExist(e.record);
 
                     switch (e.type) {
-                        case 'mapping':
-                            if (isRecordExit) {
-                                const updatedStateRecords = this.updateStateRecords(e.record);
-                                this.setState({
-                                    ...this.state,
-                                    data: updatedStateRecords
-                                });
-                            }
-                            break;
                         case 'remove':
                             if (isRecordExit) {
                                 const deletedRecordKey = resourceType.getRecordKey(e.record);
@@ -83,19 +74,6 @@ export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationPr
                 }
 
                 return false;
-            }
-
-            updateStateRecords(record: T | RecordType) {
-                const { data } = this.state;
-                const { resourceType } = restfulPaginationProps;
-                const mappingRecordKey = resourceType.getRecordKey(record);
-
-                return data.map(o => {
-                    if (mappingRecordKey === resourceType.getRecordKey(o)) {
-                        return record as T;
-                    }
-                    return o;
-                });
             }
         };
 }
