@@ -1,0 +1,20 @@
+{
+  "connection": "default",
+  "collectionName": "",
+  "info": {
+    "name": "booking",
+    "description": ""
+  },
+  "options": {
+    "timestamps": true
+  },
+  "attributes": {
+    "date": {
+      "type": "date"
+    },
+    "customer": {
+      "model": "customer",
+      "via": "bookings"
+    }
+  }
+}

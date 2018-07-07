@@ -14,25 +14,25 @@ A library helps your manage data recevice from restful APIs and and render it in
 ## Example
 
 ### server-side
-As backend, I have database with three tables: `Branchs`, `Users`, `Bookings`. The structure of the Customers consists of _id (I use mongodb), username, email, branchId (FK related to `Branchs` table). And Users has relationship (one-to-many) with `Bookings` table.
+As backend, I have database with three tables: `Branchs`, `customers`, `Bookings`. The structure of the Customers consists of _id (I use mongodb), name, email, branchId (FK related to `Branchs` table). And customers has relationship (one-to-many) with `Bookings` table.
 So i write down some API to interact with the `Customers` table:
 - create: POST /customers
 - update: PUT /customers
 - delete: DELETE /customers
-- getUserById: GET /customers/:userId
-- getUsersByBranchId: GET /customers/branch/:branchId
+- getcustomerById: GET /customers/:customerId
+- getcustomersByBranchId: GET /customers/branch/:branchId
 
-`create`, `update`, `getUserById` return a customer, `delete` return `no-content`. And `getUsersByBranchId` take a `branchId` param, `page`, `size` from query, it returns a list of user and pagination info - include properties:
+`create`, `update`, `getcustomerById` return a customer, `delete` return `no-content`. And `getcustomersByBranchId` take a `branchId` param, `page`, `size` from query, it returns a list of customer and pagination info - include properties:
 - customers
 - totalItems
 - currentPage
 - hasMore
 
 ### client-side
-First, create a `ResourceType` for these types: `user`, `branch`, `booking`
+First, create a `ResourceType` for these types: `customer`, `branch`, `booking`
 
 ````typescript
-// file: /src/restful/resources.js
+// file: /src/restful/resourceTypes.tsx
 import { ResourceType, Resource } from 'react-restful';
 
 export const branchResourceType = new ResourceType({
@@ -50,13 +50,13 @@ export const bookingResourceType = new ResourceType({
         type: 'PK'
     }, {
         type: 'FK',
-        field: 'user',
-        resourceType: 'user'
+        field: 'customer',
+        resourceType: 'customer'
     }]
 });
 
 export const customerResourceType = new ResourceType({
-    name: 'user',
+    name: 'customer',
     schema: [{
         field: '_id',
         type: 'PK'
@@ -70,50 +70,63 @@ export const customerResourceType = new ResourceType({
         resourceType: bookingResourceType.name
     }]
 });
+````
+
+````typescript
+// file: /src/restful/resources.tsx
+import { customerResourceType} from './customer'
 
 export interface CustomerDataModel {
     _id?: number;
-    username: string;
+    name: string;
     email: string;
     branchId: number;
 }
 
 export interface GetCustomersByBranchDataModel {
-    content: UserDataModel[];
+    content: CustomerDataModel[];
     totalItems: number;
     currentPage: number;
 }
 
-export const userRecources = {
-    create: new Resource<UserDataModel>({
-        resourceType: userResourceType,
-        ur: 'http://locahost:3000/api/users',
+export const customerRecources = {
+    create: new Resource<CustomerDataModel>({
+        resourceType: customerResourceType,
+        ur: 'http://locahost:3000/api/customers',
         method: 'POST',
         mapDataToStore: (data, resourceType, store) => {
             store.dataMapping(resourceType, data);
         }
     }),
-    update: new Resource<UserDataModel>({
-        resourceType: userResourceType,
-        ur: 'http://locahost:3000/api/users',
+    update: new Resource<CustomerDataModel>({
+        resourceType: customerResourceType,
+        ur: 'http://locahost:3000/api/customers',
         method: 'PUT',
         mapDataToStore: (data, resourceType, store) => {
             store.dataMapping(resourceType, data);
         }
     }),
-    getById: new Resource<UserDataModel>({
-        resourceType: userResourceType,
-        ur: 'http://locahost:3000/api/users/:userId',
+    delete: new Resource<CustomerDataModel>({
+        resourceType: customerResourceType,
+        ur: 'http://locahost:3000/api/customers',
+        method: 'DELETE',
+        mapDataToStore: (data, resourceType, store) => {
+            store.remove(resourceType, data);
+        }
+    }),
+    getById: new Resource<CustomerDataModel>({
+        resourceType: customerResourceType,
+        ur: 'http://locahost:3000/api/customers/:customerId',
         mapDataToStore: (data, resourceType, store) => {
             store.dataMapping(resourceType, data);
         }
     }),
     getByBranch: new new Resource<GetCustomersByBranchDataModel>({
-        resourceType: userResourceType,
-        ur: 'http://locahost:3000/api/users/branch/:branchId',
+        resourceType: customerResourceType,
+        ur: 'http://locahost:3000/api/customers/branch/:branchId',
         mapDataToStore: (data, resourceType, store) => {
-            for (const user of data.content) {
-                store.dataMapping(resourceType, user);
+            for (const customer of data.content) {
+                store.dataMapping(resourceType, customer);
             }
         }
     })

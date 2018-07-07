@@ -1,0 +1,26 @@
+{
+  "branch": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
+  },
+  "customer": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      },
+      "email": {
+        "appearance": ""
+      }
+    }
+  },
+  "booking": {
+    "attributes": {
+      "date": {
+        "appearance": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "connection": "default",
+  "collectionName": "branch",
+  "info": {
+    "name": "branch",
+    "description": ""
+  },
+  "options": {
+    "timestamps": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "customers": {
+      "collection": "customer",
+      "via": "branch"
+    }
+  }
+}
