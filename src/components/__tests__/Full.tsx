@@ -1,11 +1,11 @@
 import { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { Resource, ResourceParameter, Store } from '../../utilities';
-import { RecordType } from '../../utilities/RecordTable';
-import { ResourceType, SchemaField } from '../../utilities/ResourceType';
+
+import { RecordType, ResourceType, SchemaField, Resource, ResourceParameter, Store } from '../../utilities';
+
 import { RestfulEntry } from '../RestfulEntry';
-import { PaginationProps, restfulPagination } from '../restfulPagination';
+import { PaginationProps, restfulDataContainer } from '../restfulDataContainer';
 import { RestfulRender } from '../RestfulRender';
 
 interface User extends RecordType {
@@ -109,7 +109,7 @@ describe('Full', () => {
         }
     }
 
-    const PaginationHOC = restfulPagination<User>({
+    const PaginationHOC = restfulDataContainer<User>({
         store: store,
         resourceType: userResourceType,
     })(Pagination);

@@ -114,11 +114,16 @@ describe('RestfulRender', () => {
     // tslint:disable-next-line:no-any
     const restfulRenderInstance: PropsSetter<RestfulRenderProps<Pagination>> = restfulRender.getInstance() as any;
 
-    describe('init', () => {
-        it('render with initial renderProps', () => {
-            expect(render).toBeCalledWith({
+    describe('init props', () => {
+        it('two first render props', () => {
+            expect(render.mock.calls.length).toBe(2);
+            expect(render.mock.calls[0][0]).toEqual({
                 error: null,
                 data: null
+            });
+            expect(render.mock.calls[1][0]).toEqual({
+                error: null,
+                data: testUserData
             });
         });
     });
@@ -151,7 +156,8 @@ describe('RestfulRender', () => {
             expect(render).toBeCalledWith({
                 error: null,
                 data: testUserData
-            });
+            // tslint:disable-next-line:align
+            }, {});
         });
 
         it('refetch data when `resource` change', () => {
@@ -175,7 +181,8 @@ describe('RestfulRender', () => {
             expect(render).toBeCalledWith({
                 error: null,
                 data: testUserData
-            });
+            // tslint:disable-next-line:align
+            }, {});
         });
         it('refetch data when `render` change', () => {
             render.mockClear();
@@ -195,7 +202,8 @@ describe('RestfulRender', () => {
             expect(render).toBeCalledWith({
                 error: null,
                 data: testUserData
-            });
+            // tslint:disable-next-line:align
+            }, {});
         });
     });
 });

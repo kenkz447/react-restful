@@ -2,13 +2,13 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { ResourceType, Store } from '../../utilities';
 import { PropsSetter } from '../PropsSetter';
-import { PaginationProps, restfulPagination } from '../restfulPagination';
+import { PaginationProps, restfulDataContainer } from '../restfulDataContainer';
 
 interface User {
     _id: number;
 }
 
-describe('restfulPagination', () => {
+describe('restfulDataContainer', () => {
     const render = jest.fn(() => <div />);
     class Pagination extends React.Component<PaginationProps<User>> {
         render() {
@@ -37,7 +37,7 @@ describe('restfulPagination', () => {
         }]
     };
 
-    const PaginationHOC = restfulPagination<User>({
+    const PaginationHOC = restfulDataContainer<User>({
         store: store,
         resourceType: userResourceType,
     })(Pagination);

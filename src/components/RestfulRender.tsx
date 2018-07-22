@@ -55,21 +55,22 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
     }
 
     componentDidMount() {
-        this.state.fetcher.fetchResource(this.state.resource, this.state.parameters).then((data) => {
-            this.setState({
-                componentRenderProps: {
-                    data: data,
-                    error: null
-                }
+        this.state.fetcher.fetchResource<T>(this.state.resource, this.state.parameters)
+            .then((data: T) => {
+                this.setState({
+                    componentRenderProps: {
+                        data: data,
+                        error: null
+                    }
+                });
+            }).catch((error: Error) => {
+                this.setState({
+                    componentRenderProps: {
+                        data: null,
+                        error: error
+                    }
+                });
             });
-        }).catch((error) => {
-            this.setState({
-                componentRenderProps: {
-                    data: null,
-                    error: error
-                }
-            });
-        });
     }
 
     render() {

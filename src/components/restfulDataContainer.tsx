@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store } from '../utilities';
 
-interface RestfulPaginationProps {
+interface RestfulDataContainerProps {
     store: Store;
     resourceType: ResourceType;
 }
@@ -14,9 +14,9 @@ interface PaginationState<DataModel> {
     data: Array<DataModel>;
 }
 
-export function restfulPagination<T>(restfulPaginationProps: RestfulPaginationProps) {
+export function restfulDataContainer<T>(restfulPaginationProps: RestfulDataContainerProps) {
     return (Component: React.ComponentType<PaginationProps<T>>) =>
-        class RestfulPaginationComponent extends React.Component<
+        class RestfulDataContainerComponent extends React.Component<
             PaginationProps<T>,
             PaginationState<T>> {
 

@@ -8,7 +8,7 @@ A library helps your manage data recevice from restful APIs and and render it in
 - Fetcher: send request and receive `Records`.
 - Store: where to store `Records` after fetch.
 - RestfulRenderer: React component acts as a bridge between React and restful APIs
-- restfulPagination: HOC function tracking part of the data, do something when data has been changed.
+- restfulDataContainer: HOC function tracking part of the data, do something when data has been changed.
 - RestfulEntry: is an accurate representation of the `Record` and its state in the `Store`.
 
 ## Example
@@ -214,7 +214,7 @@ export class CustomerItem extends React.Component<
 ````tsx
 // file: /src/components/CustomerList.tsx
 import * as React from 'react';
-import { restfulPagination } from 'react-restful';
+import { restfulDataContainer } from 'react-restful';
 
 import { CustomerResourceType, store, Customer } from '../restful';
 import { CustomerItem } from './CustomerItem';
@@ -234,7 +234,7 @@ function CustomerListComponent(props) {
     });
 }
 
-export const CustomerList = restfulPagination({
+export const CustomerList = restfulDataContainer({
     resourceType: CustomerResourceType,
     store: store
 })(CustomerListComponent)

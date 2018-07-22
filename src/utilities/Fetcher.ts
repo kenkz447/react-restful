@@ -16,7 +16,7 @@ export class Fetcher {
         return fetch(url, requestInit);
     }
 
-    async fetchResource(resource: Resource<ResourceType>, params: ResourceParameter[]) {
+    async fetchResource<DataModel>(resource: Resource<DataModel>, params: ResourceParameter[]) {
         try {
             const url = resource.urlReslover(params);
             const fetchInit = resource.requestInitReslover(params);
