@@ -7,6 +7,8 @@ export interface ResourceProps<DataModel> {
     url: string;
     method: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
+    // tslint:disable-next-line:no-any
+    meta?: any;
 }
 
 export interface ResourceParameter {

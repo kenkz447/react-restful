@@ -15,10 +15,11 @@ export interface RestfulRenderProps<DataModel> {
     store: Store;
     resource: Resource<DataModel>;
     parameters: Array<ResourceParameter>;
-    render(props: RestfulComponentRenderProps<DataModel>): React.ReactNode;
+    render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
 }
+
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
-    fetcher: Fetcher<DataModel>;
+    fetcher: Fetcher;
     componentRenderProps: RestfulComponentRenderProps<DataModel>;
 }
 
@@ -72,6 +73,7 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
     }
 
     render() {
-        return this.state.render(this.state.componentRenderProps);
+        const Component = this.state.render;
+        return <Component {...this.state.componentRenderProps} />;
     }
 }

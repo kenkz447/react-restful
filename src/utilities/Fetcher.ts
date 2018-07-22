@@ -1,10 +1,11 @@
 import { RecordType } from './RecordTable';
 import { Resource, ResourceParameter, ResourceProps } from './Resource';
 import { Store } from './Store';
+import { ResourceType } from './ResourceType';
 interface FetcherProps {
     store: Store;
 }
-export class Fetcher<T> {
+export class Fetcher {
     store: Store;
 
     constructor(props: FetcherProps) {
@@ -15,7 +16,7 @@ export class Fetcher<T> {
         return fetch(url, requestInit);
     }
 
-    async fetchResource(resource: Resource<T>, params: ResourceParameter[]) {
+    async fetchResource(resource: Resource<ResourceType>, params: ResourceParameter[]) {
         try {
             const url = resource.urlReslover(params);
             const fetchInit = resource.requestInitReslover(params);
@@ -24,15 +25,12 @@ export class Fetcher<T> {
 
             if (!response.ok) {
                 const responseText = await response.text();
-                throw new Error(responseText);
-            }
-
-            if (response.status === 200) {
+                throw responseText;
+            } else {
                 if (response.headers.get('content-type') === 'application/json') {
                     const json = await response.json();
-                    const recordType = this.store.getRegisteredResourceType(resource.recordType.name);
                     if (resource.mapDataToStore) {
-                        resource.mapDataToStore(json, recordType, this.store);
+                        resource.mapDataToStore(json, resource.recordType, this.store);
                     }
                     return json;
                 }
