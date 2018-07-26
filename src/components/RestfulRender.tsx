@@ -16,6 +16,7 @@ export interface RestfulRenderProps<DataModel> {
     resource: Resource<DataModel>;
     parameters: Array<ResourceParameter>;
     render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
+    fetcher?: Fetcher;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
@@ -46,7 +47,7 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
         super(props);
         this.state = {
             ...props,
-            fetcher: new Fetcher({ store: this.props.store }),
+            fetcher: this.props.fetcher || new Fetcher({ store: this.props.store }),
             componentRenderProps: {
                 data: null,
                 error: null
@@ -55,6 +56,24 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
     }
 
     componentDidMount() {
+        this.fetching();
+    }
+
+    componentDidUpdate(prevProps: RestfulRenderProps<T>, prevState: RestfulRenderState<T>) {
+        if (this.state.resource !== prevState.resource ||
+            this.state.render !== prevState.render ||
+            this.state.parameters !== prevState.parameters
+        ) {
+            this.fetching();
+        }
+    }
+
+    render() {
+        const Component = this.state.render;
+        return <Component {...this.state.componentRenderProps} />;
+    }
+
+    fetching() {
         this.state.fetcher.fetchResource<T>(this.state.resource, this.state.parameters)
             .then((data: T) => {
                 this.setState({
@@ -71,10 +90,5 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
                     }
                 });
             });
-    }
-
-    render() {
-        const Component = this.state.render;
-        return <Component {...this.state.componentRenderProps} />;
     }
 }

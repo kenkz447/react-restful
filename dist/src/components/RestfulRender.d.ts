@@ -10,6 +10,7 @@ export interface RestfulRenderProps<DataModel> {
     resource: Resource<DataModel>;
     parameters: Array<ResourceParameter>;
     render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
+    fetcher?: Fetcher;
 }
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     fetcher: Fetcher;
@@ -19,5 +20,7 @@ export declare class RestfulRender<T> extends React.PureComponent<RestfulRenderP
     static getDerivedStateFromProps<DataModel>(nextProps: RestfulRenderProps<DataModel>, prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null;
     constructor(props: RestfulRenderProps<T>);
     componentDidMount(): void;
+    componentDidUpdate(prevProps: RestfulRenderProps<T>, prevState: RestfulRenderState<T>): void;
     render(): JSX.Element;
+    fetching(): void;
 }

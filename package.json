@@ -2,9 +2,10 @@
     "name": "react-restful",
     "version": "1.0.0",
     "description": "",
-    "main": "index.ts",
+    "main": "dist/index.js",
     "scripts": {
-        "build": "tsc",
+        "build:before": "rimraf ./dist",
+        "build": "npm run build:before && tsc",
         "test": "jest --config ./jest.config.json"
     },
     "keywords": [],
@@ -17,6 +18,7 @@
         "jest": "^23.1.0",
         "jest-fetch-mock": "^1.6.4",
         "react-test-renderer": "^16.4.1",
+        "rimraf": "^2.6.2",
         "ts-jest": "^22.4.6",
         "tslint": "^5.10.0",
         "tslint-react": "^3.6.0",

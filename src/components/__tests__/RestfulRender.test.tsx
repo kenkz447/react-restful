@@ -1,4 +1,4 @@
-import { mockResponse } from 'jest-fetch-mock';
+import fetch, { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { Resource, ResourceParameter, Store } from '../../utilities';
@@ -156,12 +156,14 @@ describe('RestfulRender', () => {
             expect(render).toBeCalledWith({
                 error: null,
                 data: testUserData
-            // tslint:disable-next-line:align
+                // tslint:disable-next-line:align
             }, {});
         });
 
         it('refetch data when `resource` change', () => {
             render.mockClear();
+            fetch.mockClear();
+
             paramsProps = [...paramsProps];
 
             getUserByBranchResource = new Resource<Pagination<User>>({
@@ -177,11 +179,12 @@ describe('RestfulRender', () => {
                 parameters: paramsProps,
                 render: render
             });
-
+            
+            expect(fetch.mock.calls.length).toEqual(1);
             expect(render).toBeCalledWith({
                 error: null,
                 data: testUserData
-            // tslint:disable-next-line:align
+                // tslint:disable-next-line:align
             }, {});
         });
         it('refetch data when `render` change', () => {
@@ -202,7 +205,7 @@ describe('RestfulRender', () => {
             expect(render).toBeCalledWith({
                 error: null,
                 data: testUserData
-            // tslint:disable-next-line:align
+                // tslint:disable-next-line:align
             }, {});
         });
     });

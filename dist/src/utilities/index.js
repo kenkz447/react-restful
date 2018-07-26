@@ -7,3 +7,4 @@ __export(require("./Resource"));
 __export(require("./Store"));
 __export(require("./ResourceType"));
 __export(require("./RecordTable"));
+__export(require("./Fetcher"));

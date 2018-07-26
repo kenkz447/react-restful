@@ -27,7 +27,7 @@ var RestfulRender = /** @class */ (function (_super) {
     __extends(RestfulRender, _super);
     function RestfulRender(props) {
         var _this = _super.call(this, props) || this;
-        _this.state = __assign({}, props, { fetcher: new Fetcher_1.Fetcher({ store: _this.props.store }), componentRenderProps: {
+        _this.state = __assign({}, props, { fetcher: _this.props.fetcher || new Fetcher_1.Fetcher({ store: _this.props.store }), componentRenderProps: {
                 data: null,
                 error: null
             } });
@@ -42,6 +42,20 @@ var RestfulRender = /** @class */ (function (_super) {
         return null;
     };
     RestfulRender.prototype.componentDidMount = function () {
+        this.fetching();
+    };
+    RestfulRender.prototype.componentDidUpdate = function (prevProps, prevState) {
+        if (this.state.resource !== prevState.resource ||
+            this.state.render !== prevState.render ||
+            this.state.parameters !== prevState.parameters) {
+            this.fetching();
+        }
+    };
+    RestfulRender.prototype.render = function () {
+        var Component = this.state.render;
+        return react_1.default.createElement(Component, __assign({}, this.state.componentRenderProps));
+    };
+    RestfulRender.prototype.fetching = function () {
         var _this = this;
         this.state.fetcher.fetchResource(this.state.resource, this.state.parameters)
             .then(function (data) {
@@ -59,10 +73,6 @@ var RestfulRender = /** @class */ (function (_super) {
                 }
             });
         });
-    };
-    RestfulRender.prototype.render = function () {
-        var Component = this.state.render;
-        return react_1.default.createElement(Component, __assign({}, this.state.componentRenderProps));
     };
     return RestfulRender;
 }(react_1.default.PureComponent));
