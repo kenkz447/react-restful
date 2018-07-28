@@ -6,7 +6,7 @@ interface RestfulDataContainerProps {
     resourceType: ResourceType;
 }
 
-export interface PaginationProps<DataModel> {
+export interface RestfulDataContainerComponentProps<DataModel> {
     data: Array<DataModel>;
 }
 
@@ -15,12 +15,12 @@ interface PaginationState<DataModel> {
 }
 
 export function restfulDataContainer<T>(restfulPaginationProps: RestfulDataContainerProps) {
-    return (Component: React.ComponentType<PaginationProps<T>>) =>
+    return (Component: React.ComponentType<RestfulDataContainerComponentProps<T>>) =>
         class RestfulDataContainerComponent extends React.Component<
-            PaginationProps<T>,
+            RestfulDataContainerComponentProps<T>,
             PaginationState<T>> {
 
-            constructor(props: PaginationProps<T>) {
+            constructor(props: RestfulDataContainerComponentProps<T>) {
                 super(props);
 
                 const { store, resourceType } = restfulPaginationProps;
