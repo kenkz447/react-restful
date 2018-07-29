@@ -1,4 +1,5 @@
 import { RecordType } from './RecordTable';
+import { Store } from './Store';
 export interface SchemaField {
     field: string;
     type: 'PK' | 'FK' | 'MANY';
@@ -18,9 +19,10 @@ export declare class ResourceType<T extends RecordType = {}> {
     keyProperty: string;
     static findPKField(schema: ResourceTypeProps['schema']): SchemaField;
     constructor(props: ResourceTypeProps);
+    getAllRecords(store: Store): T[];
     getRecordRelated(resourceType: ResourceType, record: T): {
         [key: string]: RecordRelatedItem;
     };
-    getRecordKey(record: T): {} | null;
+    getRecordKey(record: T): any;
 }
 export {};

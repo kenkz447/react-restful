@@ -48,7 +48,7 @@ var Fetcher = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 8, , 9]);
+                        _a.trys.push([0, 7, , 8]);
                         url = resource.urlReslover(params);
                         fetchInit = resource.requestInitReslover(params);
                         return [4 /*yield*/, this.fetch(url, fetchInit)];
@@ -70,11 +70,10 @@ var Fetcher = /** @class */ (function () {
                         return [2 /*return*/, json];
                     case 5: return [4 /*yield*/, response.text()];
                     case 6: return [2 /*return*/, _a.sent()];
-                    case 7: return [3 /*break*/, 9];
-                    case 8:
+                    case 7:
                         error_1 = _a.sent();
                         throw new Error(error_1);
-                    case 9: return [2 /*return*/];
+                    case 8: return [2 /*return*/];
                 }
             });
         });

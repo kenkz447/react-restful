@@ -1,26 +1,19 @@
 import { Base64 } from 'js-base64';
 
-interface Table<T> {
-    [key: string]: T;
-}
-
-type RecordTypeValue = string | number | boolean | {};
-
 export type findRecordPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
-export interface RecordType {
-    [key: string]: RecordTypeValue;
-}
+// tslint:disable-next-line:no-any
+export type RecordType = {};
 
 export class RecordTable<T> {
-    keyProperty: keyof RecordType;
+    keyProperty: string;
     recordMap: Map<string, T>;
     get records() {
         const recordValue = this.recordMap.values();
         return Array.from(recordValue);
     }
 
-    static encodeKey(keyPropertyValue: RecordTypeValue) {
+    static encodeKey(keyPropertyValue: string | number) {
         const encoded = Base64.encode(String(keyPropertyValue));
         return encoded;
     }

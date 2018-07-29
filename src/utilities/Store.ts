@@ -27,6 +27,9 @@ export class Store {
         this.recordTypes = [];
         this.recordTables = {};
         this.subscribeStacks = [];
+
+        this.subscribe = this.subscribe.bind(this);
+        this.getRecordTable = this.getRecordTable.bind(this);
     }
 
     subscribe(resourceTypes: ResourceType[], callback: subscribeCallback) {

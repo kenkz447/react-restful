@@ -21,6 +21,11 @@ var ResourceType = /** @class */ (function () {
     ResourceType.findPKField = function (schema) {
         return schema.find(function (o) { return o.type === 'PK'; });
     };
+    ResourceType.prototype.getAllRecords = function (store) {
+        var getRecordTable = store.getRecordTable;
+        var recordTable = getRecordTable(this);
+        return recordTable.records;
+    };
     ResourceType.prototype.getRecordRelated = function (resourceType, record) {
         var e_1, _a;
         var recordToMapping = Object.assign({}, record);

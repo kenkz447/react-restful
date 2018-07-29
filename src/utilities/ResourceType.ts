@@ -1,4 +1,4 @@
-import { RecordType } from './RecordTable';
+import { RecordType, RecordTable } from './RecordTable';
 import { Store } from './Store';
 
 export interface SchemaField {
@@ -22,7 +22,7 @@ export class ResourceType<T extends RecordType = {}> {
     name: string;
     schema: ResourceTypeProps['schema'];
     keyProperty: string;
-    
+
     static findPKField(schema: ResourceTypeProps['schema']) {
         return schema.find(o => o.type === 'PK') as SchemaField;
     }
@@ -36,8 +36,32 @@ export class ResourceType<T extends RecordType = {}> {
         this.keyProperty = fKField.field;
     }
 
+    getAllRecords(store: Store) {
+        const { getRecordTable } = store;
+        const recordTable: RecordTable<T> = getRecordTable(this);
+        const result = [];
+        for (const record of recordTable.records) {
+            for (const schemaField of this.schema) {
+                switch (schemaField.type) {
+                    case 'FK':
+
+                        break;
+                    case 'MANY':
+                        break;
+                    default:
+                        break;
+                }
+            }
+            result.push({
+                ...record as object,
+            });
+        }
+
+        return recordTable.records;
+    }
+
     getRecordRelated(resourceType: ResourceType, record: T) {
-        const recordToMapping = Object.assign({}, record) as T;
+        const recordToMapping = { ...record as object };
         const recordToMappingMeta: { [key: string]: RecordRelatedItem } = {};
 
         for (const schemaField of resourceType.schema) {

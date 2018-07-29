@@ -17,6 +17,26 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -36,16 +56,32 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __importStar(require("react"));
-function restfulDataContainer(restfulPaginationProps) {
+function restfulDataContainer(restfulDataContainerProps) {
     return function (Component) {
         return /** @class */ (function (_super) {
             __extends(RestfulDataContainerComponent, _super);
             function RestfulDataContainerComponent(props) {
                 var _this = _super.call(this, props) || this;
-                var store = restfulPaginationProps.store, resourceType = restfulPaginationProps.resourceType;
+                var store = restfulDataContainerProps.store, resourceType = restfulDataContainerProps.resourceType;
                 store.subscribe([resourceType], function (e) {
                     var isRecordExit = _this.checkRecordExist(e.record);
                     switch (e.type) {
+                        case 'mapping':
+                            if (_this.props.data === undefined) {
+                                var eventRecordKey_1 = resourceType.getRecordKey(e.record);
+                                var existingRecordIndex = _this.state.data.findIndex(function (o) {
+                                    return eventRecordKey_1 === resourceType.getRecordKey(o);
+                                });
+                                if (existingRecordIndex >= 0) {
+                                    var newStateData = __spread(_this.state.data);
+                                    newStateData[existingRecordIndex] = e.record;
+                                    _this.setState(__assign({}, _this.state));
+                                }
+                                else {
+                                    _this.setState(__assign({}, _this.state, { data: __spread(_this.state.data, [e.record]) }));
+                                }
+                            }
+                            break;
                         case 'remove':
                             if (isRecordExit) {
                                 var deletedRecordKey_1 = resourceType.getRecordKey(e.record);
@@ -59,20 +95,26 @@ function restfulDataContainer(restfulPaginationProps) {
                             break;
                     }
                 });
-                _this.state = {
-                    data: props.data
-                };
+                if (_this.props.data) {
+                    _this.state = { data: props.data };
+                }
+                else {
+                    _this.state = {
+                        data: resourceType.getAllRecords(store)
+                    };
+                }
                 return _this;
             }
             RestfulDataContainerComponent.prototype.componentDidMount = function () {
                 //
             };
             RestfulDataContainerComponent.prototype.render = function () {
-                return (React.createElement(Component, { data: this.state.data }));
+                var mapToProps = restfulDataContainerProps.mapToProps;
+                return (React.createElement(Component, __assign({}, this.props, mapToProps(this.state.data))));
             };
             RestfulDataContainerComponent.prototype.checkRecordExist = function (record) {
                 var e_1, _a;
-                var resourceType = restfulPaginationProps.resourceType;
+                var resourceType = restfulDataContainerProps.resourceType;
                 var checkingRecordKey = resourceType.getRecordKey(record);
                 try {
                     for (var _b = __values(this.state.data), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -93,7 +135,7 @@ function restfulDataContainer(restfulPaginationProps) {
                 return false;
             };
             return RestfulDataContainerComponent;
-        }(React.Component));
+        }(React.PureComponent));
     };
 }
 exports.restfulDataContainer = restfulDataContainer;

@@ -1,7 +1,6 @@
-import { RecordType } from './RecordTable';
-import { Resource, ResourceParameter, ResourceProps } from './Resource';
+import { Resource, ResourceParameter } from './Resource';
 import { Store } from './Store';
-import { ResourceType } from './ResourceType';
+
 interface FetcherProps {
     store: Store;
 }
@@ -26,16 +25,15 @@ export class Fetcher {
             if (!response.ok) {
                 const responseText = await response.text();
                 throw responseText;
-            } else {
-                if (response.headers.get('content-type') === 'application/json') {
-                    const json = await response.json();
-                    if (resource.mapDataToStore) {
-                        resource.mapDataToStore(json, resource.recordType, this.store);
-                    }
-                    return json;
-                }
-                return await response.text();
             }
+            if (response.headers.get('content-type') === 'application/json') {
+                const json = await response.json();
+                if (resource.mapDataToStore) {
+                    resource.mapDataToStore(json, resource.recordType, this.store);
+                }
+                return json;
+            }
+            return await response.text();
         } catch (error) {
             throw new Error(error);
         }

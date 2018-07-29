@@ -16,6 +16,8 @@ var Store = /** @class */ (function () {
         this.recordTypes = [];
         this.recordTables = {};
         this.subscribeStacks = [];
+        this.subscribe = this.subscribe.bind(this);
+        this.getRecordTable = this.getRecordTable.bind(this);
     }
     Store.prototype.subscribe = function (resourceTypes, callback) {
         this.subscribeStacks.push({

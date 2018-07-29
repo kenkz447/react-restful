@@ -1,16 +1,17 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store } from '../utilities';
-interface RestfulDataContainerProps {
+interface RestfulDataContainerProps<T extends RecordType, P = {}> {
     store: Store;
     resourceType: ResourceType;
+    mapToProps: (data: T[]) => P;
 }
-export interface RestfulDataContainerComponentProps<DataModel> {
-    data: Array<DataModel>;
+export interface RestfulDataContainerComponentProps<T extends RecordType> {
+    data: Array<T>;
 }
-interface PaginationState<DataModel> {
-    data: Array<DataModel>;
+interface PaginationState<T extends RecordType = RecordType> {
+    data: Array<T | any>;
 }
-export declare function restfulDataContainer<T>(restfulPaginationProps: RestfulDataContainerProps): (Component: React.ComponentType<RestfulDataContainerComponentProps<T>>) => {
+export declare function restfulDataContainer<T extends RecordType, P>(restfulDataContainerProps: RestfulDataContainerProps<T, P>): (Component: React.ComponentType<P>) => {
     new (props: RestfulDataContainerComponentProps<T>): {
         componentDidMount(): void;
         render(): JSX.Element;
