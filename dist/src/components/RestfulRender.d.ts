@@ -1,9 +1,9 @@
 import React from 'react';
-import { Resource, ResourceParameter, Store } from '../utilities';
-import { Fetcher } from '../utilities/Fetcher';
+import { Resource, ResourceParameter, Store, Fetcher } from '../utilities';
 export interface RestfulComponentRenderProps<DataModel> {
     data?: DataModel | null;
     error?: Error | null;
+    fetching?: boolean;
 }
 export interface RestfulRenderProps<DataModel> {
     store: Store;
@@ -11,6 +11,8 @@ export interface RestfulRenderProps<DataModel> {
     parameters: Array<ResourceParameter>;
     render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     fetcher?: Fetcher;
+    needsUpdate?: boolean;
+    fetching?: boolean;
 }
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     fetcher: Fetcher;

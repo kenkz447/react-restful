@@ -3,18 +3,18 @@ import { ResourceType } from './ResourceType';
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
-interface SubscribeEvent<T extends RecordType = RecordType> {
+export interface SubscribeEvent<T extends RecordType = RecordType> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
     record: T;
 }
-declare type subscribeCallback = (event: SubscribeEvent) => void;
+declare type SubscribeCallback = (event: SubscribeEvent) => void;
 export declare class Store {
-    private recordTypes;
+    private resourceTypes;
     private recordTables;
     private subscribeStacks;
     constructor();
-    subscribe(resourceTypes: ResourceType[], callback: subscribeCallback): void;
+    subscribe(resourceTypes: ResourceType[], callback: SubscribeCallback): void;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
     getRecordTable<T = RecordType>(resourceType: ResourceType): RecordTable<T>;
     registerRecordType(resourceType: ResourceType): void;

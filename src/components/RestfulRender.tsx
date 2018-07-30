@@ -2,13 +2,14 @@ import React from 'react';
 import {
     Resource,
     ResourceParameter,
-    Store
+    Store,
+    Fetcher
 } from '../utilities';
-import { Fetcher } from '../utilities/Fetcher';
 
 export interface RestfulComponentRenderProps<DataModel> {
     data?: DataModel | null;
     error?: Error | null;
+    fetching?: boolean;
 }
 
 export interface RestfulRenderProps<DataModel> {
@@ -17,6 +18,8 @@ export interface RestfulRenderProps<DataModel> {
     parameters: Array<ResourceParameter>;
     render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     fetcher?: Fetcher;
+    needsUpdate?: boolean;
+    fetching?: boolean;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
@@ -36,7 +39,9 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
             return {
                 ...nextProps,
                 fetcher: prevState.fetcher,
-                componentRenderProps: prevState.componentRenderProps
+                componentRenderProps: prevState.componentRenderProps,
+                needsUpdate: true,
+                fetching: true
             };
         }
 
@@ -48,6 +53,7 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
         this.state = {
             ...props,
             fetcher: this.props.fetcher || new Fetcher({ store: this.props.store }),
+            fetching: false,
             componentRenderProps: {
                 data: null,
                 error: null
@@ -60,23 +66,27 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
     }
 
     componentDidUpdate(prevProps: RestfulRenderProps<T>, prevState: RestfulRenderState<T>) {
-        if (this.state.resource !== prevState.resource ||
-            this.state.render !== prevState.render ||
-            this.state.parameters !== prevState.parameters
-        ) {
+        if (this.state.needsUpdate) {
             this.fetching();
         }
     }
 
     render() {
         const Component = this.state.render;
-        return <Component {...this.state.componentRenderProps} />;
+        return (
+            <Component
+                {...this.state.componentRenderProps}
+                fetching={this.state.fetching}
+            />
+        );
     }
 
     fetching() {
         this.state.fetcher.fetchResource<T>(this.state.resource, this.state.parameters)
             .then((data: T) => {
                 this.setState({
+                    needsUpdate: false,
+                    fetching: false,
                     componentRenderProps: {
                         data: data,
                         error: null
@@ -84,6 +94,7 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
                 });
             }).catch((error: Error) => {
                 this.setState({
+                    fetching: false,
                     componentRenderProps: {
                         data: null,
                         error: error

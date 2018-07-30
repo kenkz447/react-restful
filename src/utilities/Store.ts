@@ -5,26 +5,26 @@ export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
 
-interface SubscribeEvent<T extends RecordType = RecordType> {
+export interface SubscribeEvent<T extends RecordType = RecordType> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
     record: T;
 }
 
-type subscribeCallback = (event: SubscribeEvent) => void;
+type SubscribeCallback = (event: SubscribeEvent) => void;
 
 interface SubscribeStack {
     resourceTypes: ResourceType[];
-    callback: subscribeCallback;
+    callback: SubscribeCallback;
 }
 
 export class Store {
-    private recordTypes: Array<ResourceType>;
+    private resourceTypes: Array<ResourceType>;
     private recordTables: RecordTables;
     private subscribeStacks: Array<SubscribeStack>;
 
     constructor() {
-        this.recordTypes = [];
+        this.resourceTypes = [];
         this.recordTables = {};
         this.subscribeStacks = [];
 
@@ -32,15 +32,15 @@ export class Store {
         this.getRecordTable = this.getRecordTable.bind(this);
     }
 
-    subscribe(resourceTypes: ResourceType[], callback: subscribeCallback) {
+    subscribe(resourceTypes: ResourceType[], callback: SubscribeCallback) {
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
             callback: callback
         });
     }
 
-    getRegisteredResourceType(resourceTypeName: string) {
-        const resourceType = this.recordTypes.find(o => o.name === resourceTypeName);
+    getRegisteredResourceType(resourceTypeName: string): ResourceType<{}> {
+        const resourceType = this.resourceTypes.find(o => o.name === resourceTypeName);
         if (!resourceType) {
             throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
         }
@@ -63,7 +63,7 @@ export class Store {
 
         this.recordTables[resourceType.name] = newRecordTable;
 
-        this.recordTypes.push(resourceType);
+        this.resourceTypes.push(resourceType);
     }
 
     mapRecord<T extends RecordType>(resourceType: ResourceType, record: T) {
@@ -112,30 +112,64 @@ export class Store {
      */
     dataMapping<T extends RecordType>(resourceType: ResourceType, record: T) {
         const recordToMapping = Object.assign({}, record) as T;
+        const recordKey = resourceType.getRecordKey(record);
 
         for (const schemaField of resourceType.schema) {
             const resourceTypeName = schemaField.resourceType as string;
-            const relatedField = recordToMapping[schemaField.field] as {};
-
-            if (!relatedField) {
-                continue;
-            }
 
             switch (schemaField.type) {
                 case 'FK':
+                    let fkValue = recordToMapping[schemaField.field];
+                    const fkIsObject = (typeof fkValue === 'object');
+                    if (!fkIsObject) {
+                        continue;
+                    }
+
                     const fkResourceType = this.getRegisteredResourceType(resourceTypeName);
-                    this.dataMapping(fkResourceType, relatedField);
-                    // delete recordToMapping[schemaField.field];
+
+                    // We need update MANY field FKResource
+                    const fkValueKey = fkResourceType.getRecordKey(fkValue);
+                    const tryGetFKObjectFormStore = this.findRecordByKey(fkResourceType, fkValueKey);
+                    if (tryGetFKObjectFormStore) {
+                        fkValue = tryGetFKObjectFormStore;
+                    }
+                    const fkChildSchemaField = fkResourceType.getChildTypeSchemafield(resourceType);
+                    if (fkValue[fkChildSchemaField.field]) {
+                        if (!fkValue[fkChildSchemaField.field].includes(recordKey)) {
+                            fkValue[fkChildSchemaField.field].push(recordKey);
+                        }
+                    } else {
+                        fkValue[fkChildSchemaField.field] = [recordKey];
+                    }
+
+                    this.dataMapping(fkResourceType, fkValue);
+                    // Replace the original object with their id
+                    recordToMapping[schemaField.field] = fkResourceType.getRecordKey(fkValue);
                     break;
                 case 'MANY':
-                    if (!Array.isArray(relatedField)) {
+                    const childValue = recordToMapping[schemaField.field];
+                    if (!childValue) {
+                        continue;
+                    }
+
+                    const childValueIsArrayObject = (typeof childValue[0] === 'object');
+                    if (!childValueIsArrayObject) {
+                        continue;
+                    }
+
+                    if (!Array.isArray(childValue)) {
                         throw new Error('MANY related but received something is not an array!');
                     }
-                    const manyResourceType = this.getRegisteredResourceType(resourceTypeName);
-                    for (const relatedRecord of relatedField) {
-                        this.dataMapping(manyResourceType, relatedRecord);
+
+                    // TODO: We need update FK field of childResource to map with parent record
+
+                    const childResourceType = this.getRegisteredResourceType(resourceTypeName);
+                    for (const relatedRecord of childValue) {
+                        this.dataMapping(childResourceType, relatedRecord);
                     }
-                    // delete recordToMapping[schemaField.field];
+
+                    // Replace the original object array with their ID array
+                    recordToMapping[schemaField.field] = childValue.map((o: T) => childResourceType.getRecordKey(o));
                     break;
                 default:
                     break;

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { RecordType, ResourceType, Store } from '../utilities';
+import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
 interface RestfulDataContainerProps<T extends RecordType, P = {}> {
     store: Store;
     resourceType: ResourceType;
-    mapToProps: (data: T[]) => P;
+    mapToProps: (data: T[], ownProps: {}) => P;
 }
 export interface RestfulDataContainerComponentProps<T extends RecordType> {
     data: Array<T>;
@@ -13,9 +13,10 @@ interface PaginationState<T extends RecordType = RecordType> {
 }
 export declare function restfulDataContainer<T extends RecordType, P>(restfulDataContainerProps: RestfulDataContainerProps<T, P>): (Component: React.ComponentType<P>) => {
     new (props: RestfulDataContainerComponentProps<T>): {
-        componentDidMount(): void;
+        mappingTimeout?: number | undefined;
         render(): JSX.Element;
-        checkRecordExist(record: RecordType): boolean;
+        checkRecordExistInState(record: RecordType): boolean;
+        onDataMapping(e: SubscribeEvent<RecordType>): void;
         setState<K extends "data">(state: PaginationState<T> | ((prevState: Readonly<PaginationState<T>>, props: RestfulDataContainerComponentProps<T>) => PaginationState<T> | Pick<PaginationState<T>, K> | null) | Pick<PaginationState<T>, K> | null, callback?: (() => void) | undefined): void;
         forceUpdate(callBack?: (() => void) | undefined): void;
         props: Readonly<{

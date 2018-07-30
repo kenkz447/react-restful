@@ -17,6 +17,16 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -37,16 +47,6 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -63,56 +63,18 @@ function restfulDataContainer(restfulDataContainerProps) {
             function RestfulDataContainerComponent(props) {
                 var _this = _super.call(this, props) || this;
                 var store = restfulDataContainerProps.store, resourceType = restfulDataContainerProps.resourceType;
-                store.subscribe([resourceType], function (e) {
-                    var isRecordExit = _this.checkRecordExist(e.record);
-                    switch (e.type) {
-                        case 'mapping':
-                            if (_this.props.data === undefined) {
-                                var eventRecordKey_1 = resourceType.getRecordKey(e.record);
-                                var existingRecordIndex = _this.state.data.findIndex(function (o) {
-                                    return eventRecordKey_1 === resourceType.getRecordKey(o);
-                                });
-                                if (existingRecordIndex >= 0) {
-                                    var newStateData = __spread(_this.state.data);
-                                    newStateData[existingRecordIndex] = e.record;
-                                    _this.setState(__assign({}, _this.state));
-                                }
-                                else {
-                                    _this.setState(__assign({}, _this.state, { data: __spread(_this.state.data, [e.record]) }));
-                                }
-                            }
-                            break;
-                        case 'remove':
-                            if (isRecordExit) {
-                                var deletedRecordKey_1 = resourceType.getRecordKey(e.record);
-                                var updatedStateRecords = _this.state.data.filter(function (o) {
-                                    return resourceType.getRecordKey(o) !== deletedRecordKey_1;
-                                });
-                                _this.setState(__assign({}, _this.state, { data: updatedStateRecords }));
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                });
-                if (_this.props.data) {
-                    _this.state = { data: props.data };
-                }
-                else {
-                    _this.state = {
-                        data: resourceType.getAllRecords(store)
-                    };
-                }
+                store.subscribe([resourceType], _this.onDataMapping.bind(_this));
+                var data = _this.props.data ? props.data : resourceType.getAllRecords(store);
+                _this.state = {
+                    data: data
+                };
                 return _this;
             }
-            RestfulDataContainerComponent.prototype.componentDidMount = function () {
-                //
-            };
             RestfulDataContainerComponent.prototype.render = function () {
                 var mapToProps = restfulDataContainerProps.mapToProps;
-                return (React.createElement(Component, __assign({}, this.props, mapToProps(this.state.data))));
+                return (React.createElement(Component, __assign({}, this.props, mapToProps(this.state.data, this.props))));
             };
-            RestfulDataContainerComponent.prototype.checkRecordExist = function (record) {
+            RestfulDataContainerComponent.prototype.checkRecordExistInState = function (record) {
                 var e_1, _a;
                 var resourceType = restfulDataContainerProps.resourceType;
                 var checkingRecordKey = resourceType.getRecordKey(record);
@@ -133,6 +95,50 @@ function restfulDataContainer(restfulDataContainerProps) {
                     finally { if (e_1) throw e_1.error; }
                 }
                 return false;
+            };
+            RestfulDataContainerComponent.prototype.onDataMapping = function (e) {
+                var _this = this;
+                var store = restfulDataContainerProps.store, resourceType = restfulDataContainerProps.resourceType;
+                var isRecordExit = this.checkRecordExistInState(e.record);
+                switch (e.type) {
+                    case 'mapping':
+                        if (this.props.data === undefined) {
+                            var eventRecordKey_1 = resourceType.getRecordKey(e.record);
+                            var existingRecordIndex = this.state.data.findIndex(function (o) {
+                                return eventRecordKey_1 === resourceType.getRecordKey(o);
+                            });
+                            if (existingRecordIndex >= 0) {
+                                var newStateData_1 = __spread(this.state.data);
+                                newStateData_1[existingRecordIndex] = e.record;
+                                if (this.mappingTimeout) {
+                                    clearTimeout(this.mappingTimeout);
+                                }
+                                this.mappingTimeout = setTimeout(function () {
+                                    var dataIds = newStateData_1.map(function (o) { return resourceType.getRecordKey(o); });
+                                    var data = resourceType.getAllRecords(store, function (o) {
+                                        return dataIds.includes(resourceType.getRecordKey(o));
+                                    });
+                                    _this.setState(__assign({}, _this.state, { data: data }));
+                                    // tslint:disable-next-line:align
+                                }, 100);
+                            }
+                            else {
+                                this.setState(__assign({}, this.state, { data: __spread(this.state.data, [e.record]) }));
+                            }
+                        }
+                        break;
+                    case 'remove':
+                        if (isRecordExit) {
+                            var deletedRecordKey_1 = resourceType.getRecordKey(e.record);
+                            var updatedStateRecords = this.state.data.filter(function (o) {
+                                return resourceType.getRecordKey(o) !== deletedRecordKey_1;
+                            });
+                            this.setState(__assign({}, this.state, { data: updatedStateRecords }));
+                        }
+                        break;
+                    default:
+                        break;
+                }
             };
             return RestfulDataContainerComponent;
         }(React.PureComponent));

@@ -22,12 +22,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importDefault(require("react"));
-var Fetcher_1 = require("../utilities/Fetcher");
+var utilities_1 = require("../utilities");
 var RestfulRender = /** @class */ (function (_super) {
     __extends(RestfulRender, _super);
     function RestfulRender(props) {
         var _this = _super.call(this, props) || this;
-        _this.state = __assign({}, props, { fetcher: _this.props.fetcher || new Fetcher_1.Fetcher({ store: _this.props.store }), componentRenderProps: {
+        _this.state = __assign({}, props, { fetcher: _this.props.fetcher || new utilities_1.Fetcher({ store: _this.props.store }), fetching: false, componentRenderProps: {
                 data: null,
                 error: null
             } });
@@ -37,7 +37,7 @@ var RestfulRender = /** @class */ (function (_super) {
         if (nextProps.resource !== prevState.resource ||
             nextProps.render !== prevState.render ||
             nextProps.parameters !== prevState.parameters) {
-            return __assign({}, nextProps, { fetcher: prevState.fetcher, componentRenderProps: prevState.componentRenderProps });
+            return __assign({}, nextProps, { fetcher: prevState.fetcher, componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
         }
         return null;
     };
@@ -45,21 +45,21 @@ var RestfulRender = /** @class */ (function (_super) {
         this.fetching();
     };
     RestfulRender.prototype.componentDidUpdate = function (prevProps, prevState) {
-        if (this.state.resource !== prevState.resource ||
-            this.state.render !== prevState.render ||
-            this.state.parameters !== prevState.parameters) {
+        if (this.state.needsUpdate) {
             this.fetching();
         }
     };
     RestfulRender.prototype.render = function () {
         var Component = this.state.render;
-        return react_1.default.createElement(Component, __assign({}, this.state.componentRenderProps));
+        return (react_1.default.createElement(Component, __assign({}, this.state.componentRenderProps, { fetching: this.state.fetching })));
     };
     RestfulRender.prototype.fetching = function () {
         var _this = this;
         this.state.fetcher.fetchResource(this.state.resource, this.state.parameters)
             .then(function (data) {
             _this.setState({
+                needsUpdate: false,
+                fetching: false,
                 componentRenderProps: {
                     data: data,
                     error: null
@@ -67,6 +67,7 @@ var RestfulRender = /** @class */ (function (_super) {
             });
         }).catch(function (error) {
             _this.setState({
+                fetching: false,
                 componentRenderProps: {
                     data: null,
                     error: error

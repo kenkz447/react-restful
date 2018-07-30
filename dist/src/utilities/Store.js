@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var RecordTable_1 = require("./RecordTable");
 var Store = /** @class */ (function () {
     function Store() {
-        this.recordTypes = [];
+        this.resourceTypes = [];
         this.recordTables = {};
         this.subscribeStacks = [];
         this.subscribe = this.subscribe.bind(this);
@@ -26,7 +26,7 @@ var Store = /** @class */ (function () {
         });
     };
     Store.prototype.getRegisteredResourceType = function (resourceTypeName) {
-        var resourceType = this.recordTypes.find(function (o) { return o.name === resourceTypeName; });
+        var resourceType = this.resourceTypes.find(function (o) { return o.name === resourceTypeName; });
         if (!resourceType) {
             throw new Error("Not found any resource type with name " + resourceTypeName + "!");
         }
@@ -45,7 +45,7 @@ var Store = /** @class */ (function () {
         }
         var newRecordTable = new RecordTable_1.RecordTable(recordKeyProperty.field);
         this.recordTables[resourceType.name] = newRecordTable;
-        this.recordTypes.push(resourceType);
+        this.resourceTypes.push(resourceType);
     };
     Store.prototype.mapRecord = function (resourceType, record) {
         var table = this.recordTables[resourceType.name];
@@ -84,51 +84,84 @@ var Store = /** @class */ (function () {
      * * For FK, we only update primitive fields of FK record
      */
     Store.prototype.dataMapping = function (resourceType, record) {
-        var e_1, _a, e_2, _b;
+        var e_1, _a;
         var recordToMapping = Object.assign({}, record);
-        try {
-            for (var _c = __values(resourceType.schema), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var schemaField = _d.value;
-                var resourceTypeName = schemaField.resourceType;
-                var relatedField = recordToMapping[schemaField.field];
-                if (!relatedField) {
-                    continue;
-                }
-                switch (schemaField.type) {
-                    case 'FK':
-                        var fkResourceType = this.getRegisteredResourceType(resourceTypeName);
-                        this.dataMapping(fkResourceType, relatedField);
-                        // delete recordToMapping[schemaField.field];
-                        break;
-                    case 'MANY':
-                        if (!Array.isArray(relatedField)) {
-                            throw new Error('MANY related but received something is not an array!');
+        var recordKey = resourceType.getRecordKey(record);
+        var _loop_1 = function (schemaField) {
+            var e_2, _a;
+            var resourceTypeName = schemaField.resourceType;
+            switch (schemaField.type) {
+                case 'FK':
+                    var fkValue = recordToMapping[schemaField.field];
+                    var fkIsObject = (typeof fkValue === 'object');
+                    if (!fkIsObject) {
+                        return "continue";
+                    }
+                    var fkResourceType = this_1.getRegisteredResourceType(resourceTypeName);
+                    // We need update MANY field FKResource
+                    var fkValueKey = fkResourceType.getRecordKey(fkValue);
+                    var tryGetFKObjectFormStore = this_1.findRecordByKey(fkResourceType, fkValueKey);
+                    if (tryGetFKObjectFormStore) {
+                        fkValue = tryGetFKObjectFormStore;
+                    }
+                    var fkChildSchemaField = fkResourceType.getChildTypeSchemafield(resourceType);
+                    if (fkValue[fkChildSchemaField.field]) {
+                        if (!fkValue[fkChildSchemaField.field].includes(recordKey)) {
+                            fkValue[fkChildSchemaField.field].push(recordKey);
                         }
-                        var manyResourceType = this.getRegisteredResourceType(resourceTypeName);
+                    }
+                    else {
+                        fkValue[fkChildSchemaField.field] = [recordKey];
+                    }
+                    this_1.dataMapping(fkResourceType, fkValue);
+                    // Replace the original object with their id
+                    recordToMapping[schemaField.field] = fkResourceType.getRecordKey(fkValue);
+                    break;
+                case 'MANY':
+                    var childValue = recordToMapping[schemaField.field];
+                    if (!childValue) {
+                        return "continue";
+                    }
+                    var childValueIsArrayObject = (typeof childValue[0] === 'object');
+                    if (!childValueIsArrayObject) {
+                        return "continue";
+                    }
+                    if (!Array.isArray(childValue)) {
+                        throw new Error('MANY related but received something is not an array!');
+                    }
+                    // TODO: We need update FK field of childResource to map with parent record
+                    var childResourceType_1 = this_1.getRegisteredResourceType(resourceTypeName);
+                    try {
+                        for (var childValue_1 = __values(childValue), childValue_1_1 = childValue_1.next(); !childValue_1_1.done; childValue_1_1 = childValue_1.next()) {
+                            var relatedRecord = childValue_1_1.value;
+                            this_1.dataMapping(childResourceType_1, relatedRecord);
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
                         try {
-                            for (var relatedField_1 = __values(relatedField), relatedField_1_1 = relatedField_1.next(); !relatedField_1_1.done; relatedField_1_1 = relatedField_1.next()) {
-                                var relatedRecord = relatedField_1_1.value;
-                                this.dataMapping(manyResourceType, relatedRecord);
-                            }
+                            if (childValue_1_1 && !childValue_1_1.done && (_a = childValue_1.return)) _a.call(childValue_1);
                         }
-                        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                        finally {
-                            try {
-                                if (relatedField_1_1 && !relatedField_1_1.done && (_b = relatedField_1.return)) _b.call(relatedField_1);
-                            }
-                            finally { if (e_2) throw e_2.error; }
-                        }
-                        // delete recordToMapping[schemaField.field];
-                        break;
-                    default:
-                        break;
-                }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                    // Replace the original object array with their ID array
+                    recordToMapping[schemaField.field] = childValue.map(function (o) { return childResourceType_1.getRecordKey(o); });
+                    break;
+                default:
+                    break;
+            }
+        };
+        var this_1 = this;
+        try {
+            for (var _b = __values(resourceType.schema), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var schemaField = _c.value;
+                _loop_1(schemaField);
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_1) throw e_1.error; }
         }

@@ -1,4 +1,12 @@
 "use strict";
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -17,61 +25,82 @@ var ResourceType = /** @class */ (function () {
         var fKField = ResourceType.findPKField(props.schema);
         // TODO: Check NULL FK field, with an invariant message
         this.keyProperty = fKField.field;
+        this.getChildTypeSchemafield = this.getChildTypeSchemafield.bind(this);
     }
     ResourceType.findPKField = function (schema) {
         return schema.find(function (o) { return o.type === 'PK'; });
     };
-    ResourceType.prototype.getAllRecords = function (store) {
+    ResourceType.prototype.getAllRecords = function (store, predicate) {
+        var e_1, _a;
         var getRecordTable = store.getRecordTable;
         var recordTable = getRecordTable(this);
-        return recordTable.records;
-    };
-    ResourceType.prototype.getRecordRelated = function (resourceType, record) {
-        var e_1, _a;
-        var recordToMapping = Object.assign({}, record);
-        var recordToMappingMeta = {};
-        var _loop_1 = function (schemaField) {
-            var relatedField = recordToMapping[schemaField.field];
-            if (!relatedField) {
-                return "continue";
-            }
-            switch (schemaField.type) {
-                case 'FK':
-                    var fkKey = relatedField[this_1.keyProperty];
-                    recordToMappingMeta[schemaField.field] = {
-                        type: 'FK',
-                        value: fkKey
-                    };
-                    break;
-                case 'MANY':
-                    if (!Array.isArray(relatedField)) {
-                        throw new Error('MANY related but received something is not an array!');
-                    }
-                    var manyKeys = relatedField.map(function (o) { return o[schemaField.field]; });
-                    recordToMappingMeta[schemaField.field] = {
-                        type: 'FK',
-                        value: manyKeys
-                    };
-                    break;
-                default:
-                    break;
-            }
-        };
-        var this_1 = this;
+        var result = [];
+        var existRecords = predicate ? recordTable.records.filter(predicate) : recordTable.records;
         try {
-            for (var _b = __values(resourceType.schema), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var schemaField = _c.value;
-                _loop_1(schemaField);
+            for (var existRecords_1 = __values(existRecords), existRecords_1_1 = existRecords_1.next(); !existRecords_1_1.done; existRecords_1_1 = existRecords_1.next()) {
+                var record = existRecords_1_1.value;
+                var resultRecord = this.populate(store, record);
+                result.push(resultRecord);
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                if (existRecords_1_1 && !existRecords_1_1.done && (_a = existRecords_1.return)) _a.call(existRecords_1);
             }
             finally { if (e_1) throw e_1.error; }
         }
-        return recordToMappingMeta;
+        return result;
+    };
+    ResourceType.prototype.populate = function (store, record) {
+        var e_2, _a;
+        var populateRecord = __assign({}, record);
+        var _loop_1 = function (schemaField) {
+            switch (schemaField.type) {
+                case 'FK':
+                    var fkResourceType = store.getRegisteredResourceType(schemaField.resourceType);
+                    var fkValue = record[schemaField.field];
+                    var fkRecord = store.findRecordByKey(fkResourceType, fkValue);
+                    populateRecord[schemaField.field] = fkRecord;
+                    break;
+                case 'MANY':
+                    if (!record[schemaField.field]) {
+                        return "continue";
+                    }
+                    var childResourceType_1 = store.getRegisteredResourceType(schemaField.resourceType);
+                    var childrenKeys_1 = record[schemaField.field];
+                    var childRecords = childResourceType_1.getAllRecords(store, function (childRecord) {
+                        return childrenKeys_1.includes(childResourceType_1.getRecordKey(childRecord));
+                    });
+                    populateRecord[schemaField.field] = childRecords;
+                    break;
+                default:
+                    break;
+            }
+        };
+        try {
+            for (var _b = __values(this.schema), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var schemaField = _c.value;
+                _loop_1(schemaField);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        return populateRecord;
+    };
+    ResourceType.prototype.getAllChildType = function (store) {
+        var childFields = this.schema.filter(function (o) { return o.type === 'MANY'; });
+        return childFields.map(function (o) {
+            return store.getRegisteredResourceType(o.resourceType);
+        });
+    };
+    ResourceType.prototype.getChildTypeSchemafield = function (childType) {
+        return this.schema.find(function (o) { return o.resourceType === childType.name; });
     };
     ResourceType.prototype.getRecordKey = function (record) {
         return record[this.keyProperty] || null;

@@ -4,7 +4,7 @@ import { Store } from '../Store';
 
 describe('ResourceType', () => {
     const commonPK: SchemaField = {
-        field: '_id',
+        field: 'id',
         type: 'PK'
     };
 
@@ -50,24 +50,26 @@ describe('ResourceType', () => {
     store.registerRecordType(bookingResourceType);
 
     const testUser = {
-        _id: 1,
+        id: 1,
         username: 'user'
     };
 
     const testData = {
         ...testUser,
         branch: {
-            _id: 56,
+            id: 56,
             branchName: 'branch'
         },
         bookings: [{
-            _id: 1,
+            id: 1,
             date: '1970-01-01',
-            time: '01:00'
+            time: '01:00',
+            user: 1
         }, {
-            _id: 2,
+            id: 2,
             date: '1970-01-02',
-            time: '16:30'
+            time: '16:30',
+            user: 1
         }]
     };
     describe('instance', () => {
@@ -79,20 +81,42 @@ describe('ResourceType', () => {
             expect(store.mapRecord).toBeCalledWith(branchResourceType, testData.branch);
         });
 
-        it('dataMapping', () => {
+        it('map relateds record to store', () => {
             expect.assertions(4);
-            const storedBranch = store.findRecordByKey(branchResourceType, testData.branch._id);
-            const storeUser = store.findRecordByKey(userResourceType, testData._id);
+            const storedBranch = store.findRecordByKey(branchResourceType, testData.branch.id);
+            const storeUser = store.findRecordByKey(userResourceType, testData.id);
 
             const bookingTable = store.getRecordTable(bookingResourceType);
 
             expect(storedBranch).toEqual(testData.branch);
-            expect(storeUser).toEqual(testData);
+            expect(storeUser).toEqual({ 'id': 1, 'bookings': [1, 2], 'branch': 56, 'username': 'user' });
 
             bookingTable.recordMap.forEach((booking, encodedKey) => {
-                const testBooking = testData.bookings.find(o => RecordTable.encodeKey(o._id) === encodedKey);
+                const testBooking = testData.bookings.find(o => RecordTable.encodeKey(o.id) === encodedKey);
                 expect(booking).toEqual(testBooking);
             });
+        });
+
+        it('retreive relateds record', () => {
+            const allRecord = userResourceType.getAllRecords(store);
+            expect(allRecord).toEqual([{
+                'id': 1,
+                'bookings': [
+                    {
+                        'id': 1,
+                        'date': '1970-01-01',
+                        'time': '01:00',
+                        'user': { 'id': 1, 'bookings': [1, 2], 'branch': 56, 'username': 'user' }
+                    },
+                    {
+                        'id': 2,
+                        'date': '1970-01-02',
+                        'time': '16:30',
+                        'user': { 'id': 1, 'bookings': [1, 2], 'branch': 56, 'username': 'user' }
+                    }],
+                'branch': { 'id': 56, 'branchName': 'branch', 'users': [1] },
+                'username': 'user'
+            }]);
         });
     });
 });
