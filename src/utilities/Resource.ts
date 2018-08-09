@@ -38,9 +38,9 @@ export class Resource<DataModel> {
             if (param.type === 'body') {
                 continue;
             }
-
+            
             if (param.type === 'path') {
-                uRL = uRL.replace(`{${param.parameter}}`, param.value as string);
+                uRL = uRL.replace(`/:${param.parameter}`, `/${param.value}`);
             } else {
                 searchs.append(param.parameter as string, param.value as string);
             }

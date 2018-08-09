@@ -28,7 +28,7 @@ var Resource = /** @class */ (function () {
                     continue;
                 }
                 if (param.type === 'path') {
-                    uRL = uRL.replace("{" + param.parameter + "}", param.value);
+                    uRL = uRL.replace("/:" + param.parameter, "/" + param.value);
                 }
                 else {
                     searchs.append(param.parameter, param.value);
