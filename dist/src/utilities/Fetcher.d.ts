@@ -5,7 +5,11 @@ interface FetcherProps {
 }
 export declare class Fetcher {
     store: Store;
+    createDefaultRequestInit: () => {
+        headers: Headers;
+    };
     constructor(props: FetcherProps);
+    beforeFetch(url: string, requestInit: RequestInit): Promise<RequestInit>;
     fetch(url: string, requestInit: RequestInit): Promise<Response>;
     fetchResource<DataModel>(resource: Resource<DataModel>, params: ResourceParameter[]): Promise<any>;
 }
