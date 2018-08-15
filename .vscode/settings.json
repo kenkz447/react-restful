@@ -1,4 +1,5 @@
 {
     "typescript.extension.sortImports.sortOnSave": true,
-    "typescript.extension.sortImports.omitSemicolon": false
+    "typescript.extension.sortImports.omitSemicolon": false,
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }

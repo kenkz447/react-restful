@@ -66,7 +66,8 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
     }
 
     componentDidUpdate(prevProps: RestfulRenderProps<T>, prevState: RestfulRenderState<T>) {
-        if (this.state.needsUpdate) {
+        const { needsUpdate, fetching, componentRenderProps } = this.state;
+        if (needsUpdate && fetching) {
             this.fetching();
         }
     }

@@ -62,14 +62,26 @@ function restfulDataContainer(restfulDataContainerProps) {
             __extends(RestfulDataContainerComponent, _super);
             function RestfulDataContainerComponent(props) {
                 var _this = _super.call(this, props) || this;
+                _this.onDataMapping = _this.onDataMapping.bind(_this);
+                var data = props.data;
                 var store = restfulDataContainerProps.store, resourceType = restfulDataContainerProps.resourceType;
-                store.subscribe([resourceType], _this.onDataMapping.bind(_this));
-                var data = _this.props.data ? props.data : resourceType.getAllRecords(store);
+                _this.subscribeId = store.subscribe([resourceType], _this.onDataMapping);
+                var propDataIdMap = data && data.map(function (o) { return resourceType.getRecordKey(o); });
+                var mappingData = data ?
+                    resourceType.getAllRecords(store, function (recordInstance) {
+                        var recordInstanceKey = resourceType.getRecordKey(recordInstance);
+                        return propDataIdMap.includes(recordInstanceKey);
+                    }) :
+                    resourceType.getAllRecords(store);
                 _this.state = {
-                    data: data
+                    data: mappingData
                 };
                 return _this;
             }
+            RestfulDataContainerComponent.prototype.componentWillUnmount = function () {
+                var store = restfulDataContainerProps.store;
+                store.unSubscribe(this.subscribeId);
+            };
             RestfulDataContainerComponent.prototype.render = function () {
                 var mapToProps = restfulDataContainerProps.mapToProps;
                 return (React.createElement(Component, __assign({}, this.props, mapToProps(this.state.data, this.props))));

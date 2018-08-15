@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
 interface RestfulDataContainerProps<T extends RecordType, P = {}> {
@@ -13,7 +14,9 @@ interface PaginationState<T extends RecordType = RecordType> {
 }
 export declare function restfulDataContainer<T extends RecordType, P>(restfulDataContainerProps: RestfulDataContainerProps<T, P>): (Component: React.ComponentType<P>) => {
     new (props: RestfulDataContainerComponentProps<T>): {
-        mappingTimeout?: number | undefined;
+        mappingTimeout: NodeJS.Timer;
+        subscribeId: string;
+        componentWillUnmount(): void;
         render(): JSX.Element;
         checkRecordExistInState(record: RecordType): boolean;
         onDataMapping(e: SubscribeEvent<RecordType>): void;

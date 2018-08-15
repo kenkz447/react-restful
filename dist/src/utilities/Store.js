@@ -9,8 +9,12 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var RecordTable_1 = require("./RecordTable");
+var v1_1 = __importDefault(require("uuid/v1"));
 var Store = /** @class */ (function () {
     function Store() {
         this.resourceTypes = [];
@@ -20,10 +24,16 @@ var Store = /** @class */ (function () {
         this.getRecordTable = this.getRecordTable.bind(this);
     }
     Store.prototype.subscribe = function (resourceTypes, callback) {
+        var subscribeId = v1_1.default();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
-            callback: callback
+            callback: callback,
+            subscribeId: subscribeId
         });
+        return subscribeId;
+    };
+    Store.prototype.unSubscribe = function (subscribeId) {
+        return this.subscribeStacks.filter(function (o) { return o.subscribeId !== subscribeId; });
     };
     Store.prototype.getRegisteredResourceType = function (resourceTypeName) {
         var resourceType = this.resourceTypes.find(function (o) { return o.name === resourceTypeName; });
@@ -50,6 +60,7 @@ var Store = /** @class */ (function () {
     Store.prototype.mapRecord = function (resourceType, record) {
         var table = this.recordTables[resourceType.name];
         var upsertResult = table.upsert(record);
+        // TODO: map orther related records
         if (!upsertResult) {
             throw new Error('upsert not working!');
         }
@@ -76,8 +87,21 @@ var Store = /** @class */ (function () {
         return resultByKey;
     };
     Store.prototype.findOneRecord = function (resourceType, specs) {
-        var table = this.getRecordTable(resourceType);
-        return table.records.find(specs) || null;
+        if (!specs) {
+            return null;
+        }
+        var specsType = typeof specs;
+        switch (specsType) {
+            case 'string':
+            case 'number':
+                return this.findRecordByKey(resourceType, specs);
+            case 'object':
+                var recordKey = resourceType.getRecordKey(specs);
+                return this.findRecordByKey(resourceType, recordKey);
+            default:
+                var table = this.getRecordTable(resourceType);
+                return table.records.find(specs) || null;
+        }
     };
     /**
      * Map a fetched data of type to store
@@ -122,12 +146,12 @@ var Store = /** @class */ (function () {
                     if (!childValue) {
                         return "continue";
                     }
+                    if (!Array.isArray(childValue)) {
+                        throw new Error('MANY related but received something is not an array!');
+                    }
                     var childValueIsArrayObject = (typeof childValue[0] === 'object');
                     if (!childValueIsArrayObject) {
                         return "continue";
-                    }
-                    if (!Array.isArray(childValue)) {
-                        throw new Error('MANY related but received something is not an array!');
                     }
                     // TODO: We need update FK field of childResource to map with parent record
                     var childResourceType_1 = this_1.getRegisteredResourceType(resourceTypeName);

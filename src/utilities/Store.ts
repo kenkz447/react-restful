@@ -1,6 +1,8 @@
 import { findRecordPredicate, RecordTable, RecordType } from './RecordTable';
 import { ResourceType } from './ResourceType';
 
+import uuid from 'uuid/v1';
+
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
@@ -16,6 +18,7 @@ type SubscribeCallback = (event: SubscribeEvent) => void;
 interface SubscribeStack {
     resourceTypes: ResourceType[];
     callback: SubscribeCallback;
+    subscribeId: string;
 }
 
 export class Store {
@@ -33,10 +36,17 @@ export class Store {
     }
 
     subscribe(resourceTypes: ResourceType[], callback: SubscribeCallback) {
+        const subscribeId = uuid();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
-            callback: callback
+            callback: callback,
+            subscribeId: subscribeId
         });
+        return subscribeId;
+    }
+
+    unSubscribe(subscribeId: string) {
+        return this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
 
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}> {
@@ -67,10 +77,12 @@ export class Store {
     }
 
     mapRecord<T extends RecordType>(resourceType: ResourceType, record: T) {
-
         const table = this.recordTables[resourceType.name];
 
         const upsertResult = table.upsert(record);
+
+        // TODO: map orther related records
+
         if (!upsertResult) {
             throw new Error('upsert not working!');
         }
@@ -101,9 +113,29 @@ export class Store {
         return resultByKey;
     }
 
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null {
-        const table = this.getRecordTable<T>(resourceType);
-        return table.records.find(specs) || null;
+    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: T): T | null;
+    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: string): T | null;
+    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: number): T | null;
+    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null;
+    findOneRecord<T extends RecordType>(
+        resourceType: ResourceType<T>,
+        specs: findRecordPredicate<T> | T | string | number): T | null {
+        if (!specs) {
+            return null;
+        }
+
+        const specsType = typeof specs;
+        switch (specsType) {
+            case 'string':
+            case 'number':
+                return this.findRecordByKey(resourceType, specs as string | number);
+            case 'object':
+                const recordKey = resourceType.getRecordKey(specs as T);
+                return this.findRecordByKey(resourceType, recordKey);
+            default:
+                const table = this.getRecordTable<T>(resourceType);
+                return table.records.find(specs as findRecordPredicate<T>) || null;
+        }
     }
 
     /**
@@ -152,13 +184,13 @@ export class Store {
                         continue;
                     }
 
+                    if (!Array.isArray(childValue)) {
+                        throw new Error('MANY related but received something is not an array!');
+                    }
+
                     const childValueIsArrayObject = (typeof childValue[0] === 'object');
                     if (!childValueIsArrayObject) {
                         continue;
-                    }
-
-                    if (!Array.isArray(childValue)) {
-                        throw new Error('MANY related but received something is not an array!');
                     }
 
                     // TODO: We need update FK field of childResource to map with parent record

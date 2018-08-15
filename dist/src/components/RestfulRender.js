@@ -45,7 +45,8 @@ var RestfulRender = /** @class */ (function (_super) {
         this.fetching();
     };
     RestfulRender.prototype.componentDidUpdate = function (prevProps, prevState) {
-        if (this.state.needsUpdate) {
+        var _a = this.state, needsUpdate = _a.needsUpdate, fetching = _a.fetching, componentRenderProps = _a.componentRenderProps;
+        if (needsUpdate && fetching) {
             this.fetching();
         }
     };

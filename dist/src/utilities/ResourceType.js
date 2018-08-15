@@ -56,21 +56,32 @@ var ResourceType = /** @class */ (function () {
         var e_2, _a;
         var populateRecord = __assign({}, record);
         var _loop_1 = function (schemaField) {
+            var relatedResourceType = schemaField.resourceType;
             switch (schemaField.type) {
                 case 'FK':
-                    var fkResourceType = store.getRegisteredResourceType(schemaField.resourceType);
+                    var fkResourceType = store.getRegisteredResourceType(relatedResourceType);
                     var fkValue = record[schemaField.field];
-                    var fkRecord = store.findRecordByKey(fkResourceType, fkValue);
+                    var fkRecord = store.findOneRecord(fkResourceType, fkValue);
                     populateRecord[schemaField.field] = fkRecord;
                     break;
                 case 'MANY':
-                    if (!record[schemaField.field]) {
+                    if (!record[schemaField.field] ||
+                        !record[schemaField.field].length) {
                         return "continue";
                     }
-                    var childResourceType_1 = store.getRegisteredResourceType(schemaField.resourceType);
-                    var childrenKeys_1 = record[schemaField.field];
-                    var childRecords = childResourceType_1.getAllRecords(store, function (childRecord) {
-                        return childrenKeys_1.includes(childResourceType_1.getRecordKey(childRecord));
+                    var childResourceType_1 = store.getRegisteredResourceType(relatedResourceType);
+                    var children_1 = record[schemaField.field];
+                    var isFlatIdMap_1 = (typeof children_1[0] === 'string');
+                    var childRecords = childResourceType_1.getAllRecords(store, function (childRecordInstance) {
+                        var childRecordInstanceKey = childResourceType_1.getRecordKey(childRecordInstance);
+                        if (isFlatIdMap_1) {
+                            return children_1.includes(childRecordInstanceKey);
+                        }
+                        var detectedChildInstance = children_1
+                            .find(function (child) {
+                            return childResourceType_1.getRecordKey(child) === childRecordInstanceKey;
+                        });
+                        return detectedChildInstance !== undefined;
                     });
                     populateRecord[schemaField.field] = childRecords;
                     break;

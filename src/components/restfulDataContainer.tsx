@@ -23,17 +23,34 @@ export function restfulDataContainer<T extends RecordType, P>
             RestfulDataContainerComponentProps<T>,
             PaginationState<T>> {
 
-            mappingTimeout?: number;
+            mappingTimeout!: NodeJS.Timer;
+            subscribeId: string;
+
+            componentWillUnmount() {
+                const { store } = restfulDataContainerProps;
+                store.unSubscribe(this.subscribeId);
+            }
 
             constructor(props: RestfulDataContainerComponentProps<T>) {
                 super(props);
 
-                const { store, resourceType } = restfulDataContainerProps;
-                store.subscribe([resourceType], this.onDataMapping.bind(this));
+                this.onDataMapping = this.onDataMapping.bind(this);
 
-                const data = this.props.data ? props.data : resourceType.getAllRecords(store);
+                const { data } = props;
+                const { store, resourceType } = restfulDataContainerProps;
+                this.subscribeId = store.subscribe([resourceType], this.onDataMapping);
+
+                const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
+
+                const mappingData = data ?
+                    resourceType.getAllRecords(store, (recordInstance) => {
+                        const recordInstanceKey = resourceType.getRecordKey(recordInstance);
+                        return propDataIdMap.includes(recordInstanceKey);
+                    }) :
+                    resourceType.getAllRecords(store);
+
                 this.state = {
-                    data: data
+                    data: mappingData
                 };
             }
 
@@ -78,7 +95,7 @@ export function restfulDataContainer<T extends RecordType, P>
                                 if (this.mappingTimeout) {
                                     clearTimeout(this.mappingTimeout);
                                 }
-                                
+
                                 this.mappingTimeout = setTimeout(() => {
                                     const dataIds = newStateData.map(o => resourceType.getRecordKey(o));
                                     const data = resourceType.getAllRecords(store, (o) =>

@@ -55,23 +55,38 @@ export class ResourceType<T extends RecordType = {}> {
     populate(store: Store, record: T) {
         const populateRecord = { ...record as object };
         for (const schemaField of this.schema) {
+            const relatedResourceType = schemaField.resourceType as string;
             switch (schemaField.type) {
                 case 'FK':
-                    const fkResourceType = store.getRegisteredResourceType(schemaField.resourceType as string);
+                    const fkResourceType = store.getRegisteredResourceType(relatedResourceType);
                     const fkValue = record[schemaField.field];
-                    const fkRecord = store.findRecordByKey(fkResourceType, fkValue);
+                    const fkRecord = store.findOneRecord(fkResourceType, fkValue);
                     populateRecord[schemaField.field] = fkRecord;
                     break;
                 case 'MANY':
-                    if (!record[schemaField.field]) {
+                    if (!record[schemaField.field] ||
+                        !record[schemaField.field].length) {
                         continue;
                     }
+                    const childResourceType = store.getRegisteredResourceType(relatedResourceType);
+                    const children = record[schemaField.field];
+                    const isFlatIdMap = (typeof children[0] === 'string');
 
-                    const childResourceType = store.getRegisteredResourceType(schemaField.resourceType as string);
-                    const childrenKeys: Array<string> = record[schemaField.field];
-                    const childRecords = childResourceType.getAllRecords(store, (childRecord) => {
-                        return childrenKeys.includes(childResourceType.getRecordKey(childRecord));
+                    const childRecords = childResourceType.getAllRecords(store, (childRecordInstance) => {
+                        const childRecordInstanceKey = childResourceType.getRecordKey(childRecordInstance);
+
+                        if (isFlatIdMap) {
+                            return children.includes(childRecordInstanceKey);
+                        }
+
+                        const detectedChildInstance = children
+                            .find((child: RecordType) => {
+                                return childResourceType.getRecordKey(child) === childRecordInstanceKey;
+                            });
+
+                        return detectedChildInstance !== undefined;
                     });
+
                     populateRecord[schemaField.field] = childRecords;
                     break;
                 default:
