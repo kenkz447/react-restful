@@ -24,10 +24,12 @@ export class Fetcher {
         try {
             const url = resource.urlReslover(params);
 
-            const requestInit =
+            const requestInit: RequestInit =
                 resource.requestInitReslover(params) ||
                 this.createDefaultRequestInit();
 
+            requestInit.method = resource.method;
+            
             const modifiedRequestInit = await this.beforeFetch(url, requestInit);
             const response = await this.fetch(url, modifiedRequestInit);
 
