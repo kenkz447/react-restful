@@ -60,6 +60,7 @@ var Fetcher = /** @class */ (function () {
                         url = resource.urlReslover(params);
                         requestInit = resource.requestInitReslover(params) ||
                             this.createDefaultRequestInit();
+                        requestInit.method = resource.method;
                         return [4 /*yield*/, this.beforeFetch(url, requestInit)];
                     case 1:
                         modifiedRequestInit = _a.sent();
