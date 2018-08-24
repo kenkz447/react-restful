@@ -3,17 +3,16 @@ import { Store } from './Store';
 
 interface FetcherProps {
     store: Store;
+    beforeFetch: (url: string, requestInit: RequestInit) => RequestInit;
+    afterFetch: (response: Response) => void;
 }
+
 export class Fetcher {
-    store: Store;
+    props: FetcherProps;
     createDefaultRequestInit = () => ({ headers: new Headers() });
 
     constructor(props: FetcherProps) {
-        this.store = props.store;
-    }
-
-    async beforeFetch(url: string, requestInit: RequestInit) {
-        return requestInit;
+        this.props = props;
     }
 
     fetch(url: string, requestInit: RequestInit) {
@@ -22,6 +21,8 @@ export class Fetcher {
 
     async fetchResource<DataModel>(resource: Resource<DataModel>, params: ResourceParameter[]) {
         try {
+            const { store, beforeFetch, afterFetch } = this.props;
+
             const url = resource.urlReslover(params);
 
             const requestInit: RequestInit =
@@ -29,9 +30,11 @@ export class Fetcher {
                 this.createDefaultRequestInit();
 
             requestInit.method = resource.method;
-            
-            const modifiedRequestInit = await this.beforeFetch(url, requestInit);
+
+            const modifiedRequestInit = await beforeFetch(url, requestInit);
             const response = await this.fetch(url, modifiedRequestInit);
+
+            await afterFetch(response);
 
             if (!response.ok) {
                 throw response;
@@ -41,7 +44,7 @@ export class Fetcher {
             if (responseContentType && responseContentType.startsWith('application/json')) {
                 const json = await response.json();
                 if (resource.mapDataToStore) {
-                    resource.mapDataToStore(json, resource.recordType, this.store);
+                    resource.mapDataToStore(json, resource.recordType, store);
                 }
                 return json;
             }
