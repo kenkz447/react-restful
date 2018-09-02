@@ -5,7 +5,7 @@ export interface ResourceProps<DataModel> {
     url: string;
     method: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
-    meta?: any;
+    afterFetch?: (params: ResourceParameter[], fetchResult: DataModel) => void;
 }
 export interface ResourceParameter {
     parameter?: string;
@@ -18,6 +18,7 @@ export declare class Resource<DataModel> {
     url: string;
     method: string;
     mapDataToStore: ResourceProps<DataModel>['mapDataToStore'];
+    afterFetch: ResourceProps<DataModel>['afterFetch'];
     constructor(props: ResourceProps<DataModel>);
     urlReslover(params: Array<ResourceParameter>): string;
     requestInitReslover(params: Array<ResourceParameter>): RequestInit | null;

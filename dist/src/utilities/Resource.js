@@ -16,6 +16,7 @@ var Resource = /** @class */ (function () {
         this.url = props.url;
         this.method = props.method;
         this.mapDataToStore = props.mapDataToStore;
+        this.afterFetch = props.afterFetch;
     }
     Resource.prototype.urlReslover = function (params) {
         var e_1, _a;

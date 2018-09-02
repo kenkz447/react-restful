@@ -45,7 +45,7 @@ var Fetcher = /** @class */ (function () {
     };
     Fetcher.prototype.fetchResource = function (resource, params) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, store, beforeFetch, afterFetch, url, requestInit, modifiedRequestInit, _b, response, responseContentType, json, error_1;
+            var _a, store, beforeFetch, afterFetch, url, requestInit, modifiedRequestInit, _b, response, responseContentType, json, responseText, error_1;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -82,12 +82,21 @@ var Fetcher = /** @class */ (function () {
                         return [4 /*yield*/, response.json()];
                     case 7:
                         json = _c.sent();
+                        if (resource.afterFetch) {
+                            resource.afterFetch(params, json);
+                        }
                         if (resource.mapDataToStore) {
                             resource.mapDataToStore(json, resource.recordType, store);
                         }
                         return [2 /*return*/, json];
                     case 8: return [4 /*yield*/, response.text()];
-                    case 9: return [2 /*return*/, _c.sent()];
+                    case 9:
+                        responseText = _c.sent();
+                        if (resource.afterFetch) {
+                            // tslint:disable-next-line:no-any
+                            resource.afterFetch(params, responseText);
+                        }
+                        return [2 /*return*/, responseText];
                     case 10:
                         error_1 = _c.sent();
                         if (error_1 instanceof Response) {
