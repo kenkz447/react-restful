@@ -2,14 +2,15 @@ import { Resource, ResourceParameter } from './Resource';
 import { Store } from './Store';
 interface FetcherProps {
     store: Store;
+    beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
+    afterFetch?: (response: Response) => void;
 }
 export declare class Fetcher {
-    store: Store;
+    props: FetcherProps;
     createDefaultRequestInit: () => {
         headers: Headers;
     };
     constructor(props: FetcherProps);
-    beforeFetch(url: string, requestInit: RequestInit): Promise<RequestInit>;
     fetch(url: string, requestInit: RequestInit): Promise<Response>;
     fetchResource<DataModel>(resource: Resource<DataModel>, params: ResourceParameter[]): Promise<any>;
 }

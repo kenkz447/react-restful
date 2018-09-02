@@ -114,29 +114,27 @@ function restfulDataContainer(restfulDataContainerProps) {
                 var isRecordExit = this.checkRecordExistInState(e.record);
                 switch (e.type) {
                     case 'mapping':
-                        if (this.props.data === undefined) {
-                            var eventRecordKey_1 = resourceType.getRecordKey(e.record);
-                            var existingRecordIndex = this.state.data.findIndex(function (o) {
-                                return eventRecordKey_1 === resourceType.getRecordKey(o);
-                            });
-                            if (existingRecordIndex >= 0) {
-                                var newStateData_1 = __spread(this.state.data);
-                                newStateData_1[existingRecordIndex] = e.record;
-                                if (this.mappingTimeout) {
-                                    clearTimeout(this.mappingTimeout);
-                                }
-                                this.mappingTimeout = setTimeout(function () {
-                                    var dataIds = newStateData_1.map(function (o) { return resourceType.getRecordKey(o); });
-                                    var data = resourceType.getAllRecords(store, function (o) {
-                                        return dataIds.includes(resourceType.getRecordKey(o));
-                                    });
-                                    _this.setState(__assign({}, _this.state, { data: data }));
-                                    // tslint:disable-next-line:align
-                                }, 100);
+                        var eventRecordKey_1 = resourceType.getRecordKey(e.record);
+                        var existingRecordIndex = this.state.data.findIndex(function (o) {
+                            return eventRecordKey_1 === resourceType.getRecordKey(o);
+                        });
+                        if (existingRecordIndex >= 0) {
+                            var newStateData_1 = __spread(this.state.data);
+                            newStateData_1[existingRecordIndex] = e.record;
+                            if (this.mappingTimeout) {
+                                clearTimeout(this.mappingTimeout);
                             }
-                            else {
-                                this.setState(__assign({}, this.state, { data: __spread(this.state.data, [e.record]) }));
-                            }
+                            this.mappingTimeout = setTimeout(function () {
+                                var dataIds = newStateData_1.map(function (o) { return resourceType.getRecordKey(o); });
+                                var data = resourceType.getAllRecords(store, function (o) {
+                                    return dataIds.includes(resourceType.getRecordKey(o));
+                                });
+                                _this.setState(__assign({}, _this.state, { data: data }));
+                                // tslint:disable-next-line:align
+                            }, 100);
+                        }
+                        else {
+                            this.setState(__assign({}, this.state, { data: __spread(this.state.data, [e.record]) }));
                         }
                         break;
                     case 'remove':

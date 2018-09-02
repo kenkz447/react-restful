@@ -38,56 +38,63 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Fetcher = /** @class */ (function () {
     function Fetcher(props) {
         this.createDefaultRequestInit = function () { return ({ headers: new Headers() }); };
-        this.store = props.store;
+        this.props = props;
     }
-    Fetcher.prototype.beforeFetch = function (url, requestInit) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, requestInit];
-            });
-        });
-    };
     Fetcher.prototype.fetch = function (url, requestInit) {
         return fetch(url, requestInit);
     };
     Fetcher.prototype.fetchResource = function (resource, params) {
         return __awaiter(this, void 0, void 0, function () {
-            var url, requestInit, modifiedRequestInit, response, responseContentType, json, error_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, store, beforeFetch, afterFetch, url, requestInit, modifiedRequestInit, _b, response, responseContentType, json, error_1;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        _a.trys.push([0, 6, , 7]);
+                        _c.trys.push([0, 10, , 11]);
+                        _a = this.props, store = _a.store, beforeFetch = _a.beforeFetch, afterFetch = _a.afterFetch;
                         url = resource.urlReslover(params);
                         requestInit = resource.requestInitReslover(params) ||
                             this.createDefaultRequestInit();
                         requestInit.method = resource.method;
-                        return [4 /*yield*/, this.beforeFetch(url, requestInit)];
+                        if (!beforeFetch) return [3 /*break*/, 2];
+                        return [4 /*yield*/, beforeFetch(url, requestInit)];
                     case 1:
-                        modifiedRequestInit = _a.sent();
-                        return [4 /*yield*/, this.fetch(url, modifiedRequestInit)];
+                        _b = _c.sent();
+                        return [3 /*break*/, 3];
                     case 2:
-                        response = _a.sent();
+                        _b = requestInit;
+                        _c.label = 3;
+                    case 3:
+                        modifiedRequestInit = _b;
+                        return [4 /*yield*/, this.fetch(url, modifiedRequestInit)];
+                    case 4:
+                        response = _c.sent();
+                        if (!afterFetch) return [3 /*break*/, 6];
+                        return [4 /*yield*/, afterFetch(response)];
+                    case 5:
+                        _c.sent();
+                        _c.label = 6;
+                    case 6:
                         if (!response.ok) {
                             throw response;
                         }
                         responseContentType = response.headers.get('content-type');
-                        if (!(responseContentType && responseContentType.startsWith('application/json'))) return [3 /*break*/, 4];
+                        if (!(responseContentType && responseContentType.startsWith('application/json'))) return [3 /*break*/, 8];
                         return [4 /*yield*/, response.json()];
-                    case 3:
-                        json = _a.sent();
+                    case 7:
+                        json = _c.sent();
                         if (resource.mapDataToStore) {
-                            resource.mapDataToStore(json, resource.recordType, this.store);
+                            resource.mapDataToStore(json, resource.recordType, store);
                         }
                         return [2 /*return*/, json];
-                    case 4: return [4 /*yield*/, response.text()];
-                    case 5: return [2 /*return*/, _a.sent()];
-                    case 6:
-                        error_1 = _a.sent();
+                    case 8: return [4 /*yield*/, response.text()];
+                    case 9: return [2 /*return*/, _c.sent()];
+                    case 10:
+                        error_1 = _c.sent();
                         if (error_1 instanceof Response) {
                             throw error_1;
                         }
                         throw new Error(error_1);
-                    case 7: return [2 /*return*/];
+                    case 11: return [2 /*return*/];
                 }
             });
         });

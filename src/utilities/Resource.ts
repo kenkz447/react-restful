@@ -7,8 +7,7 @@ export interface ResourceProps<DataModel> {
     url: string;
     method: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
-    // tslint:disable-next-line:no-any
-    meta?: any;
+    afterFetch?: (params: ResourceParameter[], fetchResult: DataModel) => void;
 }
 
 export interface ResourceParameter {
@@ -23,12 +22,14 @@ export class Resource<DataModel> {
     url: string;
     method: string;
     mapDataToStore: ResourceProps<DataModel>['mapDataToStore'];
+    afterFetch: ResourceProps<DataModel>['afterFetch'];
 
     constructor(props: ResourceProps<DataModel>) {
         this.recordType = props.resourceType;
         this.url = props.url;
         this.method = props.method;
         this.mapDataToStore = props.mapDataToStore;
+        this.afterFetch = props.afterFetch;
     }
 
     urlReslover(params: Array<ResourceParameter>): string {
@@ -38,7 +39,7 @@ export class Resource<DataModel> {
             if (param.type === 'body') {
                 continue;
             }
-            
+
             if (param.type === 'path') {
                 uRL = uRL.replace(`/:${param.parameter}`, `/${param.value}`);
             } else {

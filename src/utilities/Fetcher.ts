@@ -3,8 +3,8 @@ import { Store } from './Store';
 
 interface FetcherProps {
     store: Store;
-    beforeFetch: (url: string, requestInit: RequestInit) => RequestInit;
-    afterFetch: (response: Response) => void;
+    beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
+    afterFetch?: (response: Response) => void;
 }
 
 export class Fetcher {
@@ -31,10 +31,12 @@ export class Fetcher {
 
             requestInit.method = resource.method;
 
-            const modifiedRequestInit = await beforeFetch(url, requestInit);
+            const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
             const response = await this.fetch(url, modifiedRequestInit);
 
-            await afterFetch(response);
+            if (afterFetch) {
+                await afterFetch(response);
+            }
 
             if (!response.ok) {
                 throw response;
@@ -43,12 +45,21 @@ export class Fetcher {
             const responseContentType = response.headers.get('content-type');
             if (responseContentType && responseContentType.startsWith('application/json')) {
                 const json = await response.json();
+                if (resource.afterFetch) {
+                    resource.afterFetch(params, json);
+                }
+
                 if (resource.mapDataToStore) {
                     resource.mapDataToStore(json, resource.recordType, store);
                 }
                 return json;
             }
-            return await response.text();
+            const responseText = await response.text();
+            if (resource.afterFetch) {
+                // tslint:disable-next-line:no-any
+                resource.afterFetch(params, responseText as any);
+            }
+            return responseText;
         } catch (error) {
             if (error instanceof Response) {
                 throw error;

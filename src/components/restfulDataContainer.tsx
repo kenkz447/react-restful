@@ -82,36 +82,34 @@ export function restfulDataContainer<T extends RecordType, P>
 
                 switch (e.type) {
                     case 'mapping':
-                        if (this.props.data === undefined) {
-                            const eventRecordKey = resourceType.getRecordKey(e.record);
-                            const existingRecordIndex = this.state.data.findIndex(o => {
-                                return eventRecordKey === resourceType.getRecordKey(o);
-                            });
+                        const eventRecordKey = resourceType.getRecordKey(e.record);
+                        const existingRecordIndex = this.state.data.findIndex(o => {
+                            return eventRecordKey === resourceType.getRecordKey(o);
+                        });
 
-                            if (existingRecordIndex >= 0) {
-                                const newStateData = [...this.state.data];
-                                newStateData[existingRecordIndex] = e.record;
+                        if (existingRecordIndex >= 0) {
+                            const newStateData = [...this.state.data];
+                            newStateData[existingRecordIndex] = e.record;
 
-                                if (this.mappingTimeout) {
-                                    clearTimeout(this.mappingTimeout);
-                                }
+                            if (this.mappingTimeout) {
+                                clearTimeout(this.mappingTimeout);
+                            }
 
-                                this.mappingTimeout = setTimeout(() => {
-                                    const dataIds = newStateData.map(o => resourceType.getRecordKey(o));
-                                    const data = resourceType.getAllRecords(store, (o) =>
-                                        dataIds.includes(resourceType.getRecordKey(o)));
-                                    this.setState({
-                                        ...this.state,
-                                        data: data
-                                    });
-                                    // tslint:disable-next-line:align
-                                }, 100);
-                            } else {
+                            this.mappingTimeout = setTimeout(() => {
+                                const dataIds = newStateData.map(o => resourceType.getRecordKey(o));
+                                const data = resourceType.getAllRecords(store, (o) =>
+                                    dataIds.includes(resourceType.getRecordKey(o)));
                                 this.setState({
                                     ...this.state,
-                                    data: [...this.state.data, e.record]
+                                    data: data
                                 });
-                            }
+                                // tslint:disable-next-line:align
+                            }, 100);
+                        } else {
+                            this.setState({
+                                ...this.state,
+                                data: [...this.state.data, e.record]
+                            });
                         }
                         break;
                     case 'remove':
