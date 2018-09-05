@@ -5,7 +5,7 @@ export interface ResourceProps<DataModel> {
     url: string;
     method: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
-    afterFetch?: (params: ResourceParameter[], fetchResult: DataModel) => void;
+    afterFetch?: <TMeta>(params: ResourceParameter[], fetchResult: DataModel, meta?: TMeta) => void;
 }
 export interface ResourceParameter {
     parameter?: string;

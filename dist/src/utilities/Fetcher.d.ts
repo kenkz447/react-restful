@@ -12,6 +12,6 @@ export declare class Fetcher {
     };
     constructor(props: FetcherProps);
     fetch(url: string, requestInit: RequestInit): Promise<Response>;
-    fetchResource<DataModel>(resource: Resource<DataModel>, params: ResourceParameter[]): Promise<any>;
+    fetchResource<DataModel, Meta = {}>(resource: Resource<DataModel>, params: ResourceParameter[], meta?: Meta): Promise<any>;
 }
 export {};

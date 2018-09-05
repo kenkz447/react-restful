@@ -19,7 +19,7 @@ export class Fetcher {
         return fetch(url, requestInit);
     }
 
-    async fetchResource<DataModel, Meta>(
+    async fetchResource<DataModel, Meta = {}>(
         resource: Resource<DataModel>,
         params: ResourceParameter[],
         meta?: Meta

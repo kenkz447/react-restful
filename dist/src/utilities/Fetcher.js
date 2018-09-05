@@ -43,7 +43,7 @@ var Fetcher = /** @class */ (function () {
     Fetcher.prototype.fetch = function (url, requestInit) {
         return fetch(url, requestInit);
     };
-    Fetcher.prototype.fetchResource = function (resource, params) {
+    Fetcher.prototype.fetchResource = function (resource, params, meta) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, store, beforeFetch, afterFetch, url, requestInit, modifiedRequestInit, _b, response, responseContentType, json, responseText, error_1;
             return __generator(this, function (_c) {
@@ -83,7 +83,7 @@ var Fetcher = /** @class */ (function () {
                     case 7:
                         json = _c.sent();
                         if (resource.afterFetch) {
-                            resource.afterFetch(params, json);
+                            resource.afterFetch(params, json, meta);
                         }
                         if (resource.mapDataToStore) {
                             resource.mapDataToStore(json, resource.recordType, store);
@@ -94,7 +94,7 @@ var Fetcher = /** @class */ (function () {
                         responseText = _c.sent();
                         if (resource.afterFetch) {
                             // tslint:disable-next-line:no-any
-                            resource.afterFetch(params, responseText);
+                            resource.afterFetch(params, responseText, meta);
                         }
                         return [2 /*return*/, responseText];
                     case 10:
