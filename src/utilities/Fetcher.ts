@@ -19,7 +19,11 @@ export class Fetcher {
         return fetch(url, requestInit);
     }
 
-    async fetchResource<DataModel>(resource: Resource<DataModel>, params: ResourceParameter[]) {
+    async fetchResource<DataModel, Meta>(
+        resource: Resource<DataModel>,
+        params: ResourceParameter[],
+        meta?: Meta
+    ) {
         try {
             const { store, beforeFetch, afterFetch } = this.props;
 
@@ -46,7 +50,7 @@ export class Fetcher {
             if (responseContentType && responseContentType.startsWith('application/json')) {
                 const json = await response.json();
                 if (resource.afterFetch) {
-                    resource.afterFetch(params, json);
+                    resource.afterFetch(params, json, meta);
                 }
 
                 if (resource.mapDataToStore) {
@@ -57,7 +61,7 @@ export class Fetcher {
             const responseText = await response.text();
             if (resource.afterFetch) {
                 // tslint:disable-next-line:no-any
-                resource.afterFetch(params, responseText as any);
+                resource.afterFetch(params, responseText as any, meta);
             }
             return responseText;
         } catch (error) {
