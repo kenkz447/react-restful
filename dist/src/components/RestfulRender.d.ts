@@ -13,6 +13,7 @@ export interface RestfulRenderProps<DataModel> {
     fetcher?: Fetcher;
     needsUpdate?: boolean;
     fetching?: boolean;
+    onFetchCompleted?: (data: DataModel) => void;
 }
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     fetcher: Fetcher;

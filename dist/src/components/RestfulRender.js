@@ -56,8 +56,12 @@ var RestfulRender = /** @class */ (function (_super) {
     };
     RestfulRender.prototype.fetching = function () {
         var _this = this;
-        this.state.fetcher.fetchResource(this.state.resource, this.state.parameters)
+        var _a = this.state, fetcher = _a.fetcher, resource = _a.resource, parameters = _a.parameters, onFetchCompleted = _a.onFetchCompleted;
+        fetcher.fetchResource(resource, parameters)
             .then(function (data) {
+            if (onFetchCompleted) {
+                onFetchCompleted(data);
+            }
             _this.setState({
                 needsUpdate: false,
                 fetching: false,
