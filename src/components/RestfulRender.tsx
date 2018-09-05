@@ -20,6 +20,7 @@ export interface RestfulRenderProps<DataModel> {
     fetcher?: Fetcher;
     needsUpdate?: boolean;
     fetching?: boolean;
+    onFetchCompleted?: (data: DataModel) => void;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
@@ -83,8 +84,12 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
     }
 
     fetching() {
-        this.state.fetcher.fetchResource<T>(this.state.resource, this.state.parameters)
+        const { fetcher, resource, parameters, onFetchCompleted } = this.state;
+        fetcher.fetchResource<T>(resource, parameters)
             .then((data: T) => {
+                if (onFetchCompleted) {
+                    onFetchCompleted(data);
+                }
                 this.setState({
                     needsUpdate: false,
                     fetching: false,
