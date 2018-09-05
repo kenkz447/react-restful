@@ -2,7 +2,7 @@ import { RecordType } from './RecordTable';
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
 
-export interface ResourceProps<DataModel, Meta = {}> {
+export interface ResourceProps<DataModel, Meta> {
     resourceType: ResourceType;
     url: string;
     method: string;
@@ -17,14 +17,14 @@ export interface ResourceParameter {
     contentType?: string;
 }
 
-export class Resource<DataModel> {
+export class Resource<DataModel, Meta = {}> {
     recordType: ResourceType;
     url: string;
     method: string;
-    mapDataToStore: ResourceProps<DataModel>['mapDataToStore'];
-    afterFetch: ResourceProps<DataModel>['afterFetch'];
+    mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
+    afterFetch: ResourceProps<DataModel, Meta>['afterFetch'];
 
-    constructor(props: ResourceProps<DataModel>) {
+    constructor(props: ResourceProps<DataModel, Meta>) {
         this.recordType = props.resourceType;
         this.url = props.url;
         this.method = props.method;
