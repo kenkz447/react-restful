@@ -25,7 +25,7 @@ var Resource = /** @class */ (function () {
         try {
             for (var params_1 = __values(params), params_1_1 = params_1.next(); !params_1_1.done; params_1_1 = params_1.next()) {
                 var param = params_1_1.value;
-                if (param.type === 'body') {
+                if (!param || param.type === 'body') {
                     continue;
                 }
                 if (param.type === 'path') {
