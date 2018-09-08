@@ -36,7 +36,7 @@ export class Resource<DataModel, Meta = {}> {
         let uRL: string = this.url;
         const searchs: URLSearchParams = new URLSearchParams();
         for (const param of params) {
-            if (!param || param.type === 'body') {
+            if (!param || param.type === 'body' || param.value === undefined) {
                 continue;
             }
 
