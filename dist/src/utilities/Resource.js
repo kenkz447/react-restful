@@ -12,7 +12,7 @@ class Resource {
         let uRL = this.url;
         const searchs = new URLSearchParams();
         for (const param of params) {
-            if (!param || param.type === 'body') {
+            if (!param || param.type === 'body' || param.value === undefined) {
                 continue;
             }
             if (param.type === 'path') {
