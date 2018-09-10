@@ -8,10 +8,10 @@ export interface SubscribeEvent<T extends RecordType = RecordType> {
     resourceType: ResourceType<T>;
     record: T;
 }
-declare type SubscribeCallback = (event: SubscribeEvent) => void;
-interface SubscribeStack {
+declare type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
+interface SubscribeStack<T> {
     resourceTypes: ResourceType[];
-    callback: SubscribeCallback;
+    callback: SubscribeCallback<T>;
     subscribeId: string;
 }
 export declare class Store {
@@ -19,8 +19,8 @@ export declare class Store {
     private recordTables;
     private subscribeStacks;
     constructor();
-    subscribe(resourceTypes: ResourceType[], callback: SubscribeCallback): string;
-    unSubscribe(subscribeId: string): SubscribeStack[];
+    subscribe<T>(resourceTypes: ResourceType[], callback: SubscribeCallback<T>): string;
+    unSubscribe(subscribeId: string): SubscribeStack<any>[];
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
     getRecordTable<T = RecordType>(resourceType: ResourceType): RecordTable<T>;
     registerRecordType(resourceType: ResourceType): void;
