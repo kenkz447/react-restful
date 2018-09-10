@@ -16,6 +16,7 @@ interface RecordRelatedItem {
 interface ResourceTypeProps {
     name: string;
     schema: SchemaField[];
+    store?: Store;
 }
 
 export class ResourceType<T extends RecordType = {}> {
@@ -32,10 +33,14 @@ export class ResourceType<T extends RecordType = {}> {
         this.schema = props.schema;
 
         const fKField = ResourceType.findPKField(props.schema);
-        // TODO: Check NULL FK field, with an invariant message
+        // TODO: Check NULL FK field with an invariant message
         this.keyProperty = fKField.field;
 
         this.getChildTypeSchemafield = this.getChildTypeSchemafield.bind(this);
+
+        if (props.store) {
+            props.store.registerRecordType(this);
+        }
     }
 
     getAllRecords(store: Store, predicate?: (record: T) => boolean) {
