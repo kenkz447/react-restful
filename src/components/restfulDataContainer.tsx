@@ -1,33 +1,33 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
 
-interface RestfulDataContainerProps<DataModel extends RecordType, ComponentProps> {
+interface RestfulDataContainerProps<DataModel extends RecordType, ComponentProps, MappingProps> {
     store: Store;
     resourceType: ResourceType<DataModel>;
     dataPropsKey?: string;
-    getData?: (props: ComponentProps) => DataModel[];
-    mapToProps: (data: DataModel[], ownProps: ComponentProps) => Partial<ComponentProps>;
+    getMappingDataFromProps?: (props: ComponentProps) => DataModel[];
+    mapToProps: (data: DataModel[], ownProps: ComponentProps) => MappingProps;
 }
 
 interface PaginationState<T extends RecordType> {
     data: Array<T>;
 }
 
-export function restfulDataContainer<DataMode extends RecordType, ComponentProps>
-    (restfulDataContainerProps: RestfulDataContainerProps<DataMode, ComponentProps>) {
+export function restfulDataContainer<DataMode extends RecordType, ComponentOwnProps, ComponentMappingProps>
+    (restfulDataContainerProps: RestfulDataContainerProps<DataMode, ComponentOwnProps, ComponentMappingProps>) {
 
     if (!restfulDataContainerProps.dataPropsKey) {
         restfulDataContainerProps.dataPropsKey = 'data';
     }
 
-    if (!restfulDataContainerProps.getData) {
-        restfulDataContainerProps.getData =
-            (props: ComponentProps) => props[restfulDataContainerProps.dataPropsKey!];
+    if (!restfulDataContainerProps.getMappingDataFromProps) {
+        restfulDataContainerProps.getMappingDataFromProps =
+            (props: ComponentOwnProps) => props[restfulDataContainerProps.dataPropsKey!];
     }
 
-    return (Component: React.ComponentType<ComponentProps>) =>
+    return (Component: React.ComponentType<ComponentOwnProps>) =>
         class RestfulDataContainerComponent extends
-            React.PureComponent<ComponentProps, PaginationState<DataMode>> {
+            React.PureComponent<ComponentOwnProps, PaginationState<DataMode>> {
 
             mappingTimeout!: NodeJS.Timer;
             subscribeId: string;
@@ -37,14 +37,14 @@ export function restfulDataContainer<DataMode extends RecordType, ComponentProps
                 store.unSubscribe(this.subscribeId);
             }
 
-            constructor(props: ComponentProps) {
+            constructor(props: ComponentOwnProps) {
                 super(props);
 
-                const { store, resourceType, getData } = restfulDataContainerProps;
+                const { store, resourceType, getMappingDataFromProps } = restfulDataContainerProps;
 
                 this.subscribeId = store.subscribe([resourceType], this.onDataMapping);
 
-                const data = getData!(props);
+                const data = getMappingDataFromProps!(props);
                 const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
 
                 const mappingData = data ?
