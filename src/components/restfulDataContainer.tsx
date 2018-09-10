@@ -1,27 +1,33 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
 
-interface RestfulDataContainerProps<T extends RecordType, P = {}> {
+interface RestfulDataContainerProps<DataModel extends RecordType, ComponentProps> {
     store: Store;
-    resourceType: ResourceType;
-    mapToProps: (data: T[], ownProps: {}) => P;
+    resourceType: ResourceType<DataModel>;
+    dataPropsKey?: string;
+    getData?: (props: ComponentProps) => DataModel[];
+    mapToProps: (data: DataModel[], ownProps: ComponentProps) => Partial<ComponentProps>;
 }
 
-export interface RestfulDataContainerComponentProps<T extends RecordType> {
+interface PaginationState<T extends RecordType> {
     data: Array<T>;
 }
 
-interface PaginationState<T extends RecordType = RecordType> {
-    // tslint:disable-next-line:no-any
-    data: Array<T | any>;
-}
+export function restfulDataContainer<DataMode extends RecordType, ComponentProps>
+    (restfulDataContainerProps: RestfulDataContainerProps<DataMode, ComponentProps>) {
 
-export function restfulDataContainer<T extends RecordType, P>
-    (restfulDataContainerProps: RestfulDataContainerProps<T, P>) {
-    return (Component: React.ComponentType<P>) =>
-        class RestfulDataContainerComponent extends React.PureComponent<
-            RestfulDataContainerComponentProps<T>,
-            PaginationState<T>> {
+    if (!restfulDataContainerProps.dataPropsKey) {
+        restfulDataContainerProps.dataPropsKey = 'data';
+    }
+
+    if (!restfulDataContainerProps.getData) {
+        restfulDataContainerProps.getData =
+            (props: ComponentProps) => props[restfulDataContainerProps.dataPropsKey!];
+    }
+
+    return (Component: React.ComponentType<ComponentProps>) =>
+        class RestfulDataContainerComponent extends
+            React.PureComponent<ComponentProps, PaginationState<DataMode>> {
 
             mappingTimeout!: NodeJS.Timer;
             subscribeId: string;
@@ -31,15 +37,14 @@ export function restfulDataContainer<T extends RecordType, P>
                 store.unSubscribe(this.subscribeId);
             }
 
-            constructor(props: RestfulDataContainerComponentProps<T>) {
+            constructor(props: ComponentProps) {
                 super(props);
 
-                this.onDataMapping = this.onDataMapping.bind(this);
+                const { store, resourceType, getData } = restfulDataContainerProps;
 
-                const { data } = props;
-                const { store, resourceType } = restfulDataContainerProps;
                 this.subscribeId = store.subscribe([resourceType], this.onDataMapping);
 
+                const data = getData!(props);
                 const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
 
                 const mappingData = data ?
@@ -56,15 +61,32 @@ export function restfulDataContainer<T extends RecordType, P>
 
             render() {
                 const { mapToProps } = restfulDataContainerProps;
+                const componentProps = this.getComponentProps();
 
                 return (
-                    <Component {...this.props} {...mapToProps(this.state.data, this.props)} />
+                    <Component
+                        {...componentProps}
+                        {...mapToProps(this.state.data, this.props)}
+                    />
                 );
             }
 
-            checkRecordExistInState(record: RecordType) {
-                const { resourceType } = restfulDataContainerProps;
+            getComponentProps = () => {
+                const componentProps = {};
+                for (const propKey in this.props) {
+                    if (this.props.hasOwnProperty(propKey)) {
+                        const propsValues = this.props[propKey];
+                        const isDataProp = propKey !== restfulDataContainerProps.dataPropsKey;
+                        if (!isDataProp) {
+                            componentProps[propKey] = propsValues;
+                        }
+                    }
+                }
+                return componentProps;
+            }
 
+            checkRecordExistInState = (record: DataMode) => {
+                const { resourceType } = restfulDataContainerProps;
                 const checkingRecordKey = resourceType.getRecordKey(record);
                 for (const stateRecord of this.state.data) {
                     const inStateRecordKey = resourceType.getRecordKey(stateRecord);
@@ -76,20 +98,21 @@ export function restfulDataContainer<T extends RecordType, P>
                 return false;
             }
 
-            onDataMapping(e: SubscribeEvent) {
+            onDataMapping = (e: SubscribeEvent<DataMode>) => {
                 const { store, resourceType } = restfulDataContainerProps;
-                const isRecordExit = this.checkRecordExistInState(e.record);
+                const record = e.record;
+                const isRecordExit = this.checkRecordExistInState(record);
 
                 switch (e.type) {
                     case 'mapping':
-                        const eventRecordKey = resourceType.getRecordKey(e.record);
+                        const eventRecordKey = resourceType.getRecordKey(record);
                         const existingRecordIndex = this.state.data.findIndex(o => {
                             return eventRecordKey === resourceType.getRecordKey(o);
                         });
 
                         if (existingRecordIndex >= 0) {
                             const newStateData = [...this.state.data];
-                            newStateData[existingRecordIndex] = e.record;
+                            newStateData[existingRecordIndex] = record;
 
                             if (this.mappingTimeout) {
                                 clearTimeout(this.mappingTimeout);
@@ -108,13 +131,13 @@ export function restfulDataContainer<T extends RecordType, P>
                         } else {
                             this.setState({
                                 ...this.state,
-                                data: [...this.state.data, e.record]
+                                data: [...this.state.data, record]
                             });
                         }
                         break;
                     case 'remove':
                         if (isRecordExit) {
-                            const deletedRecordKey = resourceType.getRecordKey(e.record);
+                            const deletedRecordKey = resourceType.getRecordKey(record);
 
                             const updatedStateRecords = this.state.data.filter(o =>
                                 resourceType.getRecordKey(o) !== deletedRecordKey);

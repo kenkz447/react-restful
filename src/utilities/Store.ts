@@ -13,18 +13,20 @@ export interface SubscribeEvent<T extends RecordType = RecordType> {
     record: T;
 }
 
-type SubscribeCallback = (event: SubscribeEvent) => void;
+type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
 
-interface SubscribeStack {
+interface SubscribeStack<T> {
     resourceTypes: ResourceType[];
-    callback: SubscribeCallback;
+    callback: SubscribeCallback<T>;
     subscribeId: string;
 }
 
 export class Store {
     private resourceTypes: Array<ResourceType>;
     private recordTables: RecordTables;
-    private subscribeStacks: Array<SubscribeStack>;
+    
+    // tslint:disable-next-line:no-any
+    private subscribeStacks: SubscribeStack<any>[];
 
     constructor() {
         this.resourceTypes = [];
@@ -35,7 +37,7 @@ export class Store {
         this.getRecordTable = this.getRecordTable.bind(this);
     }
 
-    subscribe(resourceTypes: ResourceType[], callback: SubscribeCallback) {
+    subscribe<T>(resourceTypes: ResourceType[], callback: SubscribeCallback<T>) {
         const subscribeId = uuid();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,

@@ -7,12 +7,6 @@ export interface SchemaField {
     resourceType?: string;
 }
 
-interface RecordRelatedItem {
-    type: 'FK' | 'MANY';
-    // tslint:disable-next-line:no-any
-    value: any;
-}
-
 interface ResourceTypeProps {
     name: string;
     schema: SchemaField[];
@@ -46,7 +40,7 @@ export class ResourceType<T extends RecordType = {}> {
     getAllRecords(store: Store, predicate?: (record: T) => boolean) {
         const { getRecordTable } = store;
         const recordTable: RecordTable<T> = getRecordTable(this);
-        const result = [];
+        const result: Array<T> = [];
 
         const existRecords = predicate ? recordTable.records.filter(predicate) : recordTable.records;
         for (const record of existRecords) {
@@ -58,7 +52,8 @@ export class ResourceType<T extends RecordType = {}> {
     }
 
     populate(store: Store, record: T) {
-        const populateRecord = { ...record as object };
+        const populateRecord = Object.assign({}, record) as T;
+        
         for (const schemaField of this.schema) {
             const relatedResourceType = schemaField.resourceType as string;
             switch (schemaField.type) {
