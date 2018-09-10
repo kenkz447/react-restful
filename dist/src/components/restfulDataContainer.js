@@ -12,8 +12,8 @@ function restfulDataContainer(restfulDataContainerProps) {
     if (!restfulDataContainerProps.dataPropsKey) {
         restfulDataContainerProps.dataPropsKey = 'data';
     }
-    if (!restfulDataContainerProps.getData) {
-        restfulDataContainerProps.getData =
+    if (!restfulDataContainerProps.getMappingDataFromProps) {
+        restfulDataContainerProps.getMappingDataFromProps =
             (props) => props[restfulDataContainerProps.dataPropsKey];
     }
     return (Component) => class RestfulDataContainerComponent extends React.PureComponent {
@@ -81,9 +81,9 @@ function restfulDataContainer(restfulDataContainerProps) {
                         break;
                 }
             };
-            const { store, resourceType, getData } = restfulDataContainerProps;
+            const { store, resourceType, getMappingDataFromProps } = restfulDataContainerProps;
             this.subscribeId = store.subscribe([resourceType], this.onDataMapping);
-            const data = getData(props);
+            const data = getMappingDataFromProps(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
             const mappingData = data ?
                 resourceType.getAllRecords(store, (recordInstance) => {
