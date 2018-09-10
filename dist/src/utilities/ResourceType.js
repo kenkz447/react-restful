@@ -5,9 +5,12 @@ class ResourceType {
         this.name = props.name;
         this.schema = props.schema;
         const fKField = ResourceType.findPKField(props.schema);
-        // TODO: Check NULL FK field, with an invariant message
+        // TODO: Check NULL FK field with an invariant message
         this.keyProperty = fKField.field;
         this.getChildTypeSchemafield = this.getChildTypeSchemafield.bind(this);
+        if (props.store) {
+            props.store.registerRecordType(this);
+        }
     }
     static findPKField(schema) {
         return schema.find(o => o.type === 'PK');

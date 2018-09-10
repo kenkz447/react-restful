@@ -8,6 +8,7 @@ export interface SchemaField {
 interface ResourceTypeProps {
     name: string;
     schema: SchemaField[];
+    store?: Store;
 }
 export declare class ResourceType<T extends RecordType = {}> {
     name: string;
