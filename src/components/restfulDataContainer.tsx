@@ -76,7 +76,7 @@ export function restfulDataContainer<DataMode extends RecordType, ComponentOwnPr
                 for (const propKey in this.props) {
                     if (this.props.hasOwnProperty(propKey)) {
                         const propsValues = this.props[propKey];
-                        const isDataProp = propKey !== restfulDataContainerProps.dataPropsKey;
+                        const isDataProp = propKey === restfulDataContainerProps.dataPropsKey;
                         if (!isDataProp) {
                             componentProps[propKey] = propsValues;
                         }
