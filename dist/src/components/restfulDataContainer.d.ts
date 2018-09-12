@@ -20,9 +20,9 @@ export declare function restfulDataContainer<DataMode extends RecordType, Compon
         getComponentProps: () => {};
         checkRecordExistInState: (record: DataMode) => boolean;
         onDataMapping: (e: SubscribeEvent<DataMode>) => void;
-        setState<K extends "data">(state: PaginationState<DataMode> | ((prevState: Readonly<PaginationState<DataMode>>, props: ComponentOwnProps) => PaginationState<DataMode> | Pick<PaginationState<DataMode>, K> | null) | Pick<PaginationState<DataMode>, K> | null, callback?: (() => void) | undefined): void;
+        setState<K extends "data">(state: PaginationState<DataMode> | ((prevState: Readonly<PaginationState<DataMode>>, props: Readonly<ComponentOwnProps>) => PaginationState<DataMode> | Pick<PaginationState<DataMode>, K> | null) | Pick<PaginationState<DataMode>, K> | null, callback?: (() => void) | undefined): void;
         forceUpdate(callBack?: (() => void) | undefined): void;
-        props: Readonly<{
+        readonly props: Readonly<{
             children?: React.ReactNode;
         }> & Readonly<ComponentOwnProps>;
         state: Readonly<PaginationState<DataMode>>;
