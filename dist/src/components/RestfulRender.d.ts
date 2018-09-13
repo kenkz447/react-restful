@@ -19,7 +19,7 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
     fetcher: Fetcher;
     componentRenderProps: RestfulComponentRenderProps<DataModel>;
 }
-export declare class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>, RestfulRenderState<T>> {
+export declare class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>>;
     static getDerivedStateFromProps<DataModel>(nextProps: RestfulRenderProps<DataModel>, prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null;
     constructor(props: RestfulRenderProps<T>);
