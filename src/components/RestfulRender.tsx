@@ -15,7 +15,7 @@ export interface RestfulComponentRenderProps<DataModel> {
 export interface RestfulRenderProps<DataModel> {
     store: Store;
     resource: Resource<DataModel>;
-    parameters: Array<ResourceParameter>;
+    parameters?: Array<ResourceParameter>;
     render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     fetcher?: Fetcher;
     needsUpdate?: boolean;
@@ -29,6 +29,9 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
 }
 
 export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>, RestfulRenderState<T>> {
+    static defaultProps: Partial<RestfulRenderProps<{}>> = {
+        parameters: []
+    };
 
     static getDerivedStateFromProps<DataModel>(
         nextProps: RestfulRenderProps<DataModel>,
@@ -66,8 +69,8 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
         this.fetching();
     }
 
-    componentDidUpdate(prevProps: RestfulRenderProps<T>, prevState: RestfulRenderState<T>) {
-        const { needsUpdate, fetching, componentRenderProps } = this.state;
+    componentDidUpdate() {
+        const { needsUpdate, fetching } = this.state;
         if (needsUpdate && fetching) {
             this.fetching();
         }

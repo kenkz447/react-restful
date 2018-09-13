@@ -7,7 +7,7 @@ export interface ResourceProps<DataModel, Meta> {
     url: string;
     method: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
-    afterFetch?: (params: ResourceParameter[], fetchResult: DataModel, meta?: Meta) => void;
+    afterFetch?: (params: ResourceParameter[] | undefined, fetchResult: DataModel, meta?: Meta) => void;
 }
 
 export interface ResourceParameter {
@@ -32,7 +32,7 @@ export class Resource<DataModel, Meta = {}> {
         this.afterFetch = props.afterFetch;
     }
 
-    urlReslover(params: Array<ResourceParameter>): string {
+    urlReslover(params: Array<ResourceParameter> = []): string {
         let uRL: string = this.url;
         const searchs: URLSearchParams = new URLSearchParams();
         for (const param of params) {
@@ -50,11 +50,7 @@ export class Resource<DataModel, Meta = {}> {
         return `${uRL}?${searchs.toString()}`;
     }
 
-    requestInitReslover(params: Array<ResourceParameter>): RequestInit | null {
-        if (!params) {
-            return null;
-        }
-
+    requestInitReslover(params: Array<ResourceParameter> = []): RequestInit | null {
         const body: ResourceParameter = params.find(param => param.type === 'body') as ResourceParameter;
 
         if (!body) {

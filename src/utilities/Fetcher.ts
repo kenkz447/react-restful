@@ -21,7 +21,7 @@ export class Fetcher {
 
     async fetchResource<DataModel, Meta = {}>(
         resource: Resource<DataModel>,
-        params: ResourceParameter[],
+        params?: ResourceParameter[],
         meta?: Meta
     ) {
         try {
