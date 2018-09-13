@@ -28,7 +28,7 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
     componentRenderProps: RestfulComponentRenderProps<DataModel>;
 }
 
-export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>, RestfulRenderState<T>> {
+export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>> = {
         parameters: []
     };
@@ -48,7 +48,13 @@ export class RestfulRender<T> extends React.PureComponent<RestfulRenderProps<T>,
                 fetching: true
             };
         }
-
+        if (nextProps.render !== prevState.render) {
+            return {
+                ...prevState,
+                ...nextProps,
+                needsUpdate: true
+            };
+        }
         return null;
     }
 
