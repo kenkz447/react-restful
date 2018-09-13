@@ -8,7 +8,7 @@ class Resource {
         this.mapDataToStore = props.mapDataToStore;
         this.afterFetch = props.afterFetch;
     }
-    urlReslover(params) {
+    urlReslover(params = []) {
         let uRL = this.url;
         const searchs = new URLSearchParams();
         for (const param of params) {
@@ -24,10 +24,7 @@ class Resource {
         }
         return `${uRL}?${searchs.toString()}`;
     }
-    requestInitReslover(params) {
-        if (!params) {
-            return null;
-        }
+    requestInitReslover(params = []) {
         const body = params.find(param => param.type === 'body');
         if (!body) {
             return null;

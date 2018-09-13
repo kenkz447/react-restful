@@ -24,8 +24,8 @@ class RestfulRender extends react_1.default.PureComponent {
     componentDidMount() {
         this.fetching();
     }
-    componentDidUpdate(prevProps, prevState) {
-        const { needsUpdate, fetching, componentRenderProps } = this.state;
+    componentDidUpdate() {
+        const { needsUpdate, fetching } = this.state;
         if (needsUpdate && fetching) {
             this.fetching();
         }
@@ -60,4 +60,7 @@ class RestfulRender extends react_1.default.PureComponent {
         });
     }
 }
+RestfulRender.defaultProps = {
+    parameters: []
+};
 exports.RestfulRender = RestfulRender;
