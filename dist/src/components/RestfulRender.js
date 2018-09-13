@@ -15,7 +15,6 @@ class RestfulRender extends react_1.default.Component {
     }
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.resource !== prevState.resource ||
-            nextProps.render !== prevState.render ||
             nextProps.parameters !== prevState.parameters) {
             return Object.assign({}, nextProps, { fetcher: prevState.fetcher, componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
         }

@@ -37,7 +37,6 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         nextProps: RestfulRenderProps<DataModel>,
         prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null {
         if (nextProps.resource !== prevState.resource ||
-            nextProps.render !== prevState.render ||
             nextProps.parameters !== prevState.parameters
         ) {
             return {
@@ -48,6 +47,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 fetching: true
             };
         }
+
         if (nextProps.render !== prevState.render) {
             return {
                 ...prevState,
@@ -55,6 +55,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 needsUpdate: true
             };
         }
+        
         return null;
     }
 
