@@ -5,7 +5,6 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly store: Store;
     readonly resourceType: ResourceType<DataModel>;
     readonly dataPropsKey?: string;
-    readonly useManualTracking?: boolean;
     readonly registerToTracking?: (
         props: OwnProps,
         current?: ReadonlyArray<DataModel>,
@@ -86,9 +85,9 @@ export function restfulDataContainer
                     return this.onDataRemove(e.record);
                 }
 
-                const { useManualTracking } = containerProps;
+                const { registerToTracking } = containerProps;
 
-                if (useManualTracking) {
+                if (registerToTracking) {
                     return this.manualMapping(e);
                 }
 
