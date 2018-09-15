@@ -41,10 +41,10 @@ export function restfulDataContainer
 
                 this.subscribeId = store.subscribe([resourceType], this.onStoreChange);
 
-                const data = registerToTracking!(props);
+                const data = registerToTracking && registerToTracking(props);
                 const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
 
-                const mappingData = data ?
+                const mappingData = propDataIdMap ?
                     resourceType.getAllRecords(store, (recordInstance) => {
                         const recordInstanceKey = resourceType.getRecordKey(recordInstance);
                         return propDataIdMap.includes(recordInstanceKey);
