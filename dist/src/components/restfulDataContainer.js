@@ -27,8 +27,8 @@ function restfulDataContainer(containerProps) {
                 if (e.type === 'remove') {
                     return this.onDataRemove(e.record);
                 }
-                const { useManualTracking } = containerProps;
-                if (useManualTracking) {
+                const { registerToTracking } = containerProps;
+                if (registerToTracking) {
                     return this.manualMapping(e);
                 }
                 return this.autoMapping(e);
