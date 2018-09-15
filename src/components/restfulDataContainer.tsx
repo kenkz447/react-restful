@@ -1,50 +1,48 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
 
-interface RestfulDataContainerProps<DataModel extends RecordType, ComponentProps, MappingProps> {
-    store: Store;
-    resourceType: ResourceType<DataModel>;
-    dataPropsKey?: string;
-    getMappingDataFromProps?: (props: ComponentProps) => DataModel[];
-    mapToProps: (data: DataModel[], ownProps: ComponentProps) => MappingProps;
+interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
+    readonly store: Store;
+    readonly resourceType: ResourceType<DataModel>;
+    readonly dataPropsKey?: string;
+    readonly useManualTracking?: boolean;
+    readonly registerToTracking?: (
+        props: OwnProps,
+        current?: ReadonlyArray<DataModel>,
+        event?: SubscribeEvent
+    ) => DataModel[];
+    readonly mapToProps: (data: DataModel[], ownProps: OwnProps) => MappingProps;
 }
 
-interface PaginationState<T extends RecordType> {
-    data: Array<T>;
-}
+export function restfulDataContainer
+    <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>
+    (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
+    return (Component: new (arg: OwnProps) => React.Component<OwnProps>) =>
+        class RestfulDataContainer extends Component {
+            readonly state: {
+                readonly trackingData: Array<DataModel>;
+            };
 
-export function restfulDataContainer<DataMode extends RecordType, ComponentOwnProps, ComponentMappingProps>
-    (restfulDataContainerProps: RestfulDataContainerProps<DataMode, ComponentOwnProps, ComponentMappingProps>) {
-
-    if (!restfulDataContainerProps.dataPropsKey) {
-        restfulDataContainerProps.dataPropsKey = 'data';
-    }
-
-    if (!restfulDataContainerProps.getMappingDataFromProps) {
-        restfulDataContainerProps.getMappingDataFromProps =
-            (props: ComponentOwnProps) => props[restfulDataContainerProps.dataPropsKey!];
-    }
-
-    return (Component: React.ComponentType<ComponentOwnProps>) =>
-        class RestfulDataContainerComponent extends
-            React.PureComponent<ComponentOwnProps, PaginationState<DataMode>> {
-
+            readonly subscribeId: string;
             mappingTimeout!: NodeJS.Timer;
-            subscribeId: string;
 
             componentWillUnmount() {
-                const { store } = restfulDataContainerProps;
+                const { store } = containerProps;
                 store.unSubscribe(this.subscribeId);
             }
 
-            constructor(props: ComponentOwnProps) {
+            constructor(props: OwnProps) {
                 super(props);
 
-                const { store, resourceType, getMappingDataFromProps } = restfulDataContainerProps;
+                const {
+                    store,
+                    resourceType,
+                    registerToTracking
+                } = containerProps;
 
-                this.subscribeId = store.subscribe([resourceType], this.onDataMapping);
+                this.subscribeId = store.subscribe([resourceType], this.onStoreChange);
 
-                const data = getMappingDataFromProps!(props);
+                const data = registerToTracking!(props);
                 const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
 
                 const mappingData = data ?
@@ -55,40 +53,25 @@ export function restfulDataContainer<DataMode extends RecordType, ComponentOwnPr
                     resourceType.getAllRecords(store);
 
                 this.state = {
-                    data: mappingData
+                    trackingData: mappingData
                 };
             }
 
             render() {
-                const { mapToProps } = restfulDataContainerProps;
-                const componentProps = this.getComponentProps();
+                const { mapToProps } = containerProps;
+                const mapedProps = mapToProps(this.state.trackingData, this.props);
+
+                const props = Object.assign({}, this.props, mapedProps);
 
                 return (
-                    <Component
-                        {...componentProps}
-                        {...mapToProps(this.state.data, this.props)}
-                    />
+                    <Component {...props as OwnProps} />
                 );
             }
 
-            getComponentProps = () => {
-                const componentProps = {};
-                for (const propKey in this.props) {
-                    if (this.props.hasOwnProperty(propKey)) {
-                        const propsValues = this.props[propKey];
-                        const isDataProp = propKey === restfulDataContainerProps.dataPropsKey;
-                        if (!isDataProp) {
-                            componentProps[propKey] = propsValues;
-                        }
-                    }
-                }
-                return componentProps;
-            }
-
-            checkRecordExistInState = (record: DataMode) => {
-                const { resourceType } = restfulDataContainerProps;
+            checkRecordExistInState = (record: DataModel) => {
+                const { resourceType } = containerProps;
                 const checkingRecordKey = resourceType.getRecordKey(record);
-                for (const stateRecord of this.state.data) {
+                for (const stateRecord of this.state.trackingData) {
                     const inStateRecordKey = resourceType.getRecordKey(stateRecord);
                     if (checkingRecordKey === inStateRecordKey) {
                         return true;
@@ -98,59 +81,104 @@ export function restfulDataContainer<DataMode extends RecordType, ComponentOwnPr
                 return false;
             }
 
-            onDataMapping = (e: SubscribeEvent<DataMode>) => {
-                const { store, resourceType } = restfulDataContainerProps;
-                const record = e.record;
+            onStoreChange = (e: SubscribeEvent<DataModel>) => {
+                if (e.type === 'remove') {
+                    return this.onDataRemove(e.record);
+                }
+
+                const { useManualTracking } = containerProps;
+
+                if (useManualTracking) {
+                    return this.manualMapping(e);
+                }
+
+                return this.autoMapping(e);
+            }
+
+            manualMapping = (e: SubscribeEvent<DataModel>) => {
+                const { resourceType, registerToTracking } = containerProps;
+                const eventRecordKey = resourceType.getRecordKey(e.record);
+
+                if (!registerToTracking) {
+                    return void this.autoMapping(e);
+                }
+
+                const data = registerToTracking(this.props, this.state.trackingData, e);
+                const hasAddToTracking = data.find(o =>
+                    resourceType.getRecordKey(o) === eventRecordKey
+                );
+
+                if (!hasAddToTracking) {
+                    return;
+                }
+
+                if (this.mappingTimeout) {
+                    clearTimeout(this.mappingTimeout);
+                }
+
+                this.mappingTimeout = setTimeout(
+                    () => this.setState({ ...this.state, data: data }),
+                    100
+                );
+            }
+
+            autoMapping = (e: SubscribeEvent<DataModel>) => {
+                const { store, resourceType } = containerProps;
+
+                const eventRecordKey = resourceType.getRecordKey(e.record);
+
+                const existingRecordIndex = this.state.trackingData.findIndex(o => {
+                    return eventRecordKey === resourceType.getRecordKey(o);
+                });
+
+                if (existingRecordIndex < 0) {
+                    return this.setState({
+                        ...this.state,
+                        data: [...this.state.trackingData, e.record]
+                    });
+                }
+
+                const newStateData = [...this.state.trackingData];
+                newStateData[existingRecordIndex] = e.record;
+
+                if (this.mappingTimeout) {
+                    clearTimeout(this.mappingTimeout);
+                }
+
+                this.mappingTimeout = setTimeout(
+                    () => {
+                        const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
+
+                        const data = resourceType.getAllRecords(store, (record) =>
+                            dataIds.includes(resourceType.getRecordKey(record)));
+
+                        this.setState({
+                            ...this.state,
+                            data: data
+                        });
+                    },
+                    100
+                );
+            }
+
+            onDataRemove = (record: DataModel) => {
+                const { resourceType } = containerProps;
+
                 const isRecordExit = this.checkRecordExistInState(record);
 
-                switch (e.type) {
-                    case 'mapping':
-                        const eventRecordKey = resourceType.getRecordKey(record);
-                        const existingRecordIndex = this.state.data.findIndex(o => {
-                            return eventRecordKey === resourceType.getRecordKey(o);
-                        });
-
-                        if (existingRecordIndex >= 0) {
-                            const newStateData = [...this.state.data];
-                            newStateData[existingRecordIndex] = record;
-
-                            if (this.mappingTimeout) {
-                                clearTimeout(this.mappingTimeout);
-                            }
-
-                            this.mappingTimeout = setTimeout(() => {
-                                const dataIds = newStateData.map(o => resourceType.getRecordKey(o));
-                                const data = resourceType.getAllRecords(store, (o) =>
-                                    dataIds.includes(resourceType.getRecordKey(o)));
-                                this.setState({
-                                    ...this.state,
-                                    data: data
-                                });
-                                // tslint:disable-next-line:align
-                            }, 100);
-                        } else {
-                            this.setState({
-                                ...this.state,
-                                data: [...this.state.data, record]
-                            });
-                        }
-                        break;
-                    case 'remove':
-                        if (isRecordExit) {
-                            const deletedRecordKey = resourceType.getRecordKey(record);
-
-                            const updatedStateRecords = this.state.data.filter(o =>
-                                resourceType.getRecordKey(o) !== deletedRecordKey);
-
-                            this.setState({
-                                ...this.state,
-                                data: updatedStateRecords
-                            });
-                        }
-                        break;
-                    default:
-                        break;
+                if (!isRecordExit) {
+                    return;
                 }
+
+                const deletedRecordKey = resourceType.getRecordKey(record);
+
+                const updatedStateRecords = this.state.trackingData.filter(o =>
+                    resourceType.getRecordKey(o) !== deletedRecordKey);
+
+                this.setState({
+                    ...this.state,
+                    data: updatedStateRecords
+                });
             }
         };
 }

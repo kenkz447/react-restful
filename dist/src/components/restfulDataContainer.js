@@ -8,34 +8,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __importStar(require("react"));
-function restfulDataContainer(restfulDataContainerProps) {
-    if (!restfulDataContainerProps.dataPropsKey) {
-        restfulDataContainerProps.dataPropsKey = 'data';
-    }
-    if (!restfulDataContainerProps.getMappingDataFromProps) {
-        restfulDataContainerProps.getMappingDataFromProps =
-            (props) => props[restfulDataContainerProps.dataPropsKey];
-    }
-    return (Component) => class RestfulDataContainerComponent extends React.PureComponent {
+function restfulDataContainer(containerProps) {
+    return (Component) => class RestfulDataContainer extends Component {
         constructor(props) {
             super(props);
-            this.getComponentProps = () => {
-                const componentProps = {};
-                for (const propKey in this.props) {
-                    if (this.props.hasOwnProperty(propKey)) {
-                        const propsValues = this.props[propKey];
-                        const isDataProp = propKey === restfulDataContainerProps.dataPropsKey;
-                        if (!isDataProp) {
-                            componentProps[propKey] = propsValues;
-                        }
-                    }
-                }
-                return componentProps;
-            };
             this.checkRecordExistInState = (record) => {
-                const { resourceType } = restfulDataContainerProps;
+                const { resourceType } = containerProps;
                 const checkingRecordKey = resourceType.getRecordKey(record);
-                for (const stateRecord of this.state.data) {
+                for (const stateRecord of this.state.trackingData) {
                     const inStateRecordKey = resourceType.getRecordKey(stateRecord);
                     if (checkingRecordKey === inStateRecordKey) {
                         return true;
@@ -43,47 +23,65 @@ function restfulDataContainer(restfulDataContainerProps) {
                 }
                 return false;
             };
-            this.onDataMapping = (e) => {
-                const { store, resourceType } = restfulDataContainerProps;
-                const record = e.record;
-                const isRecordExit = this.checkRecordExistInState(record);
-                switch (e.type) {
-                    case 'mapping':
-                        const eventRecordKey = resourceType.getRecordKey(record);
-                        const existingRecordIndex = this.state.data.findIndex(o => {
-                            return eventRecordKey === resourceType.getRecordKey(o);
-                        });
-                        if (existingRecordIndex >= 0) {
-                            const newStateData = [...this.state.data];
-                            newStateData[existingRecordIndex] = record;
-                            if (this.mappingTimeout) {
-                                clearTimeout(this.mappingTimeout);
-                            }
-                            this.mappingTimeout = setTimeout(() => {
-                                const dataIds = newStateData.map(o => resourceType.getRecordKey(o));
-                                const data = resourceType.getAllRecords(store, (o) => dataIds.includes(resourceType.getRecordKey(o)));
-                                this.setState(Object.assign({}, this.state, { data: data }));
-                                // tslint:disable-next-line:align
-                            }, 100);
-                        }
-                        else {
-                            this.setState(Object.assign({}, this.state, { data: [...this.state.data, record] }));
-                        }
-                        break;
-                    case 'remove':
-                        if (isRecordExit) {
-                            const deletedRecordKey = resourceType.getRecordKey(record);
-                            const updatedStateRecords = this.state.data.filter(o => resourceType.getRecordKey(o) !== deletedRecordKey);
-                            this.setState(Object.assign({}, this.state, { data: updatedStateRecords }));
-                        }
-                        break;
-                    default:
-                        break;
+            this.onStoreChange = (e) => {
+                if (e.type === 'remove') {
+                    return this.onDataRemove(e.record);
                 }
+                const { useManualTracking } = containerProps;
+                if (useManualTracking) {
+                    return this.manualMapping(e);
+                }
+                return this.autoMapping(e);
             };
-            const { store, resourceType, getMappingDataFromProps } = restfulDataContainerProps;
-            this.subscribeId = store.subscribe([resourceType], this.onDataMapping);
-            const data = getMappingDataFromProps(props);
+            this.manualMapping = (e) => {
+                const { resourceType, registerToTracking } = containerProps;
+                const eventRecordKey = resourceType.getRecordKey(e.record);
+                if (!registerToTracking) {
+                    return void this.autoMapping(e);
+                }
+                const data = registerToTracking(this.props, this.state.trackingData, e);
+                const hasAddToTracking = data.find(o => resourceType.getRecordKey(o) === eventRecordKey);
+                if (!hasAddToTracking) {
+                    return;
+                }
+                if (this.mappingTimeout) {
+                    clearTimeout(this.mappingTimeout);
+                }
+                this.mappingTimeout = setTimeout(() => this.setState(Object.assign({}, this.state, { data: data })), 100);
+            };
+            this.autoMapping = (e) => {
+                const { store, resourceType } = containerProps;
+                const eventRecordKey = resourceType.getRecordKey(e.record);
+                const existingRecordIndex = this.state.trackingData.findIndex(o => {
+                    return eventRecordKey === resourceType.getRecordKey(o);
+                });
+                if (existingRecordIndex < 0) {
+                    return this.setState(Object.assign({}, this.state, { data: [...this.state.trackingData, e.record] }));
+                }
+                const newStateData = [...this.state.trackingData];
+                newStateData[existingRecordIndex] = e.record;
+                if (this.mappingTimeout) {
+                    clearTimeout(this.mappingTimeout);
+                }
+                this.mappingTimeout = setTimeout(() => {
+                    const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
+                    const data = resourceType.getAllRecords(store, (record) => dataIds.includes(resourceType.getRecordKey(record)));
+                    this.setState(Object.assign({}, this.state, { data: data }));
+                }, 100);
+            };
+            this.onDataRemove = (record) => {
+                const { resourceType } = containerProps;
+                const isRecordExit = this.checkRecordExistInState(record);
+                if (!isRecordExit) {
+                    return;
+                }
+                const deletedRecordKey = resourceType.getRecordKey(record);
+                const updatedStateRecords = this.state.trackingData.filter(o => resourceType.getRecordKey(o) !== deletedRecordKey);
+                this.setState(Object.assign({}, this.state, { data: updatedStateRecords }));
+            };
+            const { store, resourceType, registerToTracking } = containerProps;
+            this.subscribeId = store.subscribe([resourceType], this.onStoreChange);
+            const data = registerToTracking(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
             const mappingData = data ?
                 resourceType.getAllRecords(store, (recordInstance) => {
@@ -92,17 +90,18 @@ function restfulDataContainer(restfulDataContainerProps) {
                 }) :
                 resourceType.getAllRecords(store);
             this.state = {
-                data: mappingData
+                trackingData: mappingData
             };
         }
         componentWillUnmount() {
-            const { store } = restfulDataContainerProps;
+            const { store } = containerProps;
             store.unSubscribe(this.subscribeId);
         }
         render() {
-            const { mapToProps } = restfulDataContainerProps;
-            const componentProps = this.getComponentProps();
-            return (React.createElement(Component, Object.assign({}, componentProps, mapToProps(this.state.data, this.props))));
+            const { mapToProps } = containerProps;
+            const mapedProps = mapToProps(this.state.trackingData, this.props);
+            const props = Object.assign({}, this.props, mapedProps);
+            return (React.createElement(Component, Object.assign({}, props)));
         }
     };
 }
