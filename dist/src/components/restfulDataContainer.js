@@ -12,7 +12,7 @@ function restfulDataContainer(containerProps) {
     return (Component) => class RestfulDataContainer extends React.Component {
         constructor(props, context) {
             super(props, context);
-            this.checkRecordExistInState = (record) => {
+            this.isTracked = (record) => {
                 const { resourceType } = containerProps;
                 const checkingRecordKey = resourceType.getRecordKey(record);
                 for (const stateRecord of this.state.trackingData) {
@@ -23,7 +23,7 @@ function restfulDataContainer(containerProps) {
                 }
                 return false;
             };
-            this.onStoreChange = (e) => {
+            this.onStoreEvent = (e) => {
                 if (e.type === 'remove') {
                     return this.onDataRemove(e.record);
                 }
@@ -71,7 +71,7 @@ function restfulDataContainer(containerProps) {
             };
             this.onDataRemove = (record) => {
                 const { resourceType } = containerProps;
-                const isRecordExit = this.checkRecordExistInState(record);
+                const isRecordExit = this.isTracked(record);
                 if (!isRecordExit) {
                     return;
                 }
@@ -80,7 +80,7 @@ function restfulDataContainer(containerProps) {
                 this.setState(Object.assign({}, this.state, { data: updatedStateRecords }));
             };
             const { store, resourceType, registerToTracking } = containerProps;
-            this.subscribeId = store.subscribe([resourceType], this.onStoreChange);
+            this.subscribeId = store.subscribe([resourceType], this.onStoreEvent);
             const data = registerToTracking && registerToTracking(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
             const mappingData = propDataIdMap ?

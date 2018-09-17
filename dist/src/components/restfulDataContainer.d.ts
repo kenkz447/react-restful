@@ -17,8 +17,8 @@ export declare function restfulDataContainer<DataModel extends RecordType, Mappi
         mappingTimeout: NodeJS.Timer;
         componentWillUnmount(): void;
         render(): JSX.Element;
-        checkRecordExistInState: (record: DataModel) => boolean;
-        onStoreChange: (e: SubscribeEvent<DataModel>) => void;
+        isTracked: (record: DataModel) => boolean;
+        onStoreEvent: (e: SubscribeEvent<DataModel>) => void;
         manualMapping: (e: SubscribeEvent<DataModel>) => undefined;
         autoMapping: (e: SubscribeEvent<DataModel>) => void;
         onDataRemove: (record: DataModel) => void;
