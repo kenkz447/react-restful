@@ -16,8 +16,8 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
 export function restfulDataContainer
     <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
-    return (Component: new (arg: OwnProps) => React.Component<OwnProps>) =>
-        class RestfulDataContainer extends Component {
+    return (Component: React.ComponentType) =>
+        class RestfulDataContainer extends React.Component<OwnProps> {
             readonly state: {
                 readonly trackingData: Array<DataModel>;
             };
@@ -30,8 +30,8 @@ export function restfulDataContainer
                 store.unSubscribe(this.subscribeId);
             }
 
-            constructor(props: OwnProps) {
-                super(props);
+            constructor(props: OwnProps, context: {}) {
+                super(props, context);
 
                 const {
                     store,
@@ -39,7 +39,7 @@ export function restfulDataContainer
                     registerToTracking
                 } = containerProps;
 
-                this.subscribeId = store.subscribe([resourceType], this.onStoreChange);
+                this.subscribeId = store.subscribe([resourceType], this.onStoreEvent);
 
                 const data = registerToTracking && registerToTracking(props);
                 const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
@@ -63,11 +63,11 @@ export function restfulDataContainer
                 const props = Object.assign({}, this.props, mapedProps);
 
                 return (
-                    <Component {...props as OwnProps} />
+                    <Component {...props} />
                 );
             }
 
-            checkRecordExistInState = (record: DataModel) => {
+            isTracked = (record: DataModel) => {
                 const { resourceType } = containerProps;
                 const checkingRecordKey = resourceType.getRecordKey(record);
                 for (const stateRecord of this.state.trackingData) {
@@ -80,7 +80,7 @@ export function restfulDataContainer
                 return false;
             }
 
-            onStoreChange = (e: SubscribeEvent<DataModel>) => {
+            onStoreEvent = (e: SubscribeEvent<DataModel>) => {
                 if (e.type === 'remove') {
                     return this.onDataRemove(e.record);
                 }
@@ -163,7 +163,7 @@ export function restfulDataContainer
             onDataRemove = (record: DataModel) => {
                 const { resourceType } = containerProps;
 
-                const isRecordExit = this.checkRecordExistInState(record);
+                const isRecordExit = this.isTracked(record);
 
                 if (!isRecordExit) {
                     return;

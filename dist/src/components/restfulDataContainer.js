@@ -9,9 +9,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __importStar(require("react"));
 function restfulDataContainer(containerProps) {
-    return (Component) => class RestfulDataContainer extends Component {
-        constructor(props) {
-            super(props);
+    return (Component) => class RestfulDataContainer extends React.Component {
+        constructor(props, context) {
+            super(props, context);
             this.checkRecordExistInState = (record) => {
                 const { resourceType } = containerProps;
                 const checkingRecordKey = resourceType.getRecordKey(record);
@@ -81,9 +81,9 @@ function restfulDataContainer(containerProps) {
             };
             const { store, resourceType, registerToTracking } = containerProps;
             this.subscribeId = store.subscribe([resourceType], this.onStoreChange);
-            const data = registerToTracking(props);
+            const data = registerToTracking && registerToTracking(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
-            const mappingData = data ?
+            const mappingData = propDataIdMap ?
                 resourceType.getAllRecords(store, (recordInstance) => {
                     const recordInstanceKey = resourceType.getRecordKey(recordInstance);
                     return propDataIdMap.includes(recordInstanceKey);
