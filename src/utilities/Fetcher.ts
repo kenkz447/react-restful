@@ -50,7 +50,7 @@ export class Fetcher {
             if (responseContentType && responseContentType.startsWith('application/json')) {
                 const json = await response.json();
                 if (resource.afterFetch) {
-                    resource.afterFetch(params, json, meta);
+                    resource.afterFetch(params, json, meta, resource.recordType, store);
                 }
 
                 if (resource.mapDataToStore) {
@@ -61,7 +61,7 @@ export class Fetcher {
             const responseText = await response.text();
             if (resource.afterFetch) {
                 // tslint:disable-next-line:no-any
-                resource.afterFetch(params, responseText as any, meta);
+                resource.afterFetch(params, responseText as any, meta, resource.recordType, store);
             }
             return responseText;
         } catch (error) {
