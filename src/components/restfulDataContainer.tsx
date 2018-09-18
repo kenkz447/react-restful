@@ -5,11 +5,19 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly store: Store;
     readonly resourceType: ResourceType<DataModel>;
     readonly dataPropsKey?: string;
+
+    readonly shouldTrackingNewRecord?: (
+        record: DataModel,
+        ownProps: OwnProps,
+        trackedData: ReadonlyArray<DataModel>
+    ) => boolean;
+
     readonly registerToTracking?: (
         props: OwnProps,
         current?: ReadonlyArray<DataModel>,
         event?: SubscribeEvent
     ) => ReadonlyArray<DataModel>;
+
     readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
 }
 
@@ -95,7 +103,7 @@ export function restfulDataContainer
             }
 
             manualMapping = (e: SubscribeEvent<DataModel>) => {
-                const { resourceType, registerToTracking } = containerProps;
+                const { resourceType, registerToTracking, shouldTrackingNewRecord } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
 
                 if (!registerToTracking) {
@@ -109,7 +117,15 @@ export function restfulDataContainer
                     return o;
                 });
 
-                const data = registerToTracking(this.props, nextTrackingData, e);
+                const recordExistedInTrackingList =
+                    nextTrackingData.find(o => resourceType.getRecordKey(o) === eventRecordKey);
+
+                const allowTrackingNewRecord = (!recordExistedInTrackingList && shouldTrackingNewRecord)
+                    && shouldTrackingNewRecord(e.record, this.props, this.state.trackingData);
+
+                const data = allowTrackingNewRecord ?
+                    registerToTracking(this.props, [...nextTrackingData, e.record], e) :
+                    registerToTracking(this.props, nextTrackingData, e);
 
                 const hasAddToTracking = data.find(o =>
                     resourceType.getRecordKey(o) === eventRecordKey
