@@ -36,7 +36,7 @@ class Fetcher {
                 if (responseContentType && responseContentType.startsWith('application/json')) {
                     const json = yield response.json();
                     if (resource.afterFetch) {
-                        resource.afterFetch(params, json, meta);
+                        resource.afterFetch(params, json, meta, resource.recordType, store);
                     }
                     if (resource.mapDataToStore) {
                         resource.mapDataToStore(json, resource.recordType, store);
@@ -46,7 +46,7 @@ class Fetcher {
                 const responseText = yield response.text();
                 if (resource.afterFetch) {
                     // tslint:disable-next-line:no-any
-                    resource.afterFetch(params, responseText, meta);
+                    resource.afterFetch(params, responseText, meta, resource.recordType, store);
                 }
                 return responseText;
             }
