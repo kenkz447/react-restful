@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-type Wrapper<P> = (Component: React.ComponentClass<P>) => new (...arg: object[]) => React.Component<P>;
+type Wrapper<P> = (Component: React.ComponentClass<P>) => new (props: P, context: {}) => React.Component<P>;
 
 export function classDecoratorFactory<P>(wrapper: Wrapper<P>) {
     return <C extends React.ComponentClass<P>>(Component: C): C => {
