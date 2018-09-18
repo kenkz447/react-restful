@@ -8,7 +8,7 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly registerToTracking?: (props: OwnProps, current?: ReadonlyArray<DataModel>, event?: SubscribeEvent) => DataModel[];
     readonly mapToProps: (data: DataModel[], ownProps: OwnProps) => MappingProps;
 }
-export declare function restfulDataContainer<DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<{}>) => {
+export declare function restfulDataContainer<DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
         readonly state: {
             readonly trackingData: DataModel[];

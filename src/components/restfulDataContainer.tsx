@@ -16,7 +16,7 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
 export function restfulDataContainer
     <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
-    return (Component: React.ComponentType) =>
+    return (Component: React.ComponentType<OwnProps>) =>
         class RestfulDataContainer extends React.Component<OwnProps> {
             readonly state: {
                 readonly trackingData: Array<DataModel>;
