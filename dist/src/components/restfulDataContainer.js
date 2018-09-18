@@ -53,7 +53,7 @@ function restfulDataContainer(containerProps) {
                 if (this.mappingTimeout) {
                     clearTimeout(this.mappingTimeout);
                 }
-                this.mappingTimeout = setTimeout(() => this.setState(Object.assign({}, this.state, { data: data })), 100);
+                this.mappingTimeout = setTimeout(() => this.setState(Object.assign({}, this.state, { trackingData: data })), 100);
             };
             this.autoMapping = (e) => {
                 const { store, resourceType } = containerProps;
@@ -72,7 +72,7 @@ function restfulDataContainer(containerProps) {
                 this.mappingTimeout = setTimeout(() => {
                     const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
                     const data = resourceType.getAllRecords(store, (record) => dataIds.includes(resourceType.getRecordKey(record)));
-                    this.setState(Object.assign({}, this.state, { data: data }));
+                    this.setState(Object.assign({}, this.state, { trackingData: data }));
                 }, 100);
             };
             this.onDataRemove = (record) => {
