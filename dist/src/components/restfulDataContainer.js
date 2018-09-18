@@ -62,7 +62,7 @@ function restfulDataContainer(containerProps) {
                     return eventRecordKey === resourceType.getRecordKey(o);
                 });
                 if (existingRecordIndex < 0) {
-                    return this.setState(Object.assign({}, this.state, { data: [...this.state.trackingData, e.record] }));
+                    return this.setState(Object.assign({}, this.state, { trackingData: [...this.state.trackingData, e.record] }));
                 }
                 const newStateData = [...this.state.trackingData];
                 newStateData[existingRecordIndex] = e.record;
@@ -83,7 +83,7 @@ function restfulDataContainer(containerProps) {
                 }
                 const deletedRecordKey = resourceType.getRecordKey(record);
                 const updatedStateRecords = this.state.trackingData.filter(o => resourceType.getRecordKey(o) !== deletedRecordKey);
-                this.setState(Object.assign({}, this.state, { data: updatedStateRecords }));
+                this.setState(Object.assign({}, this.state, { trackingData: updatedStateRecords }));
             };
             const { store, resourceType, registerToTracking } = containerProps;
             this.subscribeId = store.subscribe([resourceType], this.onStoreEvent);

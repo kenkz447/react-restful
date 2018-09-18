@@ -6,13 +6,13 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly resourceType: ResourceType<DataModel>;
     readonly dataPropsKey?: string;
     readonly registerToTracking?: (props: OwnProps, current?: ReadonlyArray<DataModel>, event?: SubscribeEvent) => ReadonlyArray<DataModel>;
-    readonly mapToProps: (data: DataModel[], ownProps: OwnProps) => MappingProps;
+    readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
+}
+interface RestfulDataContainerState<DataModel> {
+    readonly trackingData: ReadonlyArray<DataModel>;
 }
 export declare function restfulDataContainer<DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
-        readonly state: {
-            readonly trackingData: DataModel[];
-        };
         readonly subscribeId: string;
         mappingTimeout: NodeJS.Timer;
         componentWillUnmount(): void;
@@ -22,11 +22,12 @@ export declare function restfulDataContainer<DataModel extends RecordType, Mappi
         manualMapping: (e: SubscribeEvent<DataModel>) => undefined;
         autoMapping: (e: SubscribeEvent<DataModel>) => void;
         onDataRemove: (record: DataModel) => void;
-        setState<K extends never>(state: {} | ((prevState: Readonly<{}>, props: Readonly<OwnProps>) => {} | Pick<{}, K> | null) | Pick<{}, K> | null, callback?: (() => void) | undefined): void;
+        setState<K extends "trackingData">(state: RestfulDataContainerState<DataModel> | ((prevState: Readonly<RestfulDataContainerState<DataModel>>, props: Readonly<OwnProps>) => RestfulDataContainerState<DataModel> | Pick<RestfulDataContainerState<DataModel>, K> | null) | Pick<RestfulDataContainerState<DataModel>, K> | null, callback?: (() => void) | undefined): void;
         forceUpdate(callBack?: (() => void) | undefined): void;
         readonly props: Readonly<{
             children?: React.ReactNode;
         }> & Readonly<OwnProps>;
+        state: Readonly<RestfulDataContainerState<DataModel>>;
         context: any;
         refs: {
             [key: string]: React.ReactInstance;
