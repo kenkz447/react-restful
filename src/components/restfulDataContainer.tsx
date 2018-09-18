@@ -9,7 +9,7 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
         props: OwnProps,
         current?: ReadonlyArray<DataModel>,
         event?: SubscribeEvent
-    ) => DataModel[];
+    ) => ReadonlyArray<DataModel>;
     readonly mapToProps: (data: DataModel[], ownProps: OwnProps) => MappingProps;
 }
 
@@ -124,7 +124,10 @@ export function restfulDataContainer
                 }
 
                 this.mappingTimeout = setTimeout(
-                    () => this.setState({ ...this.state, data: data }),
+                    () => this.setState({
+                        ...this.state,
+                        trackingData: data
+                    }),
                     100
                 );
             }
@@ -161,7 +164,7 @@ export function restfulDataContainer
 
                         this.setState({
                             ...this.state,
-                            data: data
+                            trackingData: data
                         });
                     },
                     100
