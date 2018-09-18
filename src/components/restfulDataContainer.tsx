@@ -102,7 +102,15 @@ export function restfulDataContainer
                     return void this.autoMapping(e);
                 }
 
-                const data = registerToTracking(this.props, this.state.trackingData, e);
+                const nextTrackingData = this.state.trackingData.map(o => {
+                    if (resourceType.getRecordKey(o) === eventRecordKey) {
+                        return e.record;
+                    }
+                    return o;
+                });
+
+                const data = registerToTracking(this.props, nextTrackingData, e);
+
                 const hasAddToTracking = data.find(o =>
                     resourceType.getRecordKey(o) === eventRecordKey
                 );
