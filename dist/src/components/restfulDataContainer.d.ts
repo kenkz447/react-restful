@@ -5,6 +5,7 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly store: Store;
     readonly resourceType: ResourceType<DataModel>;
     readonly dataPropsKey?: string;
+    readonly shouldTrackingNewRecord?: (record: DataModel, ownProps: OwnProps, trackedData: ReadonlyArray<DataModel>) => boolean;
     readonly registerToTracking?: (props: OwnProps, current?: ReadonlyArray<DataModel>, event?: SubscribeEvent) => ReadonlyArray<DataModel>;
     readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
 }
