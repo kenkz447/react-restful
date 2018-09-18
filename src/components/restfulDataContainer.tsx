@@ -10,18 +10,18 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
         current?: ReadonlyArray<DataModel>,
         event?: SubscribeEvent
     ) => ReadonlyArray<DataModel>;
-    readonly mapToProps: (data: DataModel[], ownProps: OwnProps) => MappingProps;
+    readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
+}
+
+interface RestfulDataContainerState<DataModel> {
+    readonly trackingData: ReadonlyArray<DataModel>;
 }
 
 export function restfulDataContainer
     <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
     return (Component: React.ComponentType<OwnProps>) =>
-        class RestfulDataContainer extends React.Component<OwnProps> {
-            readonly state: {
-                readonly trackingData: Array<DataModel>;
-            };
-
+        class RestfulDataContainer extends React.Component<OwnProps, RestfulDataContainerState<DataModel>> {
             readonly subscribeId: string;
             mappingTimeout!: NodeJS.Timer;
 
@@ -144,7 +144,7 @@ export function restfulDataContainer
                 if (existingRecordIndex < 0) {
                     return this.setState({
                         ...this.state,
-                        data: [...this.state.trackingData, e.record]
+                        trackingData: [...this.state.trackingData, e.record]
                     });
                 }
 
@@ -187,7 +187,7 @@ export function restfulDataContainer
 
                 this.setState({
                     ...this.state,
-                    data: updatedStateRecords
+                    trackingData: updatedStateRecords
                 });
             }
         };
