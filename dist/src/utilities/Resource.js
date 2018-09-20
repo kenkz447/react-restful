@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class Resource {
     constructor(props) {
-        this.recordType = props.resourceType;
+        this.recordType = props.resourceType || null;
         this.url = props.url;
         this.method = props.method;
         this.mapDataToStore = props.mapDataToStore;
