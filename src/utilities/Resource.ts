@@ -3,7 +3,7 @@ import { ResourceType } from './ResourceType';
 import { Store } from './Store';
 
 export interface ResourceProps<DataModel, Meta> {
-    resourceType: ResourceType;
+    resourceType?: ResourceType;
     url: string;
     method: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
@@ -11,7 +11,7 @@ export interface ResourceProps<DataModel, Meta> {
         params: ResourceParameter[] | undefined,
         fetchResult: DataModel,
         meta: Meta | undefined,
-        resourceType: ResourceType,
+        resourceType: ResourceType | null,
         store: Store
     ) => void;
 }
@@ -24,14 +24,14 @@ export interface ResourceParameter {
 }
 
 export class Resource<DataModel, Meta = {}> {
-    recordType: ResourceType;
+    recordType: ResourceType | null;
     url: string;
     method: string;
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     afterFetch: ResourceProps<DataModel, Meta>['afterFetch'];
 
     constructor(props: ResourceProps<DataModel, Meta>) {
-        this.recordType = props.resourceType;
+        this.recordType = props.resourceType || null;
         this.url = props.url;
         this.method = props.method;
         this.mapDataToStore = props.mapDataToStore;

@@ -53,7 +53,7 @@ export class Fetcher {
                     resource.afterFetch(params, json, meta, resource.recordType, store);
                 }
 
-                if (resource.mapDataToStore) {
+                if (resource.mapDataToStore && resource.recordType) {
                     resource.mapDataToStore(json, resource.recordType, store);
                 }
                 return json;
