@@ -47,14 +47,6 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 fetching: true
             };
         }
-
-        if (nextProps.render !== prevState.render) {
-            return {
-                ...prevState,
-                ...nextProps,
-                needsUpdate: true
-            };
-        }
         
         return null;
     }
@@ -64,7 +56,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         this.state = {
             ...props,
             fetcher: this.props.fetcher || new Fetcher({ store: this.props.store }),
-            fetching: false,
+            fetching: true,
             componentRenderProps: {
                 data: null,
                 error: null
