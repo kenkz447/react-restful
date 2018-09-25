@@ -7,13 +7,14 @@ export interface SchemaField {
 }
 interface ResourceTypeProps {
     name: string;
-    schema: SchemaField[];
+    schema?: SchemaField[];
     store?: Store;
 }
 export declare class ResourceType<T extends RecordType = {}> {
+    static defaultProps: Partial<ResourceTypeProps>;
     name: string;
     schema: ResourceTypeProps['schema'];
-    keyProperty: string;
+    primaryKey: string;
     static findPKField(schema: ResourceTypeProps['schema']): SchemaField;
     constructor(props: ResourceTypeProps);
     getAllRecords(store: Store, predicate?: (record: T) => boolean): T[];

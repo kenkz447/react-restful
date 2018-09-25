@@ -2,12 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class ResourceType {
     constructor(props) {
-        this.name = props.name;
-        this.schema = props.schema;
-        const fKField = ResourceType.findPKField(props.schema);
-        // TODO: Check NULL FK field with an invariant message
-        this.keyProperty = fKField.field;
-        this.getChildTypeSchemafield = this.getChildTypeSchemafield.bind(this);
+        const { name, schema, store } = props;
+        this.name = name;
+        this.schema = schema;
+        const PKField = ResourceType.findPKField(props.schema);
+        this.primaryKey = PKField.field;
         if (props.store) {
             props.store.registerRecordType(this);
         }
@@ -74,7 +73,13 @@ class ResourceType {
         return this.schema.find(o => o.resourceType === childType.name);
     }
     getRecordKey(record) {
-        return record[this.keyProperty] || null;
+        return record[this.primaryKey] || null;
     }
 }
+ResourceType.defaultProps = {
+    schema: [{
+            field: 'id',
+            type: 'PK'
+        }]
+};
 exports.ResourceType = ResourceType;

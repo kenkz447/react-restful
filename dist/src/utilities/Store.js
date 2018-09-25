@@ -39,18 +39,17 @@ class Store {
         if (this.recordTables[resourceType.name]) {
             return;
         }
-        const recordKeyProperty = resourceType.schema.find(o => o.type === 'PK');
-        if (recordKeyProperty === undefined) {
+        const primaryKey = resourceType.primaryKey;
+        if (!primaryKey) {
             throw new Error(`${resourceType.name} has no PK field!`);
         }
-        const newRecordTable = new RecordTable_1.RecordTable(recordKeyProperty.field);
+        const newRecordTable = new RecordTable_1.RecordTable(primaryKey);
         this.recordTables[resourceType.name] = newRecordTable;
         this.resourceTypes.push(resourceType);
     }
     mapRecord(resourceType, record) {
         const table = this.recordTables[resourceType.name];
         const upsertResult = table.upsert(record);
-        // TODO: map orther related records
         if (!upsertResult) {
             throw new Error('upsert not working!');
         }
