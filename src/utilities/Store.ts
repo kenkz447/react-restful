@@ -67,11 +67,12 @@ export class Store {
         if (this.recordTables[resourceType.name]) {
             return;
         }
-        const recordKeyProperty = resourceType.schema.find(o => o.type === 'PK');
-        if (recordKeyProperty === undefined) {
+
+        const primaryKey = resourceType.primaryKey;
+        if (!primaryKey) {
             throw new Error(`${resourceType.name} has no PK field!`);
         }
-        const newRecordTable = new RecordTable(recordKeyProperty.field);
+        const newRecordTable = new RecordTable(primaryKey);
 
         this.recordTables[resourceType.name] = newRecordTable;
 
@@ -82,8 +83,6 @@ export class Store {
         const table = this.recordTables[resourceType.name];
 
         const upsertResult = table.upsert(record);
-
-        // TODO: map orther related records
 
         if (!upsertResult) {
             throw new Error('upsert not working!');
@@ -148,7 +147,7 @@ export class Store {
         const recordToMapping = Object.assign({}, record) as T;
         const recordKey = resourceType.getRecordKey(record);
 
-        for (const schemaField of resourceType.schema) {
+        for (const schemaField of resourceType.schema!) {
             const resourceTypeName = schemaField.resourceType as string;
 
             switch (schemaField.type) {

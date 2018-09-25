@@ -9,28 +9,34 @@ export interface SchemaField {
 
 interface ResourceTypeProps {
     name: string;
-    schema: SchemaField[];
+    schema?: SchemaField[];
     store?: Store;
 }
 
 export class ResourceType<T extends RecordType = {}> {
+    static defaultProps: Partial<ResourceTypeProps> = {
+        schema: [{
+            field: 'id',
+            type: 'PK'
+        }]
+    };
+
     name: string;
     schema: ResourceTypeProps['schema'];
-    keyProperty: string;
+    primaryKey: string;
 
     static findPKField(schema: ResourceTypeProps['schema']) {
-        return schema.find(o => o.type === 'PK') as SchemaField;
+        return schema!.find(o => o.type === 'PK')!;
     }
 
     constructor(props: ResourceTypeProps) {
-        this.name = props.name;
-        this.schema = props.schema;
+        const { name, schema, store } = props;
 
-        const fKField = ResourceType.findPKField(props.schema);
-        // TODO: Check NULL FK field with an invariant message
-        this.keyProperty = fKField.field;
+        this.name = name;
+        this.schema = schema;
 
-        this.getChildTypeSchemafield = this.getChildTypeSchemafield.bind(this);
+        const PKField = ResourceType.findPKField(props.schema);
+        this.primaryKey = PKField.field;
 
         if (props.store) {
             props.store.registerRecordType(this);
@@ -53,8 +59,8 @@ export class ResourceType<T extends RecordType = {}> {
 
     populate(store: Store, record: T) {
         const populateRecord = Object.assign({}, record) as T;
-        
-        for (const schemaField of this.schema) {
+
+        for (const schemaField of this.schema!) {
             const relatedResourceType = schemaField.resourceType as string;
             switch (schemaField.type) {
                 case 'FK':
@@ -97,17 +103,17 @@ export class ResourceType<T extends RecordType = {}> {
     }
 
     getAllChildType(store: Store) {
-        const childFields = this.schema.filter(o => o.type === 'MANY');
+        const childFields = this.schema!.filter(o => o.type === 'MANY');
         return childFields.map(o => {
-            return store.getRegisteredResourceType(o.resourceType as string);
+            return store.getRegisteredResourceType(o.resourceType!);
         });
     }
 
     getChildTypeSchemafield(childType: ResourceType) {
-        return this.schema.find(o => o.resourceType === childType.name) as SchemaField;
+        return this.schema!.find(o => o.resourceType === childType.name)!;
     }
 
     getRecordKey(record: T) {
-        return record[this.keyProperty] || null;
+        return record[this.primaryKey] || null;
     }
 }
