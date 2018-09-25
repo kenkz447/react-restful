@@ -52,7 +52,7 @@ describe('Resource', () => {
     const createUserResource = new Resource<User>({
         resourceType: userResourceType,
         method: 'POST',
-        url: '/api/users/{branch}',
+        url: '/api/users/:branch',
         mapDataToStore: mapDataToStore
     });
 

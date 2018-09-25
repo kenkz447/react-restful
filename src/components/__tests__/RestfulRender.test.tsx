@@ -119,94 +119,14 @@ describe('RestfulRender', () => {
             expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[0][0]).toEqual({
                 error: null,
-                data: null
+                data: null,
+                fetching: true
             });
             expect(render.mock.calls[1][0]).toEqual({
                 error: null,
-                data: testUserData
+                data: testUserData,
+                fetching: false
             });
-        });
-    });
-
-    describe('when props change', () => {
-        it('nothing change', () => {
-            render.mockClear();
-
-            restfulRenderInstance.setProps({
-                store: store,
-                resource: getUserByBranchResource,
-                parameters: paramsProps,
-                render: render
-            });
-
-            expect(render).not.toBeCalled();
-        });
-
-        it('refetch data when `parameters` change', () => {
-            render.mockClear();
-            paramsProps = [...paramsProps];
-
-            restfulRenderInstance.setProps({
-                store: store,
-                resource: getUserByBranchResource,
-                parameters: paramsProps,
-                render: render
-            });
-
-            expect(render).toBeCalledWith({
-                error: null,
-                data: testUserData
-                // tslint:disable-next-line:align
-            }, {});
-        });
-
-        it('refetch data when `resource` change', () => {
-            render.mockClear();
-            fetch.mockClear();
-
-            paramsProps = [...paramsProps];
-
-            getUserByBranchResource = new Resource<Pagination<User>>({
-                resourceType: userResourceType,
-                method: 'GET',
-                url: '/api/users/{branch}',
-                mapDataToStore: getUserByBranchResource.mapDataToStore
-            });
-
-            restfulRenderInstance.setProps({
-                store: store,
-                resource: getUserByBranchResource,
-                parameters: paramsProps,
-                render: render
-            });
-            
-            expect(fetch.mock.calls.length).toEqual(1);
-            expect(render).toBeCalledWith({
-                error: null,
-                data: testUserData
-                // tslint:disable-next-line:align
-            }, {});
-        });
-        it('refetch data when `render` change', () => {
-            render.mockClear();
-            paramsProps = [...paramsProps];
-
-            render = jest.fn(() => {
-                return 'loading';
-            });
-
-            restfulRenderInstance.setProps({
-                store: store,
-                resource: getUserByBranchResource,
-                parameters: paramsProps,
-                render: render
-            });
-
-            expect(render).toBeCalledWith({
-                error: null,
-                data: testUserData
-                // tslint:disable-next-line:align
-            }, {});
         });
     });
 });
