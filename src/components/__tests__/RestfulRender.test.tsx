@@ -39,7 +39,7 @@ describe('RestfulRender', () => {
     let render = jest.fn((renderProps) => {
         return 'loading';
     });
-
+    const onFetchCompleted = jest.fn();
     const mockResponseDataStr = JSON.stringify(testUserData);
     mockResponse(mockResponseDataStr, {
         headers: { 'content-type': 'application/json' }
@@ -51,8 +51,10 @@ describe('RestfulRender', () => {
                 store={restfulStore}
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
-                render={render}
-            />
+                onFetchCompleted={onFetchCompleted}
+            >
+                {render}
+            </RestfulRender>
         </PropsSetter>
     );
 
@@ -62,7 +64,6 @@ describe('RestfulRender', () => {
 
     describe('init props', () => {
         it('Props as first render', () => {
-            expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[0][0]).toEqual({
                 error: null,
                 data: null,
@@ -73,10 +74,11 @@ describe('RestfulRender', () => {
                 data: testUserData,
                 fetching: false
             });
+            expect(onFetchCompleted).toBeCalledWith(testUserData);
         });
     });
 
-    describe('xx', () => {
+    describe('fails', () => {
         const error = new Error('Fetch mock failed');
 
         beforeAll(() => {
@@ -87,7 +89,7 @@ describe('RestfulRender', () => {
             });
         });
 
-        it('Fetch failed', () => {
+        it('fetch failed', () => {
             expect(render.mock.calls[2][0]).toEqual({
                 error: null,
                 data: testUserData,

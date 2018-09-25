@@ -16,15 +16,22 @@ export interface RestfulRenderProps<DataModel> {
     store: Store;
     resource: Resource<DataModel>;
     parameters?: Array<ResourceParameter>;
-    render: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     fetcher?: Fetcher;
-    needsUpdate?: boolean;
-    fetching?: boolean;
+
+    /**
+     * @deprecated, use children instead
+     * !Will be removed at version 2.0
+     */
+    render?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
+
+    children?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     onFetchCompleted?: (data: DataModel) => void;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     fetcher: Fetcher;
+    needsUpdate?: boolean;
+    fetching?: boolean;
     componentRenderProps: RestfulComponentRenderProps<DataModel>;
 }
 
@@ -76,13 +83,22 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     }
 
     render() {
-        const Component = this.state.render;
+        const { children } = this.props;
+        const { render, componentRenderProps, fetching } = this.state;
+
+        const Component = children || render;
+
+        if (!Component) {
+            return null;
+        }
+
+        const componentProps = {
+            ...componentRenderProps,
+            fetching: fetching
+        };
 
         return (
-            <Component
-                {...this.state.componentRenderProps}
-                fetching={this.state.fetching}
-            />
+            <Component {...componentProps} />
         );
     }
 
