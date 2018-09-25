@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import {
     Resource,
     ResourceParameter,
@@ -47,7 +47,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 fetching: true
             };
         }
-        
+
         return null;
     }
 
@@ -77,6 +77,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
 
     render() {
         const Component = this.state.render;
+
         return (
             <Component
                 {...this.state.componentRenderProps}
@@ -92,6 +93,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 if (onFetchCompleted) {
                     onFetchCompleted(data);
                 }
+
                 this.setState({
                     needsUpdate: false,
                     fetching: false,

@@ -1,39 +1,35 @@
 import { mockResponseOnce } from 'jest-fetch-mock';
 import { Fetcher } from '../Fetcher';
 import { Resource, ResourceParameter } from '../Resource';
-import { ResourceType } from '../ResourceType';
 import { Store } from '../Store';
 
+import { userResourceType, User } from '../../test-resources';
+
 describe('Fetcher', () => {
+    const newUser: User = {
+        id: 1,
+        name: 'user01'
+    };
 
-    const newUser = { _id: 1 };
-
-    const mapDataToStore = jest.fn(() => {
-        // do something...
-    });
-
-    const resourceType = new ResourceType({
-        name: 'user',
-        schema: [{
-            field: '_id',
-            type: 'PK',
-        }]
-    });
+    const mapDataToStore = jest.fn(() => void 0);
 
     const createUserResource = new Resource({
-        resourceType: resourceType,
+        resourceType: userResourceType,
         method: 'POST',
         url: '/api/users',
         mapDataToStore: mapDataToStore
     });
 
     const store = new Store();
+    store.registerRecordType(userResourceType);
 
-    store.registerRecordType(resourceType);
+    const fetcher = new Fetcher({
+        store: store,
+        beforeFetch: jest.fn((url: string, requestInit: RequestInit) => requestInit),
+        afterFetch: jest.fn((response: Response) => void 0),
+    });
 
-    const fetcher = new Fetcher({ store });
-
-    describe('instance', () => {
+    describe('instance methods', () => {
         it('fetch', async () => {
             expect.assertions(1);
 
@@ -47,19 +43,31 @@ describe('Fetcher', () => {
         });
 
         it('fetch resource', async () => {
+            expect.assertions(3);
+
             const mockResponseData = newUser;
             const mockResponseDataStr = JSON.stringify(mockResponseData);
             mockResponseOnce(mockResponseDataStr, {
                 headers: { 'content-type': 'application/json' }
             });
 
-            const fetchParam: ResourceParameter = {
+            const fetchBodyParam: ResourceParameter = {
                 type: 'body',
                 value: newUser,
             };
 
-            const data = await fetcher.fetchResource(createUserResource, [fetchParam]);
+            const fetchParams = [fetchBodyParam];
+            const data = await fetcher.fetchResource(createUserResource, fetchParams);
             expect(data).toEqual(newUser);
+
+            const requestInit = createUserResource.requestInitReslover(fetchParams);
+
+            expect(fetcher.props.beforeFetch).toBeCalledWith(
+                createUserResource.url,
+                requestInit
+            );
+
+            expect(fetcher.props.afterFetch).toBeCalled();
         });
     });
 

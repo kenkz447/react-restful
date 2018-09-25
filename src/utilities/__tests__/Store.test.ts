@@ -1,20 +1,10 @@
 import { RecordTable } from '../RecordTable';
-import { ResourceType } from '../ResourceType';
 import { Store } from '../Store';
+import { userResourceType, User } from '../../test-resources';
 
 describe('Store', () => {
     const store = new Store();
-    
-    const userResourceType = new ResourceType<{
-        _id: number
-        username: string
-    }>({
-        name: 'user',
-        schema: [{
-            field: '_id',
-            type: 'PK',
-        }]
-    });
+
     const mappingCallback = jest.fn();
     const removeCallback = jest.fn();
 
@@ -27,9 +17,9 @@ describe('Store', () => {
     });
 
     let table: RecordTable<{}>;
-    const testUser = {
-        _id: 1,
-        username: 'test'
+    const testUser: User = {
+        id: 1,
+        name: 'test'
     };
 
     describe('instance', () => {
@@ -37,7 +27,7 @@ describe('Store', () => {
             store.registerRecordType(userResourceType);
             table = store.getRecordTable(userResourceType);
             const registeredResourceType = store.getRegisteredResourceType(userResourceType.name);
-            
+
             expect(table instanceof RecordTable).toBe(true);
             expect(registeredResourceType).toBe(userResourceType);
         });
@@ -48,20 +38,20 @@ describe('Store', () => {
         });
 
         it('find one record by key', () => {
-            const storedUser = store.findRecordByKey(userResourceType, testUser._id);
+            const storedUser = store.findRecordByKey(userResourceType, testUser.id);
             expect(storedUser).toEqual(testUser);
         });
 
         it('find one record by predicate', () => {
             const storedUser = store.findOneRecord(userResourceType, (user) => {
-                return user.username.includes('tes');
+                return user.name.includes('tes');
             });
             expect(storedUser).toEqual(testUser);
         });
 
         it('remove record from table', () => {
             const removeResult = store.removeRecord(userResourceType, testUser);
-            const storedUser = store.findRecordByKey(userResourceType, testUser._id);
+            const storedUser = store.findRecordByKey(userResourceType, testUser.id);
 
             expect(removeResult).toBe(true);
             expect(storedUser).toBe(null);

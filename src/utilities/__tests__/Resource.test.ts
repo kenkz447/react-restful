@@ -1,59 +1,10 @@
-import { RecordType } from '../RecordTable';
 import { Resource, ResourceParameter } from '../Resource';
-import { ResourceType, SchemaField } from '../ResourceType';
-
-interface User extends RecordType {
-    _id: number;
-}
+import { User } from '../../test-resources';
 
 describe('Resource', () => {
-    const commonPK: SchemaField = {
-        field: '_id',
-        type: 'PK'
-    };
-
-    const branchResourceType = new ResourceType({
-        name: 'branch',
-        schema: [commonPK, {
-            type: 'MANY',
-            field: 'users',
-            resourceType: 'user'
-        }]
-    });
-
-    const bookingResourceType = new ResourceType({
-        name: 'booking',
-        schema: [commonPK, {
-            type: 'FK',
-            field: 'user',
-            resourceType: 'user'
-        }]
-    });
-
-    const userResourceType = new ResourceType({
-        name: 'user',
-        schema: [
-            commonPK, {
-                type: 'FK',
-                field: 'branch',
-                resourceType: branchResourceType.name
-            }, {
-                type: 'MANY',
-                field: 'bookings',
-                resourceType: bookingResourceType.name
-            }
-        ]
-    });
-
-    const mapDataToStore = jest.fn((record, store) => {
-        store.mapRecord('user', record);
-    });
-
     const createUserResource = new Resource<User>({
-        resourceType: userResourceType,
         method: 'POST',
-        url: '/api/users/:branch',
-        mapDataToStore: mapDataToStore
+        url: '/api/users/:branch'
     });
 
     const pathParam: ResourceParameter = {
@@ -61,14 +12,16 @@ describe('Resource', () => {
         parameter: 'branch',
         value: 1
     };
+
     const queryParam: ResourceParameter = {
         type: 'query',
         parameter: 'page',
         value: 2
     };
+
     const bodyParams: ResourceParameter = {
         type: 'body',
-        value: { _id: 1 }
+        value: { id: 1 }
     };
 
     describe('instance', () => {

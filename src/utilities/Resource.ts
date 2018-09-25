@@ -53,7 +53,8 @@ export class Resource<DataModel, Meta = {}> {
             }
         }
 
-        return `${uRL}?${searchs.toString()}`;
+        const searchString = searchs.toString();
+        return searchString ? `${uRL}?${searchString}` : uRL;
     }
 
     requestInitReslover(params: Array<ResourceParameter> = []): RequestInit | null {

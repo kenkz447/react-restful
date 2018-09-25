@@ -65,10 +65,7 @@ export class Fetcher {
             }
             return responseText;
         } catch (error) {
-            if (error instanceof Response) {
-                throw error;
-            }
-            throw new Error(error);
+            throw error;
         }
     }
 }
