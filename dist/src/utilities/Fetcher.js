@@ -19,8 +19,11 @@ class Fetcher {
     fetchResource(resource, params, meta) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { store, beforeFetch, afterFetch } = this.props;
-                const url = resource.urlReslover(params);
+                const { entry, store, beforeFetch, afterFetch } = this.props;
+                let url = resource.urlReslover(params);
+                if (entry) {
+                    url = entry + url;
+                }
                 const requestInit = resource.requestInitReslover(params) ||
                     this.createDefaultRequestInit();
                 requestInit.method = resource.method;
@@ -51,10 +54,7 @@ class Fetcher {
                 return responseText;
             }
             catch (error) {
-                if (error instanceof Response) {
-                    throw error;
-                }
-                throw new Error(error);
+                throw error;
             }
         });
     }

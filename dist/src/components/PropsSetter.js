@@ -12,7 +12,7 @@ class PropsSetter extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            props: null,
+            props: null
         };
         this.setProps = this.setProps.bind(this);
     }
@@ -22,8 +22,7 @@ class PropsSetter extends React.PureComponent {
     render() {
         const child = React.Children.only(this.props.children);
         if (this.state.props) {
-            const element = React.cloneElement(child, this.state.props);
-            return element;
+            return React.cloneElement(child, this.state.props);
         }
         return child;
     }

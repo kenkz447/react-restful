@@ -3,7 +3,7 @@ import { Store } from './Store';
 export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
     url: string;
-    method: string;
+    method?: string;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
     afterFetch?: (params: ResourceParameter[] | undefined, fetchResult: DataModel, meta: Meta | undefined, resourceType: ResourceType | null, store: Store) => void;
 }

@@ -4,11 +4,11 @@ class ResourceType {
     constructor(props) {
         const { name, schema, store } = props;
         this.name = name;
-        this.schema = schema;
-        const PKField = ResourceType.findPKField(props.schema);
+        this.schema = schema || ResourceType.defaultProps.schema;
+        const PKField = ResourceType.findPKField(this.schema);
         this.primaryKey = PKField.field;
-        if (props.store) {
-            props.store.registerRecordType(this);
+        if (store) {
+            store.registerRecordType(this);
         }
     }
     static findPKField(schema) {

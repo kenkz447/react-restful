@@ -4,7 +4,7 @@ class Resource {
     constructor(props) {
         this.recordType = props.resourceType || null;
         this.url = props.url;
-        this.method = props.method;
+        this.method = props.method || 'GET';
         this.mapDataToStore = props.mapDataToStore;
         this.afterFetch = props.afterFetch;
     }
@@ -22,7 +22,8 @@ class Resource {
                 searchs.append(param.parameter, param.value);
             }
         }
-        return `${uRL}?${searchs.toString()}`;
+        const searchString = searchs.toString();
+        return searchString ? `${uRL}?${searchString}` : uRL;
     }
     requestInitReslover(params = []) {
         const body = params.find(param => param.type === 'body');

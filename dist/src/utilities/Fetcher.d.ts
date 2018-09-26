@@ -1,7 +1,8 @@
 import { Resource, ResourceParameter } from './Resource';
 import { Store } from './Store';
-interface FetcherProps {
+export interface FetcherProps {
     store: Store;
+    entry?: string;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     afterFetch?: (response: Response) => void;
 }
@@ -14,4 +15,3 @@ export declare class Fetcher {
     fetch(url: string, requestInit: RequestInit): Promise<Response>;
     fetchResource<DataModel, Meta = {}>(resource: Resource<DataModel>, params?: ResourceParameter[], meta?: Meta): Promise<any>;
 }
-export {};
