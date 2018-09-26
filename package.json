@@ -1,6 +1,6 @@
 {
     "name": "react-restful",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "description": "",
     "main": "dist/index.js",
     "repository": "github:kenkz447/react-restful",

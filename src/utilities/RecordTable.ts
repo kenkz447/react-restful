@@ -2,7 +2,6 @@ import { Base64 } from 'js-base64';
 
 export type findRecordPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
-// tslint:disable-next-line:no-any
 export type RecordType = {};
 
 export class RecordTable<T> {

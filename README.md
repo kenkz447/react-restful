@@ -9,99 +9,93 @@ A library helps your manage data recevice from restful APIs and and render it in
 ## The simplest way to use
 
 ````typescript
-// file: /restful/restful-environment.ts
+/**
+ * File: /src/restful/restful-environment.ts
+ */
 
-import { Store, Fetcher } from 'react-restful';
-import * as Cookies from 'js-cookie';
+import { setupEnvironment } from 'react-restful';
 
-export const restfulStore = new Store();
-
-export const restfulFetcher = new Fetcher({
-    store: restfulStore,
+setupEnvironment({
+    entry: 'http//localhost:1337',
     beforeFetch: (url: string, requestInit: RequestInit) => {
-        if (requestInit.headers instanceof Headers) {
-            const token = Cookies.get('token');
-            if (token) {
-                requestInit.headers.append('Authorization', `Bearer ${token}`);
-            }
-        }
-
+        // Inject request headers here...
         return requestInit;
     },
     afterFetch: async (response) => {
-        if (response.ok) {
-            return;
-        }
-
-        const error = await response.text();
-        console.error(error);
+        // Side-effects here
     }
-});
-
-export const apiEntry = (path: string) => `http//localhost:1337${path}`;
+})
 ````
 
 ````typescript
-// file: /restful/resources/user.ts
+/**
+ * file: /src/restful/resources/user.ts
+ */ 
 
 import {
     RecordType,
     Resource,
-    ResourceType
+    ResourceType,
+    getStore
 } from 'react-restful';
 
-import { apiEntry, restfulStore } from '@/restful/restful-environment';
-
 export interface User extends RecordType {
-    readonly id: number;
+    readonly id?: number;
     readonly name: string;
-    readonly email: string;
 }
 
 export const userResourceType = new ResourceType<User>({
-    store: restfulStore,
+    store: getStore(),
     name: 'User'
 });
 
-export const userResources = {
-    getCurrentUserByToken: new Resource<User>({
-        resourceType: userResourceType,
-        url: apiEntry('/accountservice/api/account'),
-        method: 'GET',
-        mapDataToStore: (data, resourceType, store) => {
-            store.dataMapping(resourceType, data);
-        }
-    })
-};
+export const getUserById = new Resource<User>({
+    resourceType: userResourceType,
+    url: '/user/:id',
+    mapDataToStore: (data, resourceType, store) => {
+        store.dataMapping(resourceType, data);
+    }
+})
 ````
 
 ````tsx
-// file: /components/User.tsx
+/**
+ * file: /src/components/UserContainer.tsx
+ */ 
 
 import * as React from 'react';
 import { RestfulRender } from 'react-restful';
 
-import { userResources, restfulStore,restfulFetcher } from '@/restful';
+import { getUserById } from '/src/restful';
 
-import { CustomerList } from './customer-container';
+interface UserContainerProps {
+    readonly userId: number;
+}
 
-export class CustomersContainer extends React.PureComponent {
-    public render() {
+export class UserContainer extends React.Component<UserContainerProps> {
+    render() {
+        const { userId } = this.props;
         return (
             <RestfulRender
-                store={restfulStore}
-                fetcher={restfulFetcher}
-                resource={userResources.getCurrentUserByToken}
-                render={(renderProps) => {
-                    const { data } = renderProps;
+                resource={getUserById}
+                parameters={[{
+                    type: 'path',
+                    parameter: 'id',
+                    value: userId
+                }]}
+            >
+                {
+                    (renderProps) => {
+                        const { data, error, fetching } = renderProps;
 
-                    if (!data) {
-                        return null;
+                        if (!data) {
+                            return null;
+                        }
+
+                        return <span>{data.name}</span>
                     }
-
-                    return <span>{data.name}</span>
-                }}
-            />
+                }
+            </RestfulRender>
         );
     }
 }

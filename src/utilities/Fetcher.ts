@@ -1,8 +1,9 @@
 import { Resource, ResourceParameter } from './Resource';
 import { Store } from './Store';
 
-interface FetcherProps {
+export interface FetcherProps {
     store: Store;
+    entry?: string;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     afterFetch?: (response: Response) => void;
 }
@@ -25,9 +26,12 @@ export class Fetcher {
         meta?: Meta
     ) {
         try {
-            const { store, beforeFetch, afterFetch } = this.props;
+            const { entry, store, beforeFetch, afterFetch } = this.props;
 
-            const url = resource.urlReslover(params);
+            let url = resource.urlReslover(params);
+            if (entry) {
+                url = entry + url;
+            }
 
             const requestInit: RequestInit =
                 resource.requestInitReslover(params) ||

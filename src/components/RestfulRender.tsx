@@ -3,7 +3,9 @@ import {
     Resource,
     ResourceParameter,
     Store,
-    Fetcher
+    Fetcher,
+    fetcherSymbol,
+    storeSymbol
 } from '../utilities';
 
 export interface RestfulComponentRenderProps<DataModel> {
@@ -13,10 +15,10 @@ export interface RestfulComponentRenderProps<DataModel> {
 }
 
 export interface RestfulRenderProps<DataModel> {
-    store: Store;
+    store?: Store;
+    fetcher?: Fetcher;
     resource: Resource<DataModel>;
     parameters?: Array<ResourceParameter>;
-    fetcher?: Fetcher;
 
     /**
      * @deprecated, use children instead
@@ -29,7 +31,6 @@ export interface RestfulRenderProps<DataModel> {
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
-    fetcher: Fetcher;
     needsUpdate?: boolean;
     fetching?: boolean;
     componentRenderProps: RestfulComponentRenderProps<DataModel>;
@@ -37,7 +38,9 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
 
 export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>> = {
-        parameters: []
+        parameters: [],
+        fetcher: window[fetcherSymbol],
+        store: window[storeSymbol]
     };
 
     static getDerivedStateFromProps<DataModel>(
@@ -48,7 +51,6 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         ) {
             return {
                 ...nextProps,
-                fetcher: prevState.fetcher,
                 componentRenderProps: prevState.componentRenderProps,
                 needsUpdate: true,
                 fetching: true
@@ -62,7 +64,6 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         super(props);
         this.state = {
             ...props,
-            fetcher: this.props.fetcher || new Fetcher({ store: this.props.store }),
             fetching: true,
             componentRenderProps: {
                 data: null,
@@ -104,7 +105,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
 
     fetching() {
         const { fetcher, resource, parameters, onFetchCompleted } = this.state;
-        fetcher.fetchResource<T>(resource, parameters)
+        fetcher!.fetchResource<T>(resource, parameters)
             .then((data: T) => {
                 if (onFetchCompleted) {
                     onFetchCompleted(data);
