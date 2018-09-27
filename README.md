@@ -10,6 +10,10 @@ Another liblary for restful resources management for React app.
 
 Minimum setup (for most projects), "keep it simple stupid" is a best in development process.
 
+### Setup
+
+To start, you need create `restful` folder at somewhere in your project. I perfer prefer under `/src`.
+
 ````typescript
 /**
  * File: /src/restful/restful-environment.ts
@@ -43,17 +47,29 @@ import {
 } from 'react-restful';
 
 export interface Book extends RecordType {
-    readonly id?: number;
-    readonly name: string;
-    readonly desciption?: string;
+    id?: number;
+    name: string;
+    desciption?: string;
 }
 
 export const bookResources = {
     // API to get list of book
-    find: new Resource<Book[]>('/book'})
+    find: new Resource<Book[]>('/book')
 }
 ````
-Export `book.ts` via `/src/restful/index.ts` and using it in your components, don't forget import `restful-environment.ts` at root of project.
+Export `book.ts` via `/src/restful/index.ts`, don't forget import `restful-environment.ts` at top of `/src/restful/index.ts` file.
+
+```ts
+/**
+ * File: /src/restful/index.ts
+ */
+
+export * from './restful-environment.ts';
+export * from './resources/user.ts';
+
+```
+
+### Implememnt
 
 First, using `RestfulRender` to send GET request to get list of user,
 Then passed down response data to `UserList`
@@ -67,33 +83,16 @@ import * as React from 'react';
 import { RestfulRender, request } from 'react-restful';
 
 import { bookResources } from '/src/restful';
-import { BookList } from './BookList.ts'
+import { BookList } from './BookList.tsx'
 
-interface BookContainerProps {
-    /** 
-     * Value provided by searchbox (of parent)
-     * when user input something like book's name
-     * e.g: "republic" will call /book?name=republic
-     */
-    readonly search?: string;
-}
-
-export class BookContainer extends React.Component<BookContainerProps> {
+export class BookContainer extends React.Component {
     render() {
-        const { search } = this.props;
-        const requestParameters = search && [{
-            type: 'query',
-            parameter: 'name',
-            value: search
-        }];
-
         return (
             <RestfulRender
                 resource={bookResources.find}
-                parameters={requestParameters}
             >
                 {
-                    ({ data, error, fetching }) => {
+                    ({ data }) => {
                         if (!data) {
                             return null;
                         }
@@ -120,7 +119,7 @@ import { bookResources, Book } from '/src/restful';
 import { BookItem } from './BookItem';
 
 interface BookListProps {
-    readonly books: Book[];
+    books: Book[];
 }
 
 export class BookList extends React.Component<BookListProps> {
@@ -150,7 +149,7 @@ import { request } from 'react-restful';
 import { bookResources, Book } from '/src/restful';
 
 interface BookItemProps {
-    readonly books: Book;
+    books: Book;
 }
 
 export class BookItem extends React.Component<BookItemProps> {
