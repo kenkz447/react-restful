@@ -7,8 +7,7 @@ Another liblary for restful resources management for React app.
 [![Coverage Status](https://coveralls.io/repos/github/kenkz447/react-restful/badge.svg?branch=master)](https://coveralls.io/github/kenkz447/react-restful?branch=master)
 
 
-![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)
-You are familiar with Swagger?
+![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)*Are you familiar with Swagger?*
 
 ## The simplest way to use
 
@@ -36,7 +35,7 @@ setupEnvironment({
     }
 })
 ````
-Define your first API resource, how about an appication to manage `pets` a in pet store?
+Define your first API resource, would you like to build an app to manage `pets` a in pet store?
 
 ````typescript
 /**
@@ -69,7 +68,7 @@ Export `pet.ts` via `/src/restful/index.ts`, don't forget import `restful-enviro
  */
 
 export * from './restful-environment.ts';
-export * from './resources/user.ts';
+export * from './resources/pet.ts';
 
 ```
 
@@ -295,7 +294,7 @@ export const withPets = <P extends WithPetsProps>(): any =>
         }
     });
 ```
-Add HOC decorator to PetList
+and use withPets HOC to PetList
 
 ````diff
 /**
