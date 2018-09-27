@@ -15,9 +15,9 @@ export const setupEnvironment = (fetcherProps: FetcherProps) => {
     });
 
     request = fetcher.fetchResource;
-    
-    if (window) {
-        window[storeSymbol] = store;
-        window[fetcherSymbol] = fetcher;
+
+    if (global ) {
+        global[storeSymbol] = store;
+        global[fetcherSymbol] = fetcher;
     }
 };

@@ -1,6 +1,6 @@
 {
     "name": "react-restful",
-    "version": "1.5.4",
+    "version": "1.5.5",
     "description": "Another liblary for restful resources management for React app.",
     "main": "dist/index.js",
     "repository": "github:kenkz447/react-restful",
@@ -16,7 +16,7 @@
         "typescript"
     ],
     "author": "kenkz447",
-    "license": "ISC",
+    "license": "MIT",
     "devDependencies": {
         "@types/jest": "^23.3.2",
         "@types/js-base64": "^2.3.1",
