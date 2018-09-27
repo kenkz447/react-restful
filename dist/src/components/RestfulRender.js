@@ -71,7 +71,7 @@ class RestfulRender extends React.Component {
 }
 RestfulRender.defaultProps = {
     parameters: [],
-    fetcher: window[utilities_1.fetcherSymbol],
-    store: window[utilities_1.storeSymbol]
+    fetcher: global[utilities_1.fetcherSymbol],
+    store: global[utilities_1.storeSymbol]
 };
 exports.RestfulRender = RestfulRender;

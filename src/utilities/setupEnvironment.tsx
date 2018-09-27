@@ -4,7 +4,7 @@ import { Store } from './Store';
 export let storeSymbol = Symbol();
 export let fetcherSymbol = Symbol();
 
-export const getStore = () => window[storeSymbol];
+export const getStore = () => global[storeSymbol];
 export let request: Fetcher['fetchResource'];
 
 export const setupEnvironment = (fetcherProps: FetcherProps) => {

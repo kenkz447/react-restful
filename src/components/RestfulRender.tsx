@@ -39,8 +39,8 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
 export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>> = {
         parameters: [],
-        fetcher: window[fetcherSymbol],
-        store: window[storeSymbol]
+        fetcher: global[fetcherSymbol],
+        store: global[storeSymbol]
     };
 
     static getDerivedStateFromProps<DataModel>(
