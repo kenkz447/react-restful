@@ -1,7 +1,7 @@
 import fetch, { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { Resource, ResourceParameter, Store } from '../../utilities';
+import { Resource, ResourceParameter, Store, Fetcher } from '../../utilities';
 import { PropsSetter } from '../PropsSetter';
 import { RestfulRender, RestfulRenderProps } from '../RestfulRender';
 
@@ -10,6 +10,9 @@ import { userResourceType, User } from '../../test-resources';
 describe('RestfulRender', () => {
 
     const restfulStore = new Store();
+    const fetcher = new Fetcher({
+        store: restfulStore
+    });
     restfulStore.registerRecordType(userResourceType);
 
     let getUserByBranchResource = new Resource<User[]>({
@@ -49,6 +52,7 @@ describe('RestfulRender', () => {
         <PropsSetter>
             <RestfulRender
                 store={restfulStore}
+                fetcher={fetcher}
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
                 onFetchCompleted={onFetchCompleted}

@@ -6,13 +6,9 @@ import { User } from '../../test-resources';
 describe('ResourceType', () => {
     const restfulStore = new Store();
 
-    const userResourceType = new ResourceType({
+    const userResourceType = new ResourceType<User>({
         store: restfulStore,
-        name: 'user',
-        schema: [{
-            field: 'id',
-            type: 'PK'
-        }]
+        name: 'user'
     });
 
     restfulStore.mapRecord = jest.fn(restfulStore.mapRecord);
