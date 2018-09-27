@@ -21,6 +21,7 @@ export declare class Store {
     constructor();
     subscribe<T>(resourceTypes: ResourceType[], callback: SubscribeCallback<T>): string;
     unSubscribe(subscribeId: string): SubscribeStack<any>[];
+    resourceTypeHasRegistered(resourceTypeName: string): boolean;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
     getRecordTable<T = RecordType>(resourceType: ResourceType): RecordTable<T>;
     registerRecordType(resourceType: ResourceType): void;

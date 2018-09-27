@@ -42,6 +42,10 @@ class Fetcher {
                         resource.afterFetch(params, json, meta, resource.recordType, store);
                     }
                     if (resource.mapDataToStore && resource.recordType) {
+                        const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
+                        if (!resourceTypeHasRegistered) {
+                            store.registerRecordType(resource.recordType);
+                        }
                         resource.mapDataToStore(json, resource.recordType, store);
                     }
                     return json;

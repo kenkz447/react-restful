@@ -25,6 +25,10 @@ class Store {
     unSubscribe(subscribeId) {
         return this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
+    resourceTypeHasRegistered(resourceTypeName) {
+        const found = this.resourceTypes.find(o => o.name === resourceTypeName);
+        return found !== undefined;
+    }
     getRegisteredResourceType(resourceTypeName) {
         const resourceType = this.resourceTypes.find(o => o.name === resourceTypeName);
         if (!resourceType) {

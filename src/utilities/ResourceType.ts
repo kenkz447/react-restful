@@ -23,23 +23,30 @@ export class ResourceType<T extends RecordType = {}> {
 
     name: string;
     schema: ResourceTypeProps['schema'];
-    primaryKey: string;
+    primaryKey!: string;
 
     static findPKField(schema: ResourceTypeProps['schema']) {
         return schema!.find(o => o.type === 'PK')!;
     }
 
-    constructor(props: ResourceTypeProps) {
-        const { name, schema, store } = props;
+    constructor(props: ResourceTypeProps | string) {
+        if (typeof props === 'string') {
+            this.name = props;
+            this.schema = ResourceType.defaultProps.schema;
+            const PKField = ResourceType.findPKField(this.schema);
+            this.primaryKey = PKField.field;
+        } else {
+            const { name, schema, store } = props;
 
-        this.name = name;
-        this.schema = schema || ResourceType.defaultProps.schema;
+            this.name = name;
+            this.schema = schema || ResourceType.defaultProps.schema;
 
-        const PKField = ResourceType.findPKField(this.schema);
-        this.primaryKey = PKField.field;
+            const PKField = ResourceType.findPKField(this.schema);
+            this.primaryKey = PKField.field;
 
-        if (store) {
-            store.registerRecordType(this);
+            if (store) {
+                store.registerRecordType(this);
+            }
         }
     }
 

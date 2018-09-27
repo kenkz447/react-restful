@@ -24,7 +24,7 @@ interface SubscribeStack<T> {
 export class Store {
     private resourceTypes: Array<ResourceType>;
     private recordTables: RecordTables;
-    
+
     // tslint:disable-next-line:no-any
     private subscribeStacks: SubscribeStack<any>[];
 
@@ -51,11 +51,17 @@ export class Store {
         return this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
 
+    resourceTypeHasRegistered(resourceTypeName: string) {
+        const found = this.resourceTypes.find(o => o.name === resourceTypeName);
+        return found !== undefined;
+    }
+
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}> {
         const resourceType = this.resourceTypes.find(o => o.name === resourceTypeName);
         if (!resourceType) {
             throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
         }
+        
         return resourceType;
     }
 

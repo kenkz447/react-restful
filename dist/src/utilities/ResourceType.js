@@ -2,13 +2,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class ResourceType {
     constructor(props) {
-        const { name, schema, store } = props;
-        this.name = name;
-        this.schema = schema || ResourceType.defaultProps.schema;
-        const PKField = ResourceType.findPKField(this.schema);
-        this.primaryKey = PKField.field;
-        if (store) {
-            store.registerRecordType(this);
+        if (typeof props === 'string') {
+            this.name = props;
+            this.schema = ResourceType.defaultProps.schema;
+            const PKField = ResourceType.findPKField(this.schema);
+            this.primaryKey = PKField.field;
+        }
+        else {
+            const { name, schema, store } = props;
+            this.name = name;
+            this.schema = schema || ResourceType.defaultProps.schema;
+            const PKField = ResourceType.findPKField(this.schema);
+            this.primaryKey = PKField.field;
+            if (store) {
+                store.registerRecordType(this);
+            }
         }
     }
     static findPKField(schema) {

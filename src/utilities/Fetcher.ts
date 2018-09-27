@@ -58,6 +58,11 @@ export class Fetcher {
                 }
 
                 if (resource.mapDataToStore && resource.recordType) {
+                    const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
+                    if (!resourceTypeHasRegistered) {
+                        store.registerRecordType(resource.recordType);
+                    }
+
                     resource.mapDataToStore(json, resource.recordType, store);
                 }
                 return json;

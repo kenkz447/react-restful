@@ -21,7 +21,6 @@ describe('Fetcher', () => {
     });
 
     const store = new Store();
-    store.registerRecordType(userResourceType);
 
     const fetcher = new Fetcher({
         store: store,

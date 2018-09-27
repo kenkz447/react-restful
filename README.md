@@ -6,6 +6,8 @@ Another liblary for restful resources management for React app.
 [![Build Status](https://travis-ci.org/kenkz447/react-restful.svg?branch=master)](https://travis-ci.org/kenkz447/react-restful)
 [![Coverage Status](https://coveralls.io/repos/github/kenkz447/react-restful/badge.svg?branch=master)](https://coveralls.io/github/kenkz447/react-restful?branch=master)
 
+![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)
+
 ## The simplest way to use
 
 Minimum setup (for most projects), "keep it simple stupid" is a best in development process.
@@ -32,11 +34,11 @@ setupEnvironment({
     }
 })
 ````
-Define your first API resource, how about an appication to manage `books` in library?
+Define your first API resource, how about an appication to manage `pets` a in pet store?
 
 ````typescript
 /**
- * File: /src/restful/resources/book.ts
+ * File: /src/restful/resources/pet.ts
  */ 
 
 import {
@@ -46,18 +48,18 @@ import {
     getStore
 } from 'react-restful';
 
-export interface Book extends RecordType {
+export interface Pet extends RecordType {
     id?: number;
     name: string;
     desciption?: string;
 }
 
-export const bookResources = {
-    // API to get list of book
-    find: new Resource<Book[]>('/book')
+export const petResources = {
+    // API to get list of pet
+    find: new Resource<Pet[]>('/pet'),
 }
 ````
-Export `book.ts` via `/src/restful/index.ts`, don't forget import `restful-environment.ts` at top of `/src/restful/index.ts` file.
+Export `pet.ts` via `/src/restful/index.ts`, don't forget import `restful-environment.ts` at top of `/src/restful/index.ts` file.
 
 ```ts
 /**
@@ -76,20 +78,20 @@ Then passed down response data to `UserList`
 
 ````tsx
 /**
- * File: /src/components/BookContainer.tsx
+ * File: /src/components/PetContainer.tsx
  */ 
 
 import * as React from 'react';
 import { RestfulRender, request } from 'react-restful';
 
-import { bookResources } from '/src/restful';
-import { BookList } from './BookList.tsx'
+import { petResources } from '/src/restful';
+import { PetList } from './PetList.tsx'
 
-export class BookContainer extends React.Component {
+export class PetContainer extends React.Component {
     render() {
         return (
             <RestfulRender
-                resource={bookResources.find}
+                resource={petResources.find}
             >
                 {
                     ({ data }) => {
@@ -97,7 +99,7 @@ export class BookContainer extends React.Component {
                             return null;
                         }
 
-                        return (<BookList books={data}/>)
+                        return (<PetList pets={data}/>)
                     }
                 }
             </RestfulRender>
@@ -109,26 +111,26 @@ Component to render data:
 
 ````tsx
 /**
- * File: /src/components/BookContainer.tsx
+ * File: /src/components/PetContainer.tsx
  */ 
 
 import * as React from 'react';
 import { request } from 'react-restful';
 
-import { bookResources, Book } from '/src/restful';
-import { BookItem } from './BookItem';
+import { petResources, Pet } from '/src/restful';
+import { PetItem } from './PetItem';
 
-interface BookListProps {
-    books: Book[];
+interface PetListProps {
+    pets: Pet[];
 }
 
-export class BookList extends React.Component<BookListProps> {
+export class PetList extends React.Component<PetListProps> {
     render() {
-        const { books } = this.props;
+        const { pets } = this.props;
         return (
-            <ul className="booking-list">
+            <ul className="peting-list">
                 { 
-                    books.map(book => <BookItem key={book.id} book={book}/>) 
+                    pets.map(pet => <PetItem key={pet.id} pet={pet}/>) 
                 }
             </ul>
         );
@@ -136,26 +138,25 @@ export class BookList extends React.Component<BookListProps> {
 }
 ````
 
-And display booking info via `BookItem`
+And display peting info via `PetItem`
 
 ````tsx
 /**
- * File: /src/components/BookItem.tsx
+ * File: /src/components/PetItem.tsx
  */ 
 
 import * as React from 'react';
-import { request } from 'react-restful';
 
-import { bookResources, Book } from '/src/restful';
+import { petResources, Pet } from '/src/restful';
 
-interface BookItemProps {
-    books: Book;
+interface PetItemProps {
+    pets: Pet;
 }
 
-export class BookItem extends React.Component<BookItemProps> {
+export class PetItem extends React.Component<PetItemProps> {
     render() {
-        <li className="booking-item">
-            <h4>#{book.id}</h4>
+        <li className="peting-item">
+            <h4>#{pet.id}</h4>
         </li>
     }
 }
@@ -163,11 +164,81 @@ export class BookItem extends React.Component<BookItemProps> {
 
 End yet? not yet. You have just undergone 'R' in the CRUD definition. Look down below to see how to complete the process:
 
-````ts
+1. add three resources:
+```diff
 /**
- * File: /src/components/BookContainer.tsx
+ * File: /src/components/PetContainer.tsx
  */
 
-// ...
+export const petResources = {
+    // API to get list of pet
+    find: new Resource<Pet[]>('/pet'),
++   create: new Resource<Pet>({
++       method: 'POST',
++       url: '/user'
++}),
++   update: new Resource<Pet>({
++       method: 'PUT',
++       url: '/user'
++}),
++   delete: new Resource<Pet>({
++       method: 'DELETE',
++       url: '/user/:id'
++})
+}
+```
 
-````
+2. Add `delete` and `update` methods in `PetItem`
+
+```diff
+/**
+ * File: /src/components/PetItem.tsx
+ */
+import * as React from 'react';
++ import { request } from 'react-restful';
+
+import { petResources, Pet } from '/src/restful';
+
+export class PetItem extends React.Component<PetItemProps> {
++   input: HTMLInputElement;
+
+    render() {
+        <li className="peting-item">
+            <h4>#{pet.id}</h4>
++           <form onSubmit={this.handleSubmit}>
++               <label>
++                   Name: <input type="text" ref={(input) => this.input = input} />
++               </label>
++               <input type="submit" value="Submit" />
++               <a onClick={this.handleDelete}>Delete this pet</a>
++           </form>
+        </li>
+    }
+
++   handleSubmit = async (event) => {
++       const { pet } = this.props;
+
++      const updatePet = {
++           ...pet,
++           name: this.input.value
++      }; 
++
++      await request(petResources.update, [{ type: 'body', value: updatePet }])
++   }
+
++   handleDelete = (event) => {
++       const { pet } = this.props;
++
++       await request(
++           petResources.delete, 
++           [{ 
++               type: 'path',
++               parameter: 'id,
++               value: pet 
++           }]
++        );
++   }
+}
+```
+
+...
