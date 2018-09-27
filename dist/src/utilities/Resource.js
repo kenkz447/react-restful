@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class Resource {
     constructor(props) {
+        if (typeof props === 'string') {
+            this.recordType = null;
+            this.url = props;
+            this.method = 'GET';
+            return;
+        }
         this.recordType = props.resourceType || null;
         this.url = props.url;
         this.method = props.method || 'GET';

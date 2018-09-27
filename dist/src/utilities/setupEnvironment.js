@@ -8,7 +8,9 @@ exports.getStore = () => window[exports.storeSymbol];
 exports.setupEnvironment = (fetcherProps) => {
     const store = new Store_1.Store();
     const fetcher = new Fetcher_1.Fetcher(Object.assign({ store: store }, fetcherProps));
-    exports.fetchResource = fetcher.fetchResource;
-    window[exports.storeSymbol] = store;
-    window[exports.fetcherSymbol] = fetcher;
+    exports.request = fetcher.fetchResource;
+    if (window) {
+        window[exports.storeSymbol] = store;
+        window[exports.fetcherSymbol] = fetcher;
+    }
 };
