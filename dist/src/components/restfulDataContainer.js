@@ -8,6 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __importStar(require("react"));
+const utilities_1 = require("../utilities");
 function restfulDataContainer(containerProps) {
     return (Component) => class RestfulDataContainer extends React.Component {
         constructor(props, context) {
@@ -61,7 +62,7 @@ function restfulDataContainer(containerProps) {
                 this.mappingTimeout = setTimeout(() => this.setState(Object.assign({}, this.state, { trackingData: data })), 100);
             };
             this.autoMapping = (e) => {
-                const { store, resourceType } = containerProps;
+                const { resourceType } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
                 const existingRecordIndex = this.state.trackingData.findIndex(o => {
                     return eventRecordKey === resourceType.getRecordKey(o);
@@ -76,7 +77,7 @@ function restfulDataContainer(containerProps) {
                 }
                 this.mappingTimeout = setTimeout(() => {
                     const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
-                    const data = resourceType.getAllRecords(store, (record) => dataIds.includes(resourceType.getRecordKey(record)));
+                    const data = resourceType.getAllRecords(this.store, (record) => dataIds.includes(resourceType.getRecordKey(record)));
                     this.setState(Object.assign({}, this.state, { trackingData: data }));
                 }, 100);
             };
@@ -91,22 +92,22 @@ function restfulDataContainer(containerProps) {
                 this.setState(Object.assign({}, this.state, { trackingData: updatedStateRecords }));
             };
             const { store, resourceType, registerToTracking } = containerProps;
-            this.subscribeId = store.subscribe([resourceType], this.onStoreEvent);
+            this.store = store || global[utilities_1.storeSymbol];
+            this.subscribeId = this.store.subscribe([resourceType], this.onStoreEvent);
             const data = registerToTracking && registerToTracking(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
             const mappingData = propDataIdMap ?
-                resourceType.getAllRecords(store, (recordInstance) => {
+                resourceType.getAllRecords(this.store, (recordInstance) => {
                     const recordInstanceKey = resourceType.getRecordKey(recordInstance);
                     return propDataIdMap.includes(recordInstanceKey);
                 }) :
-                resourceType.getAllRecords(store);
+                resourceType.getAllRecords(this.store);
             this.state = {
                 trackingData: mappingData
             };
         }
         componentWillUnmount() {
-            const { store } = containerProps;
-            store.unSubscribe(this.subscribeId);
+            this.store.unSubscribe(this.subscribeId);
         }
         render() {
             const { mapToProps } = containerProps;

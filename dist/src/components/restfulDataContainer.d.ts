@@ -2,9 +2,8 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
 interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
-    readonly store: Store;
+    readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
-    readonly dataPropsKey?: string;
     readonly shouldTrackingNewRecord?: (record: DataModel, ownProps: OwnProps, trackedData: ReadonlyArray<DataModel>) => boolean;
     readonly registerToTracking?: (props: OwnProps, current?: ReadonlyArray<DataModel>, event?: SubscribeEvent) => ReadonlyArray<DataModel>;
     readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
@@ -14,6 +13,7 @@ interface RestfulDataContainerState<DataModel> {
 }
 export declare function restfulDataContainer<DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
+        readonly store: Store;
         readonly subscribeId: string;
         mappingTimeout: NodeJS.Timer;
         componentWillUnmount(): void;

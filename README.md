@@ -6,7 +6,9 @@ Another liblary for restful resources management for React app.
 [![Build Status](https://travis-ci.org/kenkz447/react-restful.svg?branch=master)](https://travis-ci.org/kenkz447/react-restful)
 [![Coverage Status](https://coveralls.io/repos/github/kenkz447/react-restful/badge.svg?branch=master)](https://coveralls.io/github/kenkz447/react-restful?branch=master)
 
+
 ![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)
+You are familiar with Swagger?
 
 ## The simplest way to use
 
@@ -14,7 +16,7 @@ Minimum setup (for most projects), "keep it simple stupid" is a best in developm
 
 ### Setup
 
-To start, you need create `restful` folder at somewhere in your project. I perfer prefer under `/src`.
+To start, you need create `restful` folder at somewhere in your project. I prefer place under `/src`.
 
 ````typescript
 /**
@@ -107,11 +109,11 @@ export class PetContainer extends React.Component {
     }
 }
 ````
-Component to render data:
+Component to render data
 
 ````tsx
 /**
- * File: /src/components/PetContainer.tsx
+ * File: /src/components/PetList.tsx
  */ 
 
 import * as React from 'react';
@@ -138,7 +140,7 @@ export class PetList extends React.Component<PetListProps> {
 }
 ````
 
-And display peting info via `PetItem`
+And display pet info via `PetItem`
 
 ````tsx
 /**
@@ -147,7 +149,10 @@ And display peting info via `PetItem`
 
 import * as React from 'react';
 
-import { petResources, Pet } from '/src/restful';
+import { 
+    petResources, 
+    Pet 
+} from '/src/restful';
 
 interface PetItemProps {
     pets: Pet;
@@ -165,9 +170,10 @@ export class PetItem extends React.Component<PetItemProps> {
 End yet? not yet. You have just undergone 'R' in the CRUD definition. Look down below to see how to complete the process:
 
 1. add three resources:
+
 ```diff
 /**
- * File: /src/components/PetContainer.tsx
+ * File: /src/restful/resources/pet.ts
  */
 
 export const petResources = {
@@ -197,22 +203,28 @@ export const petResources = {
 import * as React from 'react';
 + import { request } from 'react-restful';
 
-import { petResources, Pet } from '/src/restful';
+import { 
+    petResources, 
+    Pet 
+} from '/src/restful';
 
 export class PetItem extends React.Component<PetItemProps> {
 +   input: HTMLInputElement;
 
     render() {
-        <li className="peting-item">
-            <h4>#{pet.id}</h4>
-+           <form onSubmit={this.handleSubmit}>
-+               <label>
-+                   Name: <input type="text" ref={(input) => this.input = input} />
-+               </label>
-+               <input type="submit" value="Submit" />
-+               <a onClick={this.handleDelete}>Delete this pet</a>
-+           </form>
-        </li>
++       const { pet } = this.props; 
+        return (
+            <li className="peting-item">
+                <h4>#{pet.id}</h4>
++               <form onSubmit={this.handleSubmit}>
++                   <label>
++                       Name: <input value={pet.name} ref={(input) => this.input = input} />
++                   </label>
++                   <input type="submit" value="Update" />
++                   <a onClick={this.handleDelete}>Delete this pet</a>
++               </form>
+            </li>
+        )
     }
 
 +   handleSubmit = async (event) => {
@@ -241,4 +253,69 @@ export class PetItem extends React.Component<PetItemProps> {
 }
 ```
 
-...
+Now, you can create a request to the server to delete or update a pet's information. But soon you will realize a very painful problem: After the server processes and responds back to the client, how do you let the Components display the data exactly as you want?
+
+Use HOC to track data changes and rerender child component if needed
+
+```diff
+/**
+ * File: /src/restful/resources/pet.ts
+ */
+
+import { 
+    RecordType,
+    Resource,
+    ResourceType,
++   restfulDataContainer
+} from 'react-restful';
+```
+
+Add code below to bottom of `/src/restful/resources/pet.ts`
+
+```ts
+export interface WithPetsProps {
+    readonly pets: Array<Pet>;
+}
+
+export const withPets = <P extends WithPetsProps>(): any =>
+    restfulDataContainer<Pet, WithPetsProps, P>({
+        resourceType: petResourceType,
+        shouldTrackingNewRecord: (record, ownProps, trackedPets) => true,
+        registerToTracking: (ownProps, trackedPets, event) => {
+            if (trackedPets) {
+                return trackedPets;
+            }
+
+            return ownProps.pets;
+        },
+        mapToProps: (pets) => {
+            return {
+                pets: pets
+            };
+        }
+    });
+```
+Add HOC decorator to PetList
+
+````diff
+/**
+ * File: /src/components/PetList.tsx
+ */ 
+
+import { 
+    petResources, 
+    Pet,
++   WithPetsProps,
++   withPets
+} from '/src/restful';
+
+-interface PetListProps {
++interface PetListProps extends WithPetsProps {
+-   pets: Pet[];
+}
+
++@withPets()
+export class PetList extends React.Component<PetListProps> {
+````
+
+That all.

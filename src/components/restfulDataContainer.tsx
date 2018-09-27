@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
+import { RecordType, ResourceType, Store, SubscribeEvent, storeSymbol } from '../utilities';
 
 interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
-    readonly store: Store;
+    readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
-    readonly dataPropsKey?: string;
 
     readonly shouldTrackingNewRecord?: (
         record: DataModel,
@@ -30,12 +29,12 @@ export function restfulDataContainer
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
     return (Component: React.ComponentType<OwnProps>) =>
         class RestfulDataContainer extends React.Component<OwnProps, RestfulDataContainerState<DataModel>> {
+            readonly store: Store;
             readonly subscribeId: string;
             mappingTimeout!: NodeJS.Timer;
 
             componentWillUnmount() {
-                const { store } = containerProps;
-                store.unSubscribe(this.subscribeId);
+                this.store.unSubscribe(this.subscribeId);
             }
 
             constructor(props: OwnProps, context: {}) {
@@ -47,17 +46,19 @@ export function restfulDataContainer
                     registerToTracking
                 } = containerProps;
 
-                this.subscribeId = store.subscribe([resourceType], this.onStoreEvent);
+                this.store = store || global[storeSymbol];
+
+                this.subscribeId = this.store.subscribe([resourceType], this.onStoreEvent);
 
                 const data = registerToTracking && registerToTracking(props);
                 const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
 
                 const mappingData = propDataIdMap ?
-                    resourceType.getAllRecords(store, (recordInstance) => {
+                    resourceType.getAllRecords(this.store, (recordInstance) => {
                         const recordInstanceKey = resourceType.getRecordKey(recordInstance);
                         return propDataIdMap.includes(recordInstanceKey);
                     }) :
-                    resourceType.getAllRecords(store);
+                    resourceType.getAllRecords(this.store);
 
                 this.state = {
                     trackingData: mappingData
@@ -149,7 +150,7 @@ export function restfulDataContainer
             }
 
             autoMapping = (e: SubscribeEvent<DataModel>) => {
-                const { store, resourceType } = containerProps;
+                const { resourceType } = containerProps;
 
                 const eventRecordKey = resourceType.getRecordKey(e.record);
 
@@ -175,7 +176,7 @@ export function restfulDataContainer
                     () => {
                         const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
 
-                        const data = resourceType.getAllRecords(store, (record) =>
+                        const data = resourceType.getAllRecords(this.store, (record) =>
                             dataIds.includes(resourceType.getRecordKey(record)));
 
                         this.setState({
