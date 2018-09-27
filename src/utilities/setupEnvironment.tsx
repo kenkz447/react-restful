@@ -5,7 +5,7 @@ export let storeSymbol = Symbol();
 export let fetcherSymbol = Symbol();
 
 export const getStore = () => window[storeSymbol];
-export let fetchResource: Fetcher['fetchResource'];
+export let request: Fetcher['fetchResource'];
 
 export const setupEnvironment = (fetcherProps: FetcherProps) => {
     const store = new Store();
@@ -14,8 +14,10 @@ export const setupEnvironment = (fetcherProps: FetcherProps) => {
         ...fetcherProps,
     });
 
-    fetchResource = fetcher.fetchResource;
-
-    window[storeSymbol] = store;
-    window[fetcherSymbol] = fetcher;
+    request = fetcher.fetchResource;
+    
+    if (window) {
+        window[storeSymbol] = store;
+        window[fetcherSymbol] = fetcher;
+    }
 };

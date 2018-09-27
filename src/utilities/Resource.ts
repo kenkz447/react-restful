@@ -29,7 +29,14 @@ export class Resource<DataModel, Meta = {}> {
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     afterFetch: ResourceProps<DataModel, Meta>['afterFetch'];
 
-    constructor(props: ResourceProps<DataModel, Meta>) {
+    constructor(props: ResourceProps<DataModel, Meta> | string) {
+        if (typeof props === 'string') {
+            this.recordType = null;
+            this.url = props;
+            this.method = 'GET';
+            return;
+        }
+
         this.recordType = props.resourceType || null;
         this.url = props.url;
         this.method = props.method || 'GET';
