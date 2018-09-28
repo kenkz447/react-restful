@@ -159,7 +159,7 @@ import {
 } from '/src/restful';
 
 interface PetItemProps {
-    pets: Pet;
+    pet: Pet;
 }
 
 export class PetItem extends React.Component<PetItemProps> {

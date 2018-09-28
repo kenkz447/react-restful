@@ -48,7 +48,9 @@ function restfulDataContainer(containerProps) {
                 });
                 const recordExistedInTrackingList = nextTrackingData.find(o => resourceType.getRecordKey(o) === eventRecordKey);
                 const allowTrackingNewRecord = (!recordExistedInTrackingList && shouldTrackingNewRecord)
-                    && shouldTrackingNewRecord(e.record, this.props, this.state.trackingData);
+                    && (typeof shouldTrackingNewRecord === 'boolean' ?
+                        shouldTrackingNewRecord :
+                        shouldTrackingNewRecord(e.record, this.props, this.state.trackingData));
                 const data = allowTrackingNewRecord ?
                     registerToTracking(this.props, [...nextTrackingData, e.record], e) :
                     registerToTracking(this.props, nextTrackingData, e);

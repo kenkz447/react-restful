@@ -51,14 +51,18 @@ export class Resource<DataModel, Meta = {}> {
             this.recordType = null;
             this.url = props;
             this.method = 'GET';
-            return;
-        }
+        } else {
+            this.recordType = props.resourceType || null;
+            this.url = props.url;
+            this.method = props.method || 'GET';
 
-        this.recordType = props.resourceType || null;
-        this.url = props.url;
-        this.method = props.method || 'GET';
-        this.mapDataToStore = props.mapDataToStore || Resource.defaultMapDataToStore;
-        this.afterFetch = props.afterFetch;
+            this.mapDataToStore = props.mapDataToStore;
+            if (!this.mapDataToStore && props.resourceType) {
+                this.mapDataToStore = Resource.defaultMapDataToStore;
+            }
+
+            this.afterFetch = props.afterFetch;
+        }
     }
 
     urlReslover(params: Array<ResourceParameter> = []): string {

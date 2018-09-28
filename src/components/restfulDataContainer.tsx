@@ -1,15 +1,17 @@
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent, storeSymbol } from '../utilities';
 
+type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (
+    record: DataModel,
+    ownProps: OwnProps,
+    trackedData: ReadonlyArray<DataModel>
+) => boolean;
+
 interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
 
-    readonly shouldTrackingNewRecord?: (
-        record: DataModel,
-        ownProps: OwnProps,
-        trackedData: ReadonlyArray<DataModel>
-    ) => boolean;
+    readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
 
     readonly registerToTracking?: (
         props: OwnProps,
@@ -122,7 +124,11 @@ export function restfulDataContainer
                     nextTrackingData.find(o => resourceType.getRecordKey(o) === eventRecordKey);
 
                 const allowTrackingNewRecord = (!recordExistedInTrackingList && shouldTrackingNewRecord)
-                    && shouldTrackingNewRecord(e.record, this.props, this.state.trackingData);
+                    && (
+                        typeof shouldTrackingNewRecord === 'boolean' ?
+                            shouldTrackingNewRecord :
+                            shouldTrackingNewRecord(e.record, this.props, this.state.trackingData)
+                    );
 
                 const data = allowTrackingNewRecord ?
                     registerToTracking(this.props, [...nextTrackingData, e.record], e) :

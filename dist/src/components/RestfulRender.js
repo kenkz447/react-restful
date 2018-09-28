@@ -12,7 +12,7 @@ const utilities_1 = require("../utilities");
 class RestfulRender extends React.Component {
     constructor(props) {
         super(props);
-        this.state = Object.assign({}, props, { fetching: true, componentRenderProps: {
+        this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: true, componentRenderProps: {
                 data: null,
                 error: null
             } });
@@ -70,8 +70,6 @@ class RestfulRender extends React.Component {
     }
 }
 RestfulRender.defaultProps = {
-    parameters: [],
-    fetcher: global[utilities_1.fetcherSymbol],
-    store: global[utilities_1.storeSymbol]
+    parameters: []
 };
 exports.RestfulRender = RestfulRender;

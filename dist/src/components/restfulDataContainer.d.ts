@@ -1,10 +1,11 @@
 /// <reference types="node" />
 import * as React from 'react';
 import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
+declare type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (record: DataModel, ownProps: OwnProps, trackedData: ReadonlyArray<DataModel>) => boolean;
 interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
-    readonly shouldTrackingNewRecord?: (record: DataModel, ownProps: OwnProps, trackedData: ReadonlyArray<DataModel>) => boolean;
+    readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
     readonly registerToTracking?: (props: OwnProps, current?: ReadonlyArray<DataModel>, event?: SubscribeEvent) => ReadonlyArray<DataModel>;
     readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
 }

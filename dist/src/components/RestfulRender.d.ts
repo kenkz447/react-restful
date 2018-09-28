@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { Resource, ResourceParameter, Store, Fetcher } from '../utilities';
+import { Resource, ResourceParameter, Fetcher } from '../utilities';
 export interface RestfulComponentRenderProps<DataModel> {
     data?: DataModel | null;
     error?: Error | null;
     fetching?: boolean;
 }
 export interface RestfulRenderProps<DataModel> {
-    store?: Store;
     fetcher?: Fetcher;
     resource: Resource<DataModel>;
     parameters?: Array<ResourceParameter>;
