@@ -2,10 +2,8 @@ import * as React from 'react';
 import {
     Resource,
     ResourceParameter,
-    Store,
     Fetcher,
-    fetcherSymbol,
-    storeSymbol
+    fetcherSymbol
 } from '../utilities';
 
 export interface RestfulComponentRenderProps<DataModel> {
@@ -15,7 +13,6 @@ export interface RestfulComponentRenderProps<DataModel> {
 }
 
 export interface RestfulRenderProps<DataModel> {
-    store?: Store;
     fetcher?: Fetcher;
     resource: Resource<DataModel>;
     parameters?: Array<ResourceParameter>;
@@ -38,9 +35,7 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
 
 export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>> = {
-        parameters: [],
-        fetcher: global[fetcherSymbol],
-        store: global[storeSymbol]
+        parameters: []
     };
 
     static getDerivedStateFromProps<DataModel>(
@@ -64,6 +59,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         super(props);
         this.state = {
             ...props,
+            fetcher: props.fetcher || global[fetcherSymbol],
             fetching: true,
             componentRenderProps: {
                 data: null,

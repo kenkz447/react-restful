@@ -16,7 +16,7 @@ export const setupEnvironment = (fetcherProps: FetcherProps) => {
 
     request = fetcher.fetchResource;
 
-    if (global ) {
+    if (global) {
         global[storeSymbol] = store;
         global[fetcherSymbol] = fetcher;
     }

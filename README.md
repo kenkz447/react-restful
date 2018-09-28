@@ -53,8 +53,6 @@ Define your first API resource, would you like to build an app to manage `pets` 
 import {
     RecordType,
     Resource,
-    ResourceType,
-    getStore
 } from 'react-restful';
 
 export interface Pet extends RecordType {
@@ -91,10 +89,10 @@ Then passed down response data to `UserList`
  */ 
 
 import * as React from 'react';
-import { RestfulRender, request } from 'react-restful';
+import { RestfulRender } from 'react-restful';
 
 import { petResources } from '/src/restful';
-import { PetList } from './PetList.tsx'
+import { PetList } from './PetList'
 
 export class PetContainer extends React.Component {
     render() {
@@ -124,9 +122,8 @@ Component to render data
  */ 
 
 import * as React from 'react';
-import { request } from 'react-restful';
 
-import { petResources, Pet } from '/src/restful';
+import { Pet } from '/src/restful';
 import { PetItem } from './PetItem';
 
 interface PetListProps {
@@ -167,9 +164,12 @@ interface PetItemProps {
 
 export class PetItem extends React.Component<PetItemProps> {
     render() {
-        <li className="peting-item">
-            <h4>#{pet.id}</h4>
-        </li>
+        const { pet } = this.props; 
+        return (
+            <li className="peting-item">
+                <h4>#{pet.id}</h4>
+            </li>
+        );
     }
 }
 ````
@@ -182,19 +182,33 @@ End yet? not yet. You have just undergone 'R' in the CRUD definition. Look down 
 /**
  * File: /src/restful/resources/pet.ts
  */
+import {
+    RecordType,
+    Resource,
++   ResourceType
+} from 'react-restful';
+
++export const userResourceType = new ResourceType<Pet>('Pet');
 
 export const petResources = {
     // API to get list of pet
-    find: new Resource<Pet[]>('/pet'),
+-   find: new Resource<Pet[]>('/pet'),
++   find: new Resource<Pet[]>({
++       resourceType: userResourceType,
++       method: 'POST'
++   }),
 +   create: new Resource<Pet>({
++       resourceType: userResourceType,
 +       method: 'POST',
 +       url: '/user'
 +}),
 +   update: new Resource<Pet>({
++       resourceType: userResourceType,
 +       method: 'PUT',
 +       url: '/user'
 +}),
 +   delete: new Resource<Pet>({
++       resourceType: userResourceType,
 +       method: 'DELETE',
 +       url: '/user/:id'
 +})
@@ -219,7 +233,7 @@ export class PetItem extends React.Component<PetItemProps> {
 +   input: HTMLInputElement;
 
     render() {
-+       const { pet } = this.props; 
+        const { pet } = this.props; 
         return (
             <li className="peting-item">
                 <h4>#{pet.id}</h4>
