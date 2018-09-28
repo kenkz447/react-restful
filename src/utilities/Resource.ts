@@ -29,6 +29,23 @@ export class Resource<DataModel, Meta = {}> {
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     afterFetch: ResourceProps<DataModel, Meta>['afterFetch'];
 
+    static defaultMapDataToStore = (
+        data: {} | Array<{}>,
+        resourceType: ResourceType,
+        store: Store
+    ) => {
+        if (Array.isArray(data)) {
+            for (const record of data) {
+                store.mapRecord(resourceType, record);
+            }
+        } else {
+            const hasKey = resourceType.getRecordKey(data);
+            if (hasKey) {
+                store.mapRecord(resourceType, data);
+            }
+        }
+    }
+
     constructor(props: ResourceProps<DataModel, Meta> | string) {
         if (typeof props === 'string') {
             this.recordType = null;
@@ -40,7 +57,7 @@ export class Resource<DataModel, Meta = {}> {
         this.recordType = props.resourceType || null;
         this.url = props.url;
         this.method = props.method || 'GET';
-        this.mapDataToStore = props.mapDataToStore;
+        this.mapDataToStore = props.mapDataToStore || Resource.defaultMapDataToStore;
         this.afterFetch = props.afterFetch;
     }
 

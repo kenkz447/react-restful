@@ -11,7 +11,7 @@ class Resource {
         this.recordType = props.resourceType || null;
         this.url = props.url;
         this.method = props.method || 'GET';
-        this.mapDataToStore = props.mapDataToStore;
+        this.mapDataToStore = props.mapDataToStore || Resource.defaultMapDataToStore;
         this.afterFetch = props.afterFetch;
     }
     urlReslover(params = []) {
@@ -49,4 +49,17 @@ class Resource {
         return requestInit;
     }
 }
+Resource.defaultMapDataToStore = (data, resourceType, store) => {
+    if (Array.isArray(data)) {
+        for (const record of data) {
+            store.mapRecord(resourceType, record);
+        }
+    }
+    else {
+        const hasKey = resourceType.getRecordKey(data);
+        if (hasKey) {
+            store.mapRecord(resourceType, data);
+        }
+    }
+};
 exports.Resource = Resource;

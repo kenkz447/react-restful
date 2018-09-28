@@ -9,6 +9,14 @@ Another liblary for restful resources management for React app.
 
 ![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)*Are you familiar with Swagger?*
 
+## Why this is helpful?
+
+- Centralized all API resources in one place, for management and maintenance.
+- Monitor data changes and automatically update view.
+- Based on typescript, no redux.
+- Easy to learn, simple integration without compromising performance.
+- Small size bundle.
+
 ## The simplest way to use
 
 Minimum setup (for most projects), "keep it simple stupid" is a best in development process.

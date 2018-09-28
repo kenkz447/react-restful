@@ -19,6 +19,7 @@ export declare class Resource<DataModel, Meta = {}> {
     method: string;
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     afterFetch: ResourceProps<DataModel, Meta>['afterFetch'];
+    static defaultMapDataToStore: (data: {} | {}[], resourceType: ResourceType<{}>, store: Store) => void;
     constructor(props: ResourceProps<DataModel, Meta> | string);
     urlReslover(params?: Array<ResourceParameter>): string;
     requestInitReslover(params?: Array<ResourceParameter>): RequestInit | null;
