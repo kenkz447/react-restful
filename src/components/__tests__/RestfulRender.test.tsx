@@ -51,7 +51,6 @@ describe('RestfulRender', () => {
     const restfulRender = ReactTestRenderer.create(
         <PropsSetter>
             <RestfulRender
-                store={restfulStore}
                 fetcher={fetcher}
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
@@ -76,7 +75,7 @@ describe('RestfulRender', () => {
             expect(render.mock.calls[1][0]).toEqual({
                 error: null,
                 data: testUserData,
-                fetching: false
+                fetching: false 
             });
             expect(onFetchCompleted).toBeCalledWith(testUserData);
         });
