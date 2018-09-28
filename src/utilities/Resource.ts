@@ -1,18 +1,18 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
+import { RequestInfo } from './Fetcher';
 
 export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
     url: string;
     method?: string;
-    mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
-    afterFetch?: (
-        params: ResourceParameter[] | undefined,
-        fetchResult: DataModel,
-        meta: Meta | undefined,
-        resourceType: ResourceType | null,
-        store: Store
+    mapDataToStore?: (
+        data: DataModel,
+        resourceType: ResourceType,
+        store: Store,
+        requestInfo?: RequestInfo<Meta>
     ) => void;
+    requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 }
 
 export interface ResourceParameter {
@@ -27,9 +27,10 @@ export class Resource<DataModel, Meta = {}> {
     url: string;
     method: string;
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
-    afterFetch: ResourceProps<DataModel, Meta>['afterFetch'];
+    requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
 
-    static defaultMapDataToStore = (
+    // tslint:disable-next-line:no-any
+    static defaultMapDataToStore = (resource: Resource<any, any>) => (
         data: {} | Array<{}>,
         resourceType: ResourceType,
         store: Store
@@ -40,7 +41,14 @@ export class Resource<DataModel, Meta = {}> {
             }
         } else {
             const hasKey = resourceType.getRecordKey(data);
-            if (hasKey) {
+
+            if (!hasKey) {
+                return;
+            }
+
+            if (resource.method === 'DELETE') {
+                store.removeRecord(resourceType, data);
+            } else {
                 store.mapRecord(resourceType, data);
             }
         }
@@ -58,10 +66,9 @@ export class Resource<DataModel, Meta = {}> {
 
             this.mapDataToStore = props.mapDataToStore;
             if (!this.mapDataToStore && props.resourceType) {
-                this.mapDataToStore = Resource.defaultMapDataToStore;
+                this.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
-
-            this.afterFetch = props.afterFetch;
+            this.requestFailed = props.requestFailed;
         }
     }
 

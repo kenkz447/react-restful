@@ -13,9 +13,9 @@ class Resource {
             this.method = props.method || 'GET';
             this.mapDataToStore = props.mapDataToStore;
             if (!this.mapDataToStore && props.resourceType) {
-                this.mapDataToStore = Resource.defaultMapDataToStore;
+                this.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
-            this.afterFetch = props.afterFetch;
+            this.requestFailed = props.requestFailed;
         }
     }
     urlReslover(params = []) {
@@ -53,7 +53,8 @@ class Resource {
         return requestInit;
     }
 }
-Resource.defaultMapDataToStore = (data, resourceType, store) => {
+// tslint:disable-next-line:no-any
+Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
     if (Array.isArray(data)) {
         for (const record of data) {
             store.mapRecord(resourceType, record);
@@ -61,7 +62,13 @@ Resource.defaultMapDataToStore = (data, resourceType, store) => {
     }
     else {
         const hasKey = resourceType.getRecordKey(data);
-        if (hasKey) {
+        if (!hasKey) {
+            return;
+        }
+        if (resource.method === 'DELETE') {
+            store.removeRecord(resourceType, data);
+        }
+        else {
             store.mapRecord(resourceType, data);
         }
     }

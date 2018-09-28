@@ -1,6 +1,12 @@
 import { Resource, ResourceParameter } from './Resource';
 import { Store } from './Store';
 
+export interface RequestInfo<Meta> {
+    meta?: Meta;
+    params?: ResourceParameter[];
+    response: Response;
+}
+
 export interface FetcherProps {
     store: Store;
     entry?: string;
@@ -42,20 +48,27 @@ export class Fetcher {
             const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
             const response = await this.fetch(url, modifiedRequestInit);
 
+            const requestInfo: RequestInfo<Meta> = {
+                meta,
+                params,
+                response
+            };
+
             if (afterFetch) {
                 await afterFetch(response);
             }
 
             if (!response.ok) {
+                if (resource.requestFailed) {
+                    resource.requestFailed(requestInfo);
+                }
+
                 throw response;
             }
 
             const responseContentType = response.headers.get('content-type');
             if (responseContentType && responseContentType.startsWith('application/json')) {
                 const json = await response.json();
-                if (resource.afterFetch) {
-                    resource.afterFetch(params, json, meta, resource.recordType, store);
-                }
 
                 if (resource.mapDataToStore && resource.recordType) {
                     const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
@@ -63,15 +76,11 @@ export class Fetcher {
                         store.registerRecordType(resource.recordType);
                     }
 
-                    resource.mapDataToStore(json, resource.recordType, store);
+                    resource.mapDataToStore(json, resource.recordType, store, requestInfo);
                 }
                 return json;
             }
             const responseText = await response.text();
-            if (resource.afterFetch) {
-                // tslint:disable-next-line:no-any
-                resource.afterFetch(params, responseText as any, meta, resource.recordType, store);
-            }
             return responseText;
         } catch (error) {
             throw error;

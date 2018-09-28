@@ -29,32 +29,33 @@ class Fetcher {
                 requestInit.method = resource.method;
                 const modifiedRequestInit = beforeFetch ? yield beforeFetch(url, requestInit) : requestInit;
                 const response = yield this.fetch(url, modifiedRequestInit);
+                const requestInfo = {
+                    meta,
+                    params,
+                    response
+                };
                 if (afterFetch) {
                     yield afterFetch(response);
                 }
                 if (!response.ok) {
+                    if (resource.requestFailed) {
+                        resource.requestFailed(requestInfo);
+                    }
                     throw response;
                 }
                 const responseContentType = response.headers.get('content-type');
                 if (responseContentType && responseContentType.startsWith('application/json')) {
                     const json = yield response.json();
-                    if (resource.afterFetch) {
-                        resource.afterFetch(params, json, meta, resource.recordType, store);
-                    }
                     if (resource.mapDataToStore && resource.recordType) {
                         const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                         if (!resourceTypeHasRegistered) {
                             store.registerRecordType(resource.recordType);
                         }
-                        resource.mapDataToStore(json, resource.recordType, store);
+                        resource.mapDataToStore(json, resource.recordType, store, requestInfo);
                     }
                     return json;
                 }
                 const responseText = yield response.text();
-                if (resource.afterFetch) {
-                    // tslint:disable-next-line:no-any
-                    resource.afterFetch(params, responseText, meta, resource.recordType, store);
-                }
                 return responseText;
             }
             catch (error) {

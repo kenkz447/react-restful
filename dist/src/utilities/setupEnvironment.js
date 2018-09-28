@@ -5,11 +5,10 @@ const Store_1 = require("./Store");
 exports.storeSymbol = Symbol();
 exports.fetcherSymbol = Symbol();
 exports.getStore = () => global[exports.storeSymbol];
-exports.request = () => new Promise(() => null);
+exports.request = (...args) => global[exports.fetcherSymbol].fetchResource(...args);
 exports.setupEnvironment = (fetcherProps) => {
     const store = new Store_1.Store();
     const fetcher = new Fetcher_1.Fetcher(Object.assign({ store: store }, fetcherProps));
-    exports.request = fetcher.fetchResource;
     if (global) {
         global[exports.storeSymbol] = store;
         global[exports.fetcherSymbol] = fetcher;

@@ -1,5 +1,10 @@
 import { Resource, ResourceParameter } from './Resource';
 import { Store } from './Store';
+export interface RequestInfo<Meta> {
+    meta?: Meta;
+    params?: ResourceParameter[];
+    response: Response;
+}
 export interface FetcherProps {
     store: Store;
     entry?: string;
