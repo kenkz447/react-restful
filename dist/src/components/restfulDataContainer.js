@@ -9,6 +9,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __importStar(require("react"));
 const utilities_1 = require("../utilities");
+/**
+ * @deprecated, use withRestfulData instead
+ * !Will be removed at version 2.0
+ */
 function restfulDataContainer(containerProps) {
     return (Component) => class RestfulDataContainer extends React.Component {
         constructor(props, context) {
@@ -35,7 +39,7 @@ function restfulDataContainer(containerProps) {
                 return this.autoMapping(e);
             };
             this.manualMapping = (e) => {
-                const { resourceType, registerToTracking } = containerProps;
+                const { resourceType, registerToTracking, sort } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
                 if (!registerToTracking) {
                     return void this.autoMapping(e);
@@ -51,9 +55,12 @@ function restfulDataContainer(containerProps) {
                     && (typeof this.shouldTrackingNewRecord === 'boolean' ?
                         this.shouldTrackingNewRecord :
                         this.shouldTrackingNewRecord(e.record, this.props, this.state.trackingData));
-                const data = allowTrackingNewRecord ?
+                let data = allowTrackingNewRecord ?
                     registerToTracking(this.props, [...nextTrackingData, e.record], e) :
                     registerToTracking(this.props, nextTrackingData, e);
+                if (sort) {
+                    data = data.sort(sort);
+                }
                 const hasAddToTracking = data.find(o => resourceType.getRecordKey(o) === eventRecordKey);
                 if (!hasAddToTracking) {
                     return;
@@ -121,3 +128,4 @@ function restfulDataContainer(containerProps) {
     };
 }
 exports.restfulDataContainer = restfulDataContainer;
+exports.withRestfulData = restfulDataContainer;

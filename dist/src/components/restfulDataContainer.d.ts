@@ -8,11 +8,16 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps = 
     readonly resourceType: ResourceType<DataModel>;
     readonly shouldTrackingNewRecord?: ShouldTrackingNewRecord<DataModel, OwnProps>;
     readonly registerToTracking?: (props: OwnProps, current?: Array<DataModel>, event?: SubscribeEvent) => Array<DataModel>;
+    readonly sort?: (a: DataModel, b: DataModel) => number;
     readonly mapToProps: (data: Array<DataModel>, ownProps: OwnProps) => MappingProps;
 }
 interface RestfulDataContainerState<DataModel> {
     readonly trackingData: Array<DataModel>;
 }
+/**
+ * @deprecated, use withRestfulData instead
+ * !Will be removed at version 2.0
+ */
 export declare function restfulDataContainer<DataModel extends RecordType, MappingProps, OwnProps extends MappingProps = MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
         readonly shouldTrackingNewRecord: ShouldTrackingNewRecord<DataModel, OwnProps>;
@@ -38,4 +43,5 @@ export declare function restfulDataContainer<DataModel extends RecordType, Mappi
         };
     };
 };
+export declare const withRestfulData: typeof restfulDataContainer;
 export {};

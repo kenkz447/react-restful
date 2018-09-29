@@ -21,6 +21,7 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps = 
         event?: SubscribeEvent
     ) => Array<DataModel>;
 
+    readonly sort?: (a: DataModel, b: DataModel) => number;
     readonly mapToProps: (data: Array<DataModel>, ownProps: OwnProps) => MappingProps;
 }
 
@@ -28,6 +29,10 @@ interface RestfulDataContainerState<DataModel> {
     readonly trackingData: Array<DataModel>;
 }
 
+/**
+ * @deprecated, use withRestfulData instead
+ * !Will be removed at version 2.0
+ */
 export function restfulDataContainer
     <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps = MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
@@ -111,7 +116,7 @@ export function restfulDataContainer
             }
 
             manualMapping = (e: SubscribeEvent<DataModel>) => {
-                const { resourceType, registerToTracking } = containerProps;
+                const { resourceType, registerToTracking, sort } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
 
                 if (!registerToTracking) {
@@ -135,9 +140,13 @@ export function restfulDataContainer
                             this.shouldTrackingNewRecord(e.record, this.props, this.state.trackingData)
                     );
 
-                const data = allowTrackingNewRecord ?
+                let data = allowTrackingNewRecord ?
                     registerToTracking(this.props, [...nextTrackingData, e.record], e) :
                     registerToTracking(this.props, nextTrackingData, e);
+
+                if (sort) {
+                    data = data.sort(sort);
+                }
 
                 const hasAddToTracking = data.find(o =>
                     resourceType.getRecordKey(o) === eventRecordKey
@@ -220,3 +229,5 @@ export function restfulDataContainer
             }
         };
 }
+
+export const withRestfulData = restfulDataContainer;
