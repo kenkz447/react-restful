@@ -4,33 +4,36 @@ import { RecordType, ResourceType, Store, SubscribeEvent, storeSymbol } from '..
 type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (
     record: DataModel,
     ownProps: OwnProps,
-    trackedData: ReadonlyArray<DataModel>
+    trackedData: Array<DataModel>
 ) => boolean;
 
-interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps> {
+type ShouldTrackingNewRecord<DataModel, OwnProps> = shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
+
+interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps = MappingProps> {
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
 
-    readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
+    readonly shouldTrackingNewRecord?: ShouldTrackingNewRecord<DataModel, OwnProps>;
 
     readonly registerToTracking?: (
         props: OwnProps,
-        current?: ReadonlyArray<DataModel>,
+        current?: Array<DataModel>,
         event?: SubscribeEvent
-    ) => ReadonlyArray<DataModel>;
+    ) => Array<DataModel>;
 
-    readonly mapToProps: (data: ReadonlyArray<DataModel>, ownProps: OwnProps) => MappingProps;
+    readonly mapToProps: (data: Array<DataModel>, ownProps: OwnProps) => MappingProps;
 }
 
 interface RestfulDataContainerState<DataModel> {
-    readonly trackingData: ReadonlyArray<DataModel>;
+    readonly trackingData: Array<DataModel>;
 }
 
 export function restfulDataContainer
-    <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps>
+    <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps = MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
     return (Component: React.ComponentType<OwnProps>) =>
         class RestfulDataContainer extends React.Component<OwnProps, RestfulDataContainerState<DataModel>> {
+            readonly shouldTrackingNewRecord: ShouldTrackingNewRecord<DataModel, OwnProps>;
             readonly store: Store;
             readonly subscribeId: string;
             mappingTimeout!: NodeJS.Timer;
@@ -45,10 +48,12 @@ export function restfulDataContainer
                 const {
                     store,
                     resourceType,
-                    registerToTracking
+                    registerToTracking,
+                    shouldTrackingNewRecord
                 } = containerProps;
 
                 this.store = store || global[storeSymbol];
+                this.shouldTrackingNewRecord = shouldTrackingNewRecord || true;
 
                 this.subscribeId = this.store.subscribe([resourceType], this.onStoreEvent);
 
@@ -106,7 +111,7 @@ export function restfulDataContainer
             }
 
             manualMapping = (e: SubscribeEvent<DataModel>) => {
-                const { resourceType, registerToTracking, shouldTrackingNewRecord } = containerProps;
+                const { resourceType, registerToTracking } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
 
                 if (!registerToTracking) {
@@ -123,11 +128,11 @@ export function restfulDataContainer
                 const recordExistedInTrackingList =
                     nextTrackingData.find(o => resourceType.getRecordKey(o) === eventRecordKey);
 
-                const allowTrackingNewRecord = (!recordExistedInTrackingList && shouldTrackingNewRecord)
+                const allowTrackingNewRecord = (!recordExistedInTrackingList && this.shouldTrackingNewRecord)
                     && (
-                        typeof shouldTrackingNewRecord === 'boolean' ?
-                            shouldTrackingNewRecord :
-                            shouldTrackingNewRecord(e.record, this.props, this.state.trackingData)
+                        typeof this.shouldTrackingNewRecord === 'boolean' ?
+                            this.shouldTrackingNewRecord :
+                            this.shouldTrackingNewRecord(e.record, this.props, this.state.trackingData)
                     );
 
                 const data = allowTrackingNewRecord ?

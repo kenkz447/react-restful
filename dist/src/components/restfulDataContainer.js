@@ -35,7 +35,7 @@ function restfulDataContainer(containerProps) {
                 return this.autoMapping(e);
             };
             this.manualMapping = (e) => {
-                const { resourceType, registerToTracking, shouldTrackingNewRecord } = containerProps;
+                const { resourceType, registerToTracking } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
                 if (!registerToTracking) {
                     return void this.autoMapping(e);
@@ -47,10 +47,10 @@ function restfulDataContainer(containerProps) {
                     return o;
                 });
                 const recordExistedInTrackingList = nextTrackingData.find(o => resourceType.getRecordKey(o) === eventRecordKey);
-                const allowTrackingNewRecord = (!recordExistedInTrackingList && shouldTrackingNewRecord)
-                    && (typeof shouldTrackingNewRecord === 'boolean' ?
-                        shouldTrackingNewRecord :
-                        shouldTrackingNewRecord(e.record, this.props, this.state.trackingData));
+                const allowTrackingNewRecord = (!recordExistedInTrackingList && this.shouldTrackingNewRecord)
+                    && (typeof this.shouldTrackingNewRecord === 'boolean' ?
+                        this.shouldTrackingNewRecord :
+                        this.shouldTrackingNewRecord(e.record, this.props, this.state.trackingData));
                 const data = allowTrackingNewRecord ?
                     registerToTracking(this.props, [...nextTrackingData, e.record], e) :
                     registerToTracking(this.props, nextTrackingData, e);
@@ -93,8 +93,9 @@ function restfulDataContainer(containerProps) {
                 const updatedStateRecords = this.state.trackingData.filter(o => resourceType.getRecordKey(o) !== deletedRecordKey);
                 this.setState(Object.assign({}, this.state, { trackingData: updatedStateRecords }));
             };
-            const { store, resourceType, registerToTracking } = containerProps;
+            const { store, resourceType, registerToTracking, shouldTrackingNewRecord } = containerProps;
             this.store = store || global[utilities_1.storeSymbol];
+            this.shouldTrackingNewRecord = shouldTrackingNewRecord || true;
             this.subscribeId = this.store.subscribe([resourceType], this.onStoreEvent);
             const data = registerToTracking && registerToTracking(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
