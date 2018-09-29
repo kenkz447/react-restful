@@ -14,7 +14,7 @@ const utilities_1 = require("../utilities");
  * !Will be removed at version 2.0
  */
 function restfulDataContainer(containerProps) {
-    return (Component) => class RestfulDataContainer extends React.Component {
+    return (Component) => class RestfulDataContainer extends React.PureComponent {
         constructor(props, context) {
             super(props, context);
             this.isTracked = (record) => {
@@ -44,7 +44,10 @@ function restfulDataContainer(containerProps) {
                 if (!registerToTracking) {
                     return void this.autoMapping(e);
                 }
-                const nextTrackingData = this.state.trackingData.map(o => {
+                if (!this.tempData) {
+                    this.tempData = [...this.state.trackingData];
+                }
+                const nextTrackingData = this.tempData.map(o => {
                     if (resourceType.getRecordKey(o) === eventRecordKey) {
                         return e.record;
                     }
@@ -63,12 +66,28 @@ function restfulDataContainer(containerProps) {
                 }
                 const hasAddToTracking = data.find(o => resourceType.getRecordKey(o) === eventRecordKey);
                 if (!hasAddToTracking) {
+                    this.tempData = null;
                     return;
                 }
+                this.deferererSetState(data);
+                this.tempData = data;
+            };
+            this.deferererSetState = (data) => {
                 if (this.mappingTimeout) {
                     clearTimeout(this.mappingTimeout);
                 }
-                this.mappingTimeout = setTimeout(() => this.setState(Object.assign({}, this.state, { trackingData: data })), 100);
+                const snapshotTrackingData = this.state.trackingData;
+                this.mappingTimeout = setTimeout(() => {
+                    this.setState((stateNow) => {
+                        if (stateNow.trackingData !== snapshotTrackingData) {
+                            return null;
+                        }
+                        return {
+                            trackingData: data
+                        };
+                    });
+                    this.tempData = null;
+                }, 100);
             };
             this.autoMapping = (e) => {
                 const { resourceType } = containerProps;
@@ -103,7 +122,7 @@ function restfulDataContainer(containerProps) {
             const { store, resourceType, registerToTracking, shouldTrackingNewRecord } = containerProps;
             this.store = store || global[utilities_1.storeSymbol];
             this.shouldTrackingNewRecord = shouldTrackingNewRecord || true;
-            this.subscribeId = this.store.subscribe([resourceType], this.onStoreEvent);
+            this.unsubscribeStore = this.store.subscribe([resourceType], this.onStoreEvent);
             const data = registerToTracking && registerToTracking(props);
             const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
             const mappingData = propDataIdMap ?
@@ -113,15 +132,33 @@ function restfulDataContainer(containerProps) {
                 }) :
                 resourceType.getAllRecords(this.store);
             this.state = {
+                props: props,
                 trackingData: mappingData
             };
         }
+        static getDerivedStateFromProps(nextProps, state) {
+            const { registerToTracking, sort } = containerProps;
+            for (const nextPropKey in nextProps) {
+                if (!nextProps.hasOwnProperty(nextPropKey)) {
+                    continue;
+                }
+                if (state.props[nextPropKey] !== nextProps[nextPropKey]) {
+                    let newTrackingData = registerToTracking && registerToTracking(nextProps, []);
+                    if (newTrackingData && sort) {
+                        newTrackingData = newTrackingData.sort(sort);
+                    }
+                    return Object.assign({}, state, { props: nextProps, trackingData: newTrackingData });
+                }
+            }
+            return null;
+        }
         componentWillUnmount() {
-            this.store.unSubscribe(this.subscribeId);
+            this.unsubscribeStore();
         }
         render() {
             const { mapToProps } = containerProps;
-            const mapedProps = mapToProps(this.state.trackingData, this.props);
+            const { trackingData } = this.state;
+            const mapedProps = mapToProps(trackingData, this.props);
             const props = Object.assign({}, this.props, mapedProps);
             return (React.createElement(Component, Object.assign({}, props)));
         }

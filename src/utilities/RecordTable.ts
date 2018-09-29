@@ -1,20 +1,13 @@
-import { Base64 } from 'js-base64';
-
 export type findRecordPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
 export type RecordType = {};
 
 export class RecordTable<T> {
     keyProperty: string;
-    recordMap: Map<string, T>;
+    recordMap: Map<string | number, T>;
     get records() {
         const recordValue = this.recordMap.values();
         return Array.from(recordValue);
-    }
-
-    static encodeKey(keyPropertyValue: string | number) {
-        const encoded = Base64.encode(String(keyPropertyValue));
-        return encoded;
     }
 
     constructor(keyProperty: string) {
@@ -23,21 +16,18 @@ export class RecordTable<T> {
     }
 
     findByKey(key: string | number) {
-        const encoded = RecordTable.encodeKey(key);
-        const result = this.recordMap.get(encoded);
+        const result = this.recordMap.get(key);
         return result || null;
     }
 
     upsert(record: T) {
-        const keyPropertyValue = record[this.keyProperty];
-        const encoded = RecordTable.encodeKey(keyPropertyValue);
-        this.recordMap.set(encoded, record);
+        const recordKey = record[this.keyProperty];
+        this.recordMap.set(recordKey, record);
         return true;
     }
 
     remove(record: T) {
-        const keyPropertyValue = record[this.keyProperty];
-        const encoded = RecordTable.encodeKey(keyPropertyValue);
-        this.recordMap.delete(encoded);
+        const recordKey = record[this.keyProperty];
+        this.recordMap.delete(recordKey);
     }
 }

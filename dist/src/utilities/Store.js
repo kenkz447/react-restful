@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const RecordTable_1 = require("./RecordTable");
-const v1_1 = __importDefault(require("uuid/v1"));
 class Store {
     constructor() {
         this.resourceTypes = [];
@@ -14,16 +10,18 @@ class Store {
         this.getRecordTable = this.getRecordTable.bind(this);
     }
     subscribe(resourceTypes, callback) {
-        const subscribeId = v1_1.default();
+        const subscribeId = Symbol();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
             callback: callback,
             subscribeId: subscribeId
         });
-        return subscribeId;
+        return () => {
+            this.unSubscribe(subscribeId);
+        };
     }
     unSubscribe(subscribeId) {
-        return this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
+        this.subscribeStacks = this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
     resourceTypeHasRegistered(resourceTypeName) {
         const found = this.resourceTypes.find(o => o.name === resourceTypeName);

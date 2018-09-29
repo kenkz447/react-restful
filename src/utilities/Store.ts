@@ -1,8 +1,6 @@
 import { findRecordPredicate, RecordTable, RecordType } from './RecordTable';
 import { ResourceType } from './ResourceType';
 
-import uuid from 'uuid/v1';
-
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
@@ -18,7 +16,7 @@ type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
 interface SubscribeStack<T> {
     resourceTypes: ResourceType[];
     callback: SubscribeCallback<T>;
-    subscribeId: string;
+    subscribeId: Symbol;
 }
 
 export class Store {
@@ -38,17 +36,19 @@ export class Store {
     }
 
     subscribe<T>(resourceTypes: ResourceType[], callback: SubscribeCallback<T>) {
-        const subscribeId = uuid();
+        const subscribeId = Symbol();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
             callback: callback,
             subscribeId: subscribeId
         });
-        return subscribeId;
+        return () => {
+            this.unSubscribe(subscribeId);
+        };
     }
 
-    unSubscribe(subscribeId: string) {
-        return this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
+    unSubscribe(subscribeId: Symbol) {
+        this.subscribeStacks = this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
 
     resourceTypeHasRegistered(resourceTypeName: string) {
@@ -61,7 +61,7 @@ export class Store {
         if (!resourceType) {
             throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
         }
-        
+
         return resourceType;
     }
 

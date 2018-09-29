@@ -22,6 +22,9 @@ export interface ResourceParameter {
     contentType?: string;
 }
 
+const shouldParmeterIgnore = (param: ResourceParameter) =>
+    !param || param.type === 'body' || param.value === undefined || param.value === '';
+
 export class Resource<DataModel, Meta = {}> {
     recordType: ResourceType | null;
     url: string;
@@ -71,12 +74,13 @@ export class Resource<DataModel, Meta = {}> {
             this.requestFailed = props.requestFailed;
         }
     }
-
+    
     urlReslover(params: Array<ResourceParameter> = []): string {
         let uRL: string = this.url;
         const searchs: URLSearchParams = new URLSearchParams();
         for (const param of params) {
-            if (!param || param.type === 'body' || param.value === undefined) {
+            const ignore = shouldParmeterIgnore(param);
+            if (ignore) {
                 continue;
             }
 

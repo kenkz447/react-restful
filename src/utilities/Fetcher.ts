@@ -28,19 +28,23 @@ export class Fetcher {
 
     async fetchResource<DataModel, Meta = {}>(
         resource: Resource<DataModel>,
-        params?: ResourceParameter[],
+        params?: ResourceParameter[] | ResourceParameter,
         meta?: Meta
     ) {
         try {
             const { entry, store, beforeFetch, afterFetch } = this.props;
 
-            let url = resource.urlReslover(params);
+            const requestParams = Array.isArray(params) ?
+                params :
+                (params && [params]);
+
+            let url = resource.urlReslover(requestParams);
             if (entry) {
                 url = entry + url;
             }
 
             const requestInit: RequestInit =
-                resource.requestInitReslover(params) ||
+                resource.requestInitReslover(requestParams) ||
                 this.createDefaultRequestInit();
 
             requestInit.method = resource.method;
@@ -50,7 +54,7 @@ export class Fetcher {
 
             const requestInfo: RequestInfo<Meta> = {
                 meta,
-                params,
+                params: requestParams,
                 response
             };
 

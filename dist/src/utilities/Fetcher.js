@@ -20,18 +20,21 @@ class Fetcher {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { entry, store, beforeFetch, afterFetch } = this.props;
-                let url = resource.urlReslover(params);
+                const requestParams = Array.isArray(params) ?
+                    params :
+                    (params && [params]);
+                let url = resource.urlReslover(requestParams);
                 if (entry) {
                     url = entry + url;
                 }
-                const requestInit = resource.requestInitReslover(params) ||
+                const requestInit = resource.requestInitReslover(requestParams) ||
                     this.createDefaultRequestInit();
                 requestInit.method = resource.method;
                 const modifiedRequestInit = beforeFetch ? yield beforeFetch(url, requestInit) : requestInit;
                 const response = yield this.fetch(url, modifiedRequestInit);
                 const requestInfo = {
                     meta,
-                    params,
+                    params: requestParams,
                     response
                 };
                 if (afterFetch) {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const shouldParmeterIgnore = (param) => !param || param.type === 'body' || param.value === undefined || param.value === '';
 class Resource {
     constructor(props) {
         if (typeof props === 'string') {
@@ -22,7 +23,8 @@ class Resource {
         let uRL = this.url;
         const searchs = new URLSearchParams();
         for (const param of params) {
-            if (!param || param.type === 'body' || param.value === undefined) {
+            const ignore = shouldParmeterIgnore(param);
+            if (ignore) {
                 continue;
             }
             if (param.type === 'path') {

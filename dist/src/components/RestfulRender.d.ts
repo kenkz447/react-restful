@@ -8,11 +8,7 @@ export interface RestfulComponentRenderProps<DataModel> {
 export interface RestfulRenderProps<DataModel> {
     fetcher?: Fetcher;
     resource: Resource<DataModel>;
-    parameters?: Array<ResourceParameter>;
-    /**
-     * @deprecated, use children instead
-     * !Will be removed at version 2.0
-     */
+    parameters?: Array<ResourceParameter> | ResourceParameter;
     render?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     children?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     onFetchCompleted?: (data: DataModel) => void;

@@ -11,7 +11,8 @@ interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps = 
     readonly sort?: (a: DataModel, b: DataModel) => number;
     readonly mapToProps: (data: Array<DataModel>, ownProps: OwnProps) => MappingProps;
 }
-interface RestfulDataContainerState<DataModel> {
+interface RestfulDataContainerState<DataModel, OwnProps> {
+    readonly props: OwnProps;
     readonly trackingData: Array<DataModel>;
 }
 /**
@@ -22,26 +23,32 @@ export declare function restfulDataContainer<DataModel extends RecordType, Mappi
     new (props: OwnProps, context: {}): {
         readonly shouldTrackingNewRecord: ShouldTrackingNewRecord<DataModel, OwnProps>;
         readonly store: Store;
-        readonly subscribeId: string;
+        readonly unsubscribeStore: () => void;
         mappingTimeout: NodeJS.Timer;
+        tempData: DataModel[] | null;
         componentWillUnmount(): void;
         render(): JSX.Element;
         isTracked: (record: DataModel) => boolean;
         onStoreEvent: (e: SubscribeEvent<DataModel>) => void;
         manualMapping: (e: SubscribeEvent<DataModel>) => undefined;
+        deferererSetState: (data: DataModel[]) => void;
         autoMapping: (e: SubscribeEvent<DataModel>) => void;
         onDataRemove: (record: DataModel) => void;
-        setState<K extends "trackingData">(state: RestfulDataContainerState<DataModel> | ((prevState: Readonly<RestfulDataContainerState<DataModel>>, props: Readonly<OwnProps>) => RestfulDataContainerState<DataModel> | Pick<RestfulDataContainerState<DataModel>, K> | null) | Pick<RestfulDataContainerState<DataModel>, K> | null, callback?: (() => void) | undefined): void;
+        setState<K extends "props" | "trackingData">(state: RestfulDataContainerState<DataModel, OwnProps> | ((prevState: Readonly<RestfulDataContainerState<DataModel, OwnProps>>, props: Readonly<OwnProps>) => RestfulDataContainerState<DataModel, OwnProps> | Pick<RestfulDataContainerState<DataModel, OwnProps>, K> | null) | Pick<RestfulDataContainerState<DataModel, OwnProps>, K> | null, callback?: (() => void) | undefined): void;
         forceUpdate(callBack?: (() => void) | undefined): void;
         readonly props: Readonly<{
             children?: React.ReactNode;
         }> & Readonly<OwnProps>;
-        state: Readonly<RestfulDataContainerState<DataModel>>;
+        state: Readonly<RestfulDataContainerState<DataModel, OwnProps>>;
         context: any;
         refs: {
             [key: string]: React.ReactInstance;
         };
     };
+    getDerivedStateFromProps(nextProps: OwnProps, state: RestfulDataContainerState<DataModel, OwnProps>): {
+        props: OwnProps;
+        trackingData: DataModel[] | undefined;
+    } | null;
 };
 export declare const withRestfulData: typeof restfulDataContainer;
 export {};

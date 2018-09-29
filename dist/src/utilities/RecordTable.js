@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const js_base64_1 = require("js-base64");
 class RecordTable {
     constructor(keyProperty) {
         this.keyProperty = keyProperty;
@@ -10,25 +9,18 @@ class RecordTable {
         const recordValue = this.recordMap.values();
         return Array.from(recordValue);
     }
-    static encodeKey(keyPropertyValue) {
-        const encoded = js_base64_1.Base64.encode(String(keyPropertyValue));
-        return encoded;
-    }
     findByKey(key) {
-        const encoded = RecordTable.encodeKey(key);
-        const result = this.recordMap.get(encoded);
+        const result = this.recordMap.get(key);
         return result || null;
     }
     upsert(record) {
-        const keyPropertyValue = record[this.keyProperty];
-        const encoded = RecordTable.encodeKey(keyPropertyValue);
-        this.recordMap.set(encoded, record);
+        const recordKey = record[this.keyProperty];
+        this.recordMap.set(recordKey, record);
         return true;
     }
     remove(record) {
-        const keyPropertyValue = record[this.keyProperty];
-        const encoded = RecordTable.encodeKey(keyPropertyValue);
-        this.recordMap.delete(encoded);
+        const recordKey = record[this.keyProperty];
+        this.recordMap.delete(recordKey);
     }
 }
 exports.RecordTable = RecordTable;
