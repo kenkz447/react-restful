@@ -47,8 +47,8 @@ export declare function restfulDataContainer<DataModel extends RecordType, Mappi
     };
     getDerivedStateFromProps(nextProps: OwnProps, state: RestfulDataContainerState<DataModel, OwnProps>): {
         props: OwnProps;
-        trackingData: DataModel[] | undefined;
-    } | null;
+        trackingData: DataModel[];
+    } | null | undefined;
 };
 export declare const withRestfulData: typeof restfulDataContainer;
 export {};

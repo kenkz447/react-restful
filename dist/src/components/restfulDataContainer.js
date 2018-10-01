@@ -138,6 +138,9 @@ function restfulDataContainer(containerProps) {
         }
         static getDerivedStateFromProps(nextProps, state) {
             const { registerToTracking, sort } = containerProps;
+            if (!registerToTracking) {
+                return null;
+            }
             for (const nextPropKey in nextProps) {
                 if (!nextProps.hasOwnProperty(nextPropKey)) {
                     continue;
@@ -150,7 +153,6 @@ function restfulDataContainer(containerProps) {
                     return Object.assign({}, state, { props: nextProps, trackingData: newTrackingData });
                 }
             }
-            return null;
         }
         componentWillUnmount() {
             this.unsubscribeStore();

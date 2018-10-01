@@ -53,6 +53,11 @@ export function restfulDataContainer
                 state: RestfulDataContainerState<DataModel, OwnProps>
             ) {
                 const { registerToTracking, sort } = containerProps;
+
+                if (!registerToTracking) {
+                    return null;
+                }
+
                 for (const nextPropKey in nextProps) {
                     if (!nextProps.hasOwnProperty(nextPropKey)) {
                         continue;
@@ -71,8 +76,6 @@ export function restfulDataContainer
                         };
                     }
                 }
-
-                return null;
             }
 
             componentWillUnmount() {
