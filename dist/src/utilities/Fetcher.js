@@ -11,13 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Fetcher {
     constructor(props) {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
-        this.props = Object.assign({}, props);
-    }
-    fetch(url, requestInit) {
-        return fetch(url, requestInit);
-    }
-    fetchResource(resource, params, meta) {
-        return __awaiter(this, void 0, void 0, function* () {
+        this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { entry, store, beforeFetch, afterFetch, bodyStringify } = this.props;
                 const requestParams = Array.isArray(params) ?
@@ -31,7 +25,7 @@ class Fetcher {
                     this.createDefaultRequestInit();
                 requestInit.method = resource.method;
                 const modifiedRequestInit = beforeFetch ? yield beforeFetch(url, requestInit) : requestInit;
-                const response = yield this.fetch(url, modifiedRequestInit);
+                const response = yield fetch(url, modifiedRequestInit);
                 const requestInfo = {
                     meta,
                     params: requestParams,
@@ -65,6 +59,7 @@ class Fetcher {
                 throw error;
             }
         });
+        this.props = Object.assign({}, props);
     }
 }
 exports.Fetcher = Fetcher;

@@ -26,15 +26,11 @@ export class Fetcher {
         };
     }
 
-    fetch(url: string, requestInit: RequestInit) {
-        return fetch(url, requestInit);
-    }
-
-    async fetchResource<DataModel, Meta = {}>(
+    fetchResource = async <DataModel, Meta = {}>(
         resource: Resource<DataModel>,
         params?: ResourceParameter[] | ResourceParameter,
         meta?: Meta
-    ) {
+    ) => {
         try {
             const {
                 entry,
@@ -60,7 +56,7 @@ export class Fetcher {
             requestInit.method = resource.method;
 
             const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
-            const response = await this.fetch(url, modifiedRequestInit);
+            const response = await fetch(url, modifiedRequestInit);
 
             const requestInfo: RequestInfo<Meta> = {
                 meta,
