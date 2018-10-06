@@ -1,6 +1,6 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo, FetcherProps } from './Fetcher';
+import { RequestInfo, FetcherProps, RequestParameter } from './Fetcher';
 
 export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
@@ -15,14 +15,7 @@ export interface ResourceProps<DataModel, Meta> {
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 }
 
-export interface ResourceParameter {
-    parameter?: string;
-    value: Object | string | number;
-    type: 'body' | 'path' | 'query';
-    contentType?: string;
-}
-
-const shouldParmeterIgnore = (param: ResourceParameter) =>
+const shouldParmeterIgnore = (param: RequestParameter) =>
     !param || param.type === 'body' || param.value === undefined || param.value === '';
 
 export class Resource<DataModel, Meta = {}> {
@@ -75,7 +68,7 @@ export class Resource<DataModel, Meta = {}> {
         }
     }
 
-    urlReslover(params: Array<ResourceParameter> = []): string {
+    urlReslover(params: Array<RequestParameter> = []): string {
         let uRL: string = this.url;
         const searchs: URLSearchParams = new URLSearchParams();
         for (const param of params) {
@@ -96,7 +89,7 @@ export class Resource<DataModel, Meta = {}> {
     }
 
     requestInitReslover(
-        params: Array<ResourceParameter> = [],
+        params: Array<RequestParameter> = [],
         bodyStringify?: FetcherProps['bodyStringify']
     ): RequestInit | null {
         const bodyParam = params.find(param => param.type === 'body');

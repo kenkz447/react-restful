@@ -1,5 +1,6 @@
-import { Resource, ResourceParameter } from '../Resource';
+import { Resource } from '../Resource';
 import { User } from '../../test-resources';
+import { RequestParameter } from '../Fetcher';
 
 describe('Resource', () => {
     const createUserResource = new Resource<User>({
@@ -7,19 +8,19 @@ describe('Resource', () => {
         url: '/api/users/:branch'
     });
 
-    const pathParam: ResourceParameter = {
+    const pathParam: RequestParameter = {
         type: 'path',
         parameter: 'branch',
         value: 1
     };
 
-    const queryParam: ResourceParameter = {
+    const queryParam: RequestParameter = {
         type: 'query',
         parameter: 'page',
         value: 2
     };
 
-    const bodyParams: ResourceParameter = {
+    const bodyParams: RequestParameter = {
         type: 'body',
         value: { id: 1 }
     };

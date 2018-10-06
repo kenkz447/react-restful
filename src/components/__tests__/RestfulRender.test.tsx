@@ -1,7 +1,7 @@
 import fetch, { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { Resource, ResourceParameter, Store, Fetcher } from '../../utilities';
+import { Resource, RequestParameter, Store, Fetcher } from '../../utilities';
 import { PropsSetter } from '../PropsSetter';
 import { RestfulRender, RestfulRenderProps } from '../RestfulRender';
 
@@ -31,7 +31,7 @@ describe('RestfulRender', () => {
         { id: 2, name: '1' }
     ];
 
-    const pathParam: ResourceParameter = {
+    const pathParam: RequestParameter = {
         type: 'path',
         parameter: 'branch',
         value: 1

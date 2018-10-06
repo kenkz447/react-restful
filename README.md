@@ -9,6 +9,20 @@ Another liblary for restful resources management for React app.
 
 ![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)*Are you familiar with Swagger?*
 
+<!-- TOC -->
+
+- [react-restful](#react-restful)
+    - [Why this is helpful?](#why-this-is-helpful)
+    - [Demo](#demo)
+    - [Quick start](#quick-start)
+        - [Install and setup](#install-and-setup)
+        - [Send a GET request](#send-a-get-request)
+        - [Send POST, PUT or DELETE:](#send-post-put-or-delete)
+        - [Sync restful data with view](#sync-restful-data-with-view)
+    - [Document](#document)
+
+<!-- /TOC -->
+
 ## Why this is helpful?
 
 - Centralized all API resources in one place, for management and maintenance.
@@ -25,6 +39,8 @@ See how react-restful work with simple CRUD app (thanks `strapi` and heroku for 
 
 ## Quick start
 
+### Install and setup
+
 Install package from npm:
 
 ```bash
@@ -33,7 +49,7 @@ npm install react-restful
 
 Create `restful` folder under `./src`, follow code:
 
-```ts
+```tsx
 /**
  * file: /src/restful/environment.ts
  */
@@ -76,7 +92,7 @@ export const request = restfulEnv.request;
 
 And then, create `pet.ts`  file to define everything related to Pet API
 
-```ts
+```tsx
 /**
  * file: /src/restful/resource/pet.ts
  */
@@ -131,7 +147,7 @@ export const petResources = {
 
 Export via `index.ts`
 
-```ts
+```tsx
 /**
  * file: /src/restful/index.ts
  */
@@ -140,7 +156,7 @@ export * from './resful-environment';
 export * from './resources/pet';
 ```
 
-Send a GET request
+### Send a GET request
 
 ```tsx
 import { RestfulRender, RestfulComponentRenderProps } from 'react-restful';
@@ -212,7 +228,7 @@ const parameter: RequestParameter = {
 };
 ```
 
-Send POST, PUT or DELETE:
+### Send POST, PUT or DELETE:
 
 ```tsx
 import { request, petResources } from '../restful';
@@ -254,6 +270,50 @@ const deletePet = async () => {
         value: 1
     });
 };
+```
+
+### Sync restful data with view
+
+We need to create Higher Order Component to render Child Component every time data(passed down from RestfulRender ) changes,
+including create, update or delete event.
+
+```tsx
+import { withRestfulData } from "react-restful";
+
+import { Pet, petResourceType } from "../restful";
+
+interface PetListsProps {
+    showLoading: boolean;
+    pets: Array<Pet>;
+}
+
+// Component to display list of pet
+function PetListComponent(props: PetListsProps) {
+  return // ...
+}
+
+export const PetList = withRestfulData<Pet, PetListsProps>({
+    resourceType: petResourceType,
+    registerToTracking: (
+        ownProps: PetListsProps,
+        trackedPets: Array<Pet>,
+        event: SubscribeEvent<Pet>
+    ) => {
+        if (trackedPets && trackedPets.length) {
+            return trackedPets;
+        }
+        
+        return ownProps.pets;
+    },
+    mapToProps: (
+        pets: Array<Pet>,
+        ownProps: PetListsProps
+    ) => {
+        return {
+            pets: pets
+        };
+    }
+})(PetListComponent);
 ```
 
 Checkout the demo above to more details.

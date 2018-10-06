@@ -1,6 +1,6 @@
 import { mockResponseOnce } from 'jest-fetch-mock';
-import { Fetcher } from '../Fetcher';
-import { Resource, ResourceParameter } from '../Resource';
+import { Fetcher, RequestParameter } from '../Fetcher';
+import { Resource } from '../Resource';
 import { Store } from '../Store';
 
 import { userResourceType, User } from '../../test-resources';
@@ -29,18 +29,6 @@ describe('Fetcher', () => {
     });
 
     describe('instance methods', () => {
-        // it('fetch', async () => {
-        //     expect.assertions(1);
-
-        //     const mockResponseData = [newUser];
-        //     const mockResponseDataStr = JSON.stringify(mockResponseData);
-        //     mockResponseOnce(mockResponseDataStr);
-
-        //     const response = await fetcher.fetch('/api', {});
-        //     const data = await response.json();
-        //     expect(data).toEqual(mockResponseData);
-        // });
-
         it('fetch resource', async () => {
             expect.assertions(3);
 
@@ -50,7 +38,7 @@ describe('Fetcher', () => {
                 headers: { 'content-type': 'application/json' }
             });
 
-            const fetchBodyParam: ResourceParameter = {
+            const fetchBodyParam: RequestParameter = {
                 type: 'body',
                 value: newUser,
             };

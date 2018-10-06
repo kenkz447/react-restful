@@ -14,6 +14,6 @@ export {
     setupEnvironment,
     FetcherProps,
     ResourceProps,
-    ResourceParameter,
+    RequestParameter,
     RequestInfo,
 } from './utilities';

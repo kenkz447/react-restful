@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Resource, ResourceParameter, Fetcher } from '../utilities';
+import { Resource, RequestParameter, Fetcher } from '../utilities';
 export interface RestfulComponentRenderProps<DataModel> {
     data?: DataModel | null;
     error?: Error | null;
@@ -8,7 +8,7 @@ export interface RestfulComponentRenderProps<DataModel> {
 export interface RestfulRenderProps<DataModel> {
     fetcher?: Fetcher;
     resource: Resource<DataModel>;
-    parameters?: Array<ResourceParameter> | ResourceParameter;
+    parameters?: Array<RequestParameter> | RequestParameter;
     render?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     children?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
     onFetchCompleted?: (data: DataModel) => void;

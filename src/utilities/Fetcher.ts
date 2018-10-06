@@ -1,9 +1,16 @@
-import { Resource, ResourceParameter } from './Resource';
+import { Resource } from './Resource';
 import { Store } from './Store';
+
+export interface RequestParameter {
+    parameter?: string;
+    value: Object | string | number;
+    type: 'body' | 'path' | 'query';
+    contentType?: string;
+}
 
 export interface RequestInfo<Meta> {
     meta?: Meta;
-    params?: ResourceParameter[];
+    params?: RequestParameter[];
     response: Response;
 }
 
@@ -28,7 +35,7 @@ export class Fetcher {
 
     fetchResource = async <DataModel, Meta = {}>(
         resource: Resource<DataModel>,
-        params?: ResourceParameter[] | ResourceParameter,
+        params?: RequestParameter[] | RequestParameter,
         meta?: Meta
     ) => {
         try {
