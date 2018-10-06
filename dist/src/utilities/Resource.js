@@ -37,19 +37,31 @@ class Resource {
         const searchString = searchs.toString();
         return searchString ? `${uRL}?${searchString}` : uRL;
     }
-    requestInitReslover(params = []) {
-        const body = params.find(param => param.type === 'body');
-        if (!body) {
+    requestInitReslover(params = [], bodyStringify) {
+        const bodyParam = params.find(param => param.type === 'body');
+        if (!bodyParam) {
             return null;
+        }
+        const body = bodyParam.value;
+        let convertedBody = null;
+        if (bodyStringify) {
+            convertedBody = {};
+            for (const key in body) {
+                if (body.hasOwnProperty(key)) {
+                    const element = body[key];
+                    convertedBody[key] = bodyStringify(element);
+                }
+            }
         }
         const requestInit = {
             headers: new Headers({
-                'Content-Type': body.contentType
+                'Content-Type': bodyParam.contentType
             }),
-            body: JSON.stringify(body.value),
+            body: JSON.stringify(convertedBody || body),
             method: this.method
         };
-        if (!body.contentType) {
+        if (!bodyParam.contentType &&
+            requestInit.headers instanceof Headers) {
             requestInit.headers.set('Content-Type', 'application/json');
         }
         return requestInit;

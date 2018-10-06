@@ -1,5 +1,5 @@
-import { RecordType, ResourceType } from '../utilities';
-export interface User extends RecordType {
+import { Record, ResourceType } from '../utilities';
+export interface User extends Record {
     readonly id: number;
     readonly name: string;
 }

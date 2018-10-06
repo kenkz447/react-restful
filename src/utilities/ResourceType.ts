@@ -1,4 +1,4 @@
-import { RecordType, RecordTable } from './RecordTable';
+import { Record, RecordTable } from './RecordTable';
 import { Store } from './Store';
 
 export interface SchemaField {
@@ -13,7 +13,7 @@ interface ResourceTypeProps {
     store?: Store;
 }
 
-export class ResourceType<T extends RecordType = {}> {
+export class ResourceType<T extends Record = {}> {
     static defaultProps: Partial<ResourceTypeProps> = {
         schema: [{
             field: 'id',
@@ -45,7 +45,7 @@ export class ResourceType<T extends RecordType = {}> {
             this.primaryKey = PKField.field;
 
             if (store) {
-                store.registerRecordType(this);
+                store.registerRecord(this);
             }
         }
     }
@@ -93,7 +93,7 @@ export class ResourceType<T extends RecordType = {}> {
                         }
 
                         const detectedChildInstance = children
-                            .find((child: RecordType) => {
+                            .find((child: Record) => {
                                 return childResourceType.getRecordKey(child) === childRecordInstanceKey;
                             });
 

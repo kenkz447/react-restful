@@ -1,11 +1,11 @@
-import { findRecordPredicate, RecordTable, RecordType } from './RecordTable';
+import { findRecordPredicate, RecordTable, Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
 
-export interface SubscribeEvent<T extends RecordType = RecordType> {
+export interface SubscribeEvent<T extends Record = Record> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
     record: T;
@@ -65,11 +65,11 @@ export class Store {
         return resourceType;
     }
 
-    getRecordTable<T = RecordType>(resourceType: ResourceType) {
+    getRecordTable<T = Record>(resourceType: ResourceType) {
         return this.recordTables[resourceType.name] as RecordTable<T>;
     }
 
-    registerRecordType(resourceType: ResourceType) {
+    registerRecord(resourceType: ResourceType) {
         if (this.recordTables[resourceType.name]) {
             return;
         }
@@ -85,7 +85,7 @@ export class Store {
         this.resourceTypes.push(resourceType);
     }
 
-    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T) {
+    mapRecord<T extends Record>(resourceType: ResourceType, record: T) {
         const table = this.recordTables[resourceType.name];
 
         const upsertResult = table.upsert(record);
@@ -103,7 +103,7 @@ export class Store {
         return true;
     }
 
-    removeRecord(resourceType: ResourceType, record: RecordType) {
+    removeRecord(resourceType: ResourceType, record: Record) {
         const table = this.recordTables[resourceType.name];
         table.remove(record);
         this.doSubcribleCallbacks({
@@ -114,17 +114,13 @@ export class Store {
         return true;
     }
 
-    findRecordByKey<T extends RecordType>(resourceType: ResourceType<T>, key: string | number) {
+    findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number) {
         const table = this.getRecordTable<T>(resourceType);
         const resultByKey = table.findByKey(key);
         return resultByKey;
     }
 
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: T): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: string): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: number): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null;
-    findOneRecord<T extends RecordType>(
+    findOneRecord<T extends Record>(
         resourceType: ResourceType<T>,
         specs: findRecordPredicate<T> | T | string | number): T | null {
         if (!specs) {
@@ -149,7 +145,7 @@ export class Store {
      * Map a fetched data of type to store
      * * For FK, we only update primitive fields of FK record
      */
-    dataMapping<T extends RecordType>(resourceType: ResourceType, record: T) {
+    dataMapping<T extends Record>(resourceType: ResourceType, record: T) {
         const recordToMapping = Object.assign({}, record) as T;
         const recordKey = resourceType.getRecordKey(record);
 

@@ -13,7 +13,7 @@ describe('RestfulRender', () => {
     const fetcher = new Fetcher({
         store: restfulStore
     });
-    restfulStore.registerRecordType(userResourceType);
+    restfulStore.registerRecord(userResourceType);
 
     let getUserByBranchResource = new Resource<User[]>({
         resourceType: userResourceType,

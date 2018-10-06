@@ -1,6 +1,6 @@
 export type findRecordPredicate<T> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
-export type RecordType = {};
+export type Record = {};
 
 export class RecordTable<T> {
     keyProperty: string;

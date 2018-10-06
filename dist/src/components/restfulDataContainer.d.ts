@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import * as React from 'react';
-import { RecordType, ResourceType, Store, SubscribeEvent } from '../utilities';
+import { Record, ResourceType, Store, SubscribeEvent } from '../utilities';
 declare type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (record: DataModel, ownProps: OwnProps, trackedData: Array<DataModel>) => boolean;
 declare type ShouldTrackingNewRecord<DataModel, OwnProps> = shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
-interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps = MappingProps> {
+interface ContainerProps<DataModel extends Record, MappingProps, OwnProps = MappingProps> {
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
     readonly shouldTrackingNewRecord?: ShouldTrackingNewRecord<DataModel, OwnProps>;
@@ -19,7 +19,7 @@ interface RestfulDataContainerState<DataModel, OwnProps> {
  * @deprecated, use withRestfulData instead
  * !Will be removed at version 2.0
  */
-export declare function restfulDataContainer<DataModel extends RecordType, MappingProps, OwnProps extends MappingProps = MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
+export declare function restfulDataContainer<DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
         readonly shouldTrackingNewRecord: ShouldTrackingNewRecord<DataModel, OwnProps>;
         readonly store: Store;

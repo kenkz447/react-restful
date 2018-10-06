@@ -1,6 +1,6 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo } from './Fetcher';
+import { RequestInfo, FetcherProps } from './Fetcher';
 export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
     url: string;
@@ -23,5 +23,5 @@ export declare class Resource<DataModel, Meta = {}> {
     static defaultMapDataToStore: (resource: Resource<any, any>) => (data: {} | {}[], resourceType: ResourceType<{}>, store: Store) => void;
     constructor(props: ResourceProps<DataModel, Meta> | string);
     urlReslover(params?: Array<ResourceParameter>): string;
-    requestInitReslover(params?: Array<ResourceParameter>): RequestInit | null;
+    requestInitReslover(params?: Array<ResourceParameter>, bodyStringify?: FetcherProps['bodyStringify']): RequestInit | null;
 }

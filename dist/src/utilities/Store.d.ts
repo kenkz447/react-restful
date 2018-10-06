@@ -1,9 +1,9 @@
-import { findRecordPredicate, RecordTable, RecordType } from './RecordTable';
+import { findRecordPredicate, RecordTable, Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
-export interface SubscribeEvent<T extends RecordType = RecordType> {
+export interface SubscribeEvent<T extends Record = Record> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
     record: T;
@@ -18,20 +18,17 @@ export declare class Store {
     unSubscribe(subscribeId: Symbol): void;
     resourceTypeHasRegistered(resourceTypeName: string): boolean;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
-    getRecordTable<T = RecordType>(resourceType: ResourceType): RecordTable<T>;
-    registerRecordType(resourceType: ResourceType): void;
-    mapRecord<T extends RecordType>(resourceType: ResourceType, record: T): boolean;
-    removeRecord(resourceType: ResourceType, record: RecordType): boolean;
-    findRecordByKey<T extends RecordType>(resourceType: ResourceType<T>, key: string | number): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: T): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: string): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: number): T | null;
-    findOneRecord<T extends RecordType>(resourceType: ResourceType<T>, specs: findRecordPredicate<T>): T | null;
+    getRecordTable<T = Record>(resourceType: ResourceType): RecordTable<T>;
+    registerRecord(resourceType: ResourceType): void;
+    mapRecord<T extends Record>(resourceType: ResourceType, record: T): boolean;
+    removeRecord(resourceType: ResourceType, record: Record): boolean;
+    findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number): T | null;
+    findOneRecord<T extends Record>(resourceType: ResourceType<T>, specs: findRecordPredicate<T> | T | string | number): T | null;
     /**
      * Map a fetched data of type to store
      * * For FK, we only update primitive fields of FK record
      */
-    dataMapping<T extends RecordType>(resourceType: ResourceType, record: T): void;
+    dataMapping<T extends Record>(resourceType: ResourceType, record: T): void;
     private doSubcribleCallbacks;
 }
 export {};

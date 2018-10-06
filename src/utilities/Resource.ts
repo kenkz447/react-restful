@@ -1,6 +1,6 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo } from './Fetcher';
+import { RequestInfo, FetcherProps } from './Fetcher';
 
 export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
@@ -74,7 +74,7 @@ export class Resource<DataModel, Meta = {}> {
             this.requestFailed = props.requestFailed;
         }
     }
-    
+
     urlReslover(params: Array<ResourceParameter> = []): string {
         let uRL: string = this.url;
         const searchs: URLSearchParams = new URLSearchParams();
@@ -95,23 +95,42 @@ export class Resource<DataModel, Meta = {}> {
         return searchString ? `${uRL}?${searchString}` : uRL;
     }
 
-    requestInitReslover(params: Array<ResourceParameter> = []): RequestInit | null {
-        const body: ResourceParameter = params.find(param => param.type === 'body') as ResourceParameter;
+    requestInitReslover(
+        params: Array<ResourceParameter> = [],
+        bodyStringify?: FetcherProps['bodyStringify']
+    ): RequestInit | null {
+        const bodyParam = params.find(param => param.type === 'body');
 
-        if (!body) {
+        if (!bodyParam) {
             return null;
+        }
+
+        const body = bodyParam.value as object;
+
+        let convertedBody = null;
+        if (bodyStringify) {
+            convertedBody = {};
+            for (const key in body) {
+                if (body.hasOwnProperty(key)) {
+                    const element = body[key];
+                    convertedBody[key] = bodyStringify(element);
+                }
+            }
         }
 
         const requestInit: RequestInit = {
             headers: new Headers({
-                'Content-Type': body.contentType as string
+                'Content-Type': bodyParam.contentType as string
             }),
-            body: JSON.stringify(body.value),
+            body: JSON.stringify(convertedBody || body),
             method: this.method
         };
 
-        if (!body.contentType) {
-            (requestInit.headers as Headers).set('Content-Type', 'application/json');
+        if (
+            !bodyParam.contentType &&
+            requestInit.headers instanceof Headers
+        ) {
+            requestInit.headers.set('Content-Type', 'application/json');
         }
 
         return requestInit;

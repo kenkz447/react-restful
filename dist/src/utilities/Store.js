@@ -37,7 +37,7 @@ class Store {
     getRecordTable(resourceType) {
         return this.recordTables[resourceType.name];
     }
-    registerRecordType(resourceType) {
+    registerRecord(resourceType) {
         if (this.recordTables[resourceType.name]) {
             return;
         }

@@ -8,6 +8,7 @@ export interface RequestInfo<Meta> {
 export interface FetcherProps {
     store: Store;
     entry?: string;
+    bodyStringify?: (value: any) => any;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     afterFetch?: (response: Response) => void;
 }

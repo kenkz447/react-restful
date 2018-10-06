@@ -1,7 +1,11 @@
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./components"));
-__export(require("./utilities"));
+var components_1 = require("./components");
+exports.RestfulRender = components_1.RestfulRender;
+exports.withRestfulData = components_1.withRestfulData;
+var utilities_1 = require("./utilities");
+exports.Store = utilities_1.Store;
+exports.Fetcher = utilities_1.Fetcher;
+exports.ResourceType = utilities_1.ResourceType;
+exports.Resource = utilities_1.Resource;
+exports.setupEnvironment = utilities_1.setupEnvironment;

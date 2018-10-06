@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Fetcher {
     constructor(props) {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
-        this.props = props;
+        this.props = Object.assign({}, props);
     }
     fetch(url, requestInit) {
         return fetch(url, requestInit);
@@ -19,7 +19,7 @@ class Fetcher {
     fetchResource(resource, params, meta) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { entry, store, beforeFetch, afterFetch } = this.props;
+                const { entry, store, beforeFetch, afterFetch, bodyStringify } = this.props;
                 const requestParams = Array.isArray(params) ?
                     params :
                     (params && [params]);
@@ -27,7 +27,7 @@ class Fetcher {
                 if (entry) {
                     url = entry + url;
                 }
-                const requestInit = resource.requestInitReslover(requestParams) ||
+                const requestInit = resource.requestInitReslover(requestParams, bodyStringify) ||
                     this.createDefaultRequestInit();
                 requestInit.method = resource.method;
                 const modifiedRequestInit = beforeFetch ? yield beforeFetch(url, requestInit) : requestInit;
@@ -52,7 +52,7 @@ class Fetcher {
                     if (resource.mapDataToStore && resource.recordType) {
                         const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                         if (!resourceTypeHasRegistered) {
-                            store.registerRecordType(resource.recordType);
+                            store.registerRecord(resource.recordType);
                         }
                         resource.mapDataToStore(json, resource.recordType, store, requestInfo);
                     }

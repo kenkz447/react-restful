@@ -10,6 +10,8 @@ export interface RequestInfo<Meta> {
 export interface FetcherProps {
     store: Store;
     entry?: string;
+    // tslint:disable-next-line:no-any
+    bodyStringify?: (value: any) => any;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     afterFetch?: (response: Response) => void;
 }
@@ -19,7 +21,9 @@ export class Fetcher {
     createDefaultRequestInit = () => ({ headers: new Headers() });
 
     constructor(props: FetcherProps) {
-        this.props = props;
+        this.props = {
+            ...props
+        };
     }
 
     fetch(url: string, requestInit: RequestInit) {
@@ -32,7 +36,13 @@ export class Fetcher {
         meta?: Meta
     ) {
         try {
-            const { entry, store, beforeFetch, afterFetch } = this.props;
+            const {
+                entry,
+                store,
+                beforeFetch,
+                afterFetch,
+                bodyStringify
+            } = this.props;
 
             const requestParams = Array.isArray(params) ?
                 params :
@@ -44,7 +54,7 @@ export class Fetcher {
             }
 
             const requestInit: RequestInit =
-                resource.requestInitReslover(requestParams) ||
+                resource.requestInitReslover(requestParams, bodyStringify) ||
                 this.createDefaultRequestInit();
 
             requestInit.method = resource.method;
@@ -77,7 +87,7 @@ export class Fetcher {
                 if (resource.mapDataToStore && resource.recordType) {
                     const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                     if (!resourceTypeHasRegistered) {
-                        store.registerRecordType(resource.recordType);
+                        store.registerRecord(resource.recordType);
                     }
 
                     resource.mapDataToStore(json, resource.recordType, store, requestInfo);

@@ -1,4 +1,4 @@
-import { RecordType } from './RecordTable';
+import { Record } from './RecordTable';
 import { Store } from './Store';
 export interface SchemaField {
     field: string;
@@ -10,7 +10,7 @@ interface ResourceTypeProps {
     schema?: SchemaField[];
     store?: Store;
 }
-export declare class ResourceType<T extends RecordType = {}> {
+export declare class ResourceType<T extends Record = {}> {
     static defaultProps: Partial<ResourceTypeProps>;
     name: string;
     schema: ResourceTypeProps['schema'];

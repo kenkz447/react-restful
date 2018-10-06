@@ -15,7 +15,7 @@ class ResourceType {
             const PKField = ResourceType.findPKField(this.schema);
             this.primaryKey = PKField.field;
             if (store) {
-                store.registerRecordType(this);
+                store.registerRecord(this);
             }
         }
     }

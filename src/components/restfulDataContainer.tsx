@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RecordType, ResourceType, Store, SubscribeEvent, storeSymbol } from '../utilities';
+import { Record, ResourceType, Store, SubscribeEvent, storeSymbol } from '../utilities';
 
 type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (
     record: DataModel,
@@ -9,7 +9,7 @@ type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (
 
 type ShouldTrackingNewRecord<DataModel, OwnProps> = shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
 
-interface ContainerProps<DataModel extends RecordType, MappingProps, OwnProps = MappingProps> {
+interface ContainerProps<DataModel extends Record, MappingProps, OwnProps = MappingProps> {
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
 
@@ -35,7 +35,7 @@ interface RestfulDataContainerState<DataModel, OwnProps> {
  * !Will be removed at version 2.0
  */
 export function restfulDataContainer
-    <DataModel extends RecordType, MappingProps, OwnProps extends MappingProps = MappingProps>
+    <DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
     return (Component: React.ComponentType<OwnProps>) =>
         class RestfulDataContainer extends React.PureComponent<
