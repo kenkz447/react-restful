@@ -143,6 +143,10 @@ export * from './resources/pet';
 Send a GET request
 
 ```tsx
+import { RestfulRender, RestfulComponentRenderProps } from 'react-restful';
+
+import { petResources } from '../restful';
+
 export class PetContainer extends React.Component {
     render() {
         return (
@@ -211,6 +215,8 @@ const parameter: RequestParameter = {
 Send POST, PUT or DELETE:
 
 ```tsx
+import { request, petResources } from '../restful';
+
 const createNewPet = async () => {
     const requestParams = {
         type: 'body',
@@ -220,7 +226,8 @@ const createNewPet = async () => {
         }
     };
 
-    await request(petResources.create, requestParams);
+    const newPet = await request(petResources.create, requestParams);
+    return newPet;
 }
 
 const updatePet = async () => {
@@ -235,6 +242,7 @@ const updatePet = async () => {
         }];
 
     const updatedPet = await request(petResources.update, requestParams);
+    return updatedPet;
 };
 
 const deletePet = async () => {
