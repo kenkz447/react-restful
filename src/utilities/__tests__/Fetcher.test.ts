@@ -29,17 +29,17 @@ describe('Fetcher', () => {
     });
 
     describe('instance methods', () => {
-        it('fetch', async () => {
-            expect.assertions(1);
+        // it('fetch', async () => {
+        //     expect.assertions(1);
 
-            const mockResponseData = [newUser];
-            const mockResponseDataStr = JSON.stringify(mockResponseData);
-            mockResponseOnce(mockResponseDataStr);
+        //     const mockResponseData = [newUser];
+        //     const mockResponseDataStr = JSON.stringify(mockResponseData);
+        //     mockResponseOnce(mockResponseDataStr);
 
-            const response = await fetcher.fetch('/api', {});
-            const data = await response.json();
-            expect(data).toEqual(mockResponseData);
-        });
+        //     const response = await fetcher.fetch('/api', {});
+        //     const data = await response.json();
+        //     expect(data).toEqual(mockResponseData);
+        // });
 
         it('fetch resource', async () => {
             expect.assertions(3);
