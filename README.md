@@ -57,19 +57,18 @@ import { setupEnvironment } from 'react-restful';
 
 const restfulEnv = setupEnvironment({
     /**
-     * Your base API endpoint,
-     * will using for all requests
+     * API's URI
      */
     entry: 'https://api.domain.com',
     /**
-     *  Inject `Bearer token` to header or do anything
-     *  before sending request...
+     *  Called before fetch the request
+     *  Example: Init the bearer token into the header for authentication
      */
     beforeFetch: (url: string, requestInit: RequestInit) => {
         return requestInit;
     },
     /**
-     * Something happen here when request failed!
+     * Called after the fetch
      */
     afterFetch: async (response: Response) => {
         if (response.ok) {
