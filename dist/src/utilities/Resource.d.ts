@@ -5,6 +5,10 @@ export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
     url: string;
     method?: string;
+    /**
+     * Get json data form response after fetch.
+     */
+    getResponseData?: (response: Response) => Promise<DataModel>;
     mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store, requestInfo?: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 }
@@ -14,6 +18,7 @@ export declare class Resource<DataModel, Meta = {}> {
     method: string;
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
+    getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
     static defaultMapDataToStore: (resource: Resource<any, any>) => (data: {} | {}[], resourceType: ResourceType<{}>, store: Store) => void;
     constructor(props: ResourceProps<DataModel, Meta> | string);
     urlReslover(params?: Array<RequestParameter>): string;

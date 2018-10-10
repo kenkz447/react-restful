@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+
 import { Resource } from './Resource';
 import { Store } from './Store';
 
@@ -17,9 +19,14 @@ export interface RequestInfo<Meta> {
 export interface FetcherProps {
     store: Store;
     entry?: string;
-    // tslint:disable-next-line:no-any
     bodyStringify?: (value: any) => any;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
+    /**
+     * Get json data form response after fetch.
+     * Will not used if Resource has own getResponseData method.
+     * Default: response.json()
+     */
+    defaultGetResponseData?: (response: Response) => Promise<any>;
     afterFetch?: (response: Response) => void;
 }
 
@@ -44,7 +51,8 @@ export class Fetcher {
                 store,
                 beforeFetch,
                 afterFetch,
-                bodyStringify
+                bodyStringify,
+                defaultGetResponseData
             } = this.props;
 
             const requestParams = Array.isArray(params) ?
@@ -85,7 +93,11 @@ export class Fetcher {
 
             const responseContentType = response.headers.get('content-type');
             if (responseContentType && responseContentType.startsWith('application/json')) {
-                const json = await response.json();
+                const getResponseData =  resource.getResponseData || defaultGetResponseData;
+
+                const responseData = getResponseData ?
+                    await getResponseData(response) :
+                    await response.json();
 
                 if (resource.mapDataToStore && resource.recordType) {
                     const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
@@ -93,9 +105,9 @@ export class Fetcher {
                         store.registerRecord(resource.recordType);
                     }
 
-                    resource.mapDataToStore(json, resource.recordType, store, requestInfo);
+                    resource.mapDataToStore(responseData, resource.recordType, store, requestInfo);
                 }
-                return json;
+                return responseData;
             }
             const responseText = await response.text();
             return responseText;

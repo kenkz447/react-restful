@@ -1,4 +1,5 @@
 "use strict";
+// tslint:disable:no-any
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -13,7 +14,7 @@ class Fetcher {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { entry, store, beforeFetch, afterFetch, bodyStringify } = this.props;
+                const { entry, store, beforeFetch, afterFetch, bodyStringify, defaultGetResponseData } = this.props;
                 const requestParams = Array.isArray(params) ?
                     params :
                     (params && [params]);
@@ -42,15 +43,18 @@ class Fetcher {
                 }
                 const responseContentType = response.headers.get('content-type');
                 if (responseContentType && responseContentType.startsWith('application/json')) {
-                    const json = yield response.json();
+                    const getResponseData = resource.getResponseData || defaultGetResponseData;
+                    const responseData = getResponseData ?
+                        yield getResponseData(response) :
+                        yield response.json();
                     if (resource.mapDataToStore && resource.recordType) {
                         const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                         if (!resourceTypeHasRegistered) {
                             store.registerRecord(resource.recordType);
                         }
-                        resource.mapDataToStore(json, resource.recordType, store, requestInfo);
+                        resource.mapDataToStore(responseData, resource.recordType, store, requestInfo);
                     }
-                    return json;
+                    return responseData;
                 }
                 const responseText = yield response.text();
                 return responseText;

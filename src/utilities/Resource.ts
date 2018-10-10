@@ -6,6 +6,10 @@ export interface ResourceProps<DataModel, Meta> {
     resourceType?: ResourceType;
     url: string;
     method?: string;
+    /**
+     * Get json data form response after fetch.
+     */
+    getResponseData?: (response: Response) => Promise<DataModel>;
     mapDataToStore?: (
         data: DataModel,
         resourceType: ResourceType,
@@ -24,6 +28,7 @@ export class Resource<DataModel, Meta = {}> {
     method: string;
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
+    getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
 
     // tslint:disable-next-line:no-any
     static defaultMapDataToStore = (resource: Resource<any, any>) => (

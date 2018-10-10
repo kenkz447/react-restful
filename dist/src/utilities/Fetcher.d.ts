@@ -16,6 +16,12 @@ export interface FetcherProps {
     entry?: string;
     bodyStringify?: (value: any) => any;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
+    /**
+     * Get json data form response after fetch.
+     * Will not used if Resource has own getResponseData method.
+     * Default: response.json()
+     */
+    defaultGetResponseData?: (response: Response) => Promise<any>;
     afterFetch?: (response: Response) => void;
 }
 export declare class Fetcher {
