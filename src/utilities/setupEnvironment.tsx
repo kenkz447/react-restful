@@ -7,13 +7,8 @@ export let fetcherSymbol = Symbol();
 interface RestfulEnvironment {
     store: Store;
     request: Fetcher['fetchResource'];
-    option: FetcherProps;
 }
 
-/**
- * Quick setup for react-restful
- * @param {FetcherProps} options
- */
 export const setupEnvironment = (options: FetcherProps): RestfulEnvironment => {
     const store = new Store();
     const fetcher = new Fetcher({
@@ -28,7 +23,6 @@ export const setupEnvironment = (options: FetcherProps): RestfulEnvironment => {
 
     return {
         store: store,
-        request: fetcher.fetchResource,
-        option: options
+        request: fetcher.fetchResource
     };
 };

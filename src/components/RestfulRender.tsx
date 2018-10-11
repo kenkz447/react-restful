@@ -95,30 +95,32 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         );
     }
 
-    fetching() {
+    async fetching() {
         const { fetcher, resource, parameters, onFetchCompleted } = this.state;
-        fetcher!.fetchResource<T>(resource, parameters)
-            .then((data: T) => {
-                if (onFetchCompleted) {
-                    onFetchCompleted(data);
-                }
 
-                this.setState({
-                    needsUpdate: false,
-                    fetching: false,
-                    componentRenderProps: {
-                        data: data,
-                        error: null
-                    }
-                });
-            }).catch((error: Error) => {
-                this.setState({
-                    fetching: false,
-                    componentRenderProps: {
-                        data: null,
-                        error: error
-                    }
-                });
+        try {
+            const data = await fetcher!.fetchResource<T>(resource, parameters);
+
+            if (onFetchCompleted) {
+                onFetchCompleted(data);
+            }
+
+            this.setState({
+                needsUpdate: false,
+                fetching: false,
+                componentRenderProps: {
+                    data: data,
+                    error: null
+                }
             });
+        } catch (error) {
+            this.setState({
+                fetching: false,
+                componentRenderProps: {
+                    data: null,
+                    error: error
+                }
+            });
+        }
     }
 }

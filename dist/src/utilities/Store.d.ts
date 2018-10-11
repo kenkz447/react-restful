@@ -1,4 +1,7 @@
-import { findRecordPredicate, RecordTable, Record } from './RecordTable';
+/**
+ * Store is where data is stored from the API.
+ */
+import { RecordTable, Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
@@ -8,6 +11,7 @@ export interface SubscribeEvent<T extends Record = Record> {
     resourceType: ResourceType<T>;
     record: T;
 }
+declare type findRecordPredicate<T extends Record> = (value: T, index: number, recordMap: Array<T>) => boolean;
 declare type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
 export declare class Store {
     private resourceTypes;
@@ -18,8 +22,8 @@ export declare class Store {
     unSubscribe(subscribeId: Symbol): void;
     resourceTypeHasRegistered(resourceTypeName: string): boolean;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
-    getRecordTable<T = Record>(resourceType: ResourceType): RecordTable<T>;
-    registerRecord(resourceType: ResourceType): void;
+    getRecordTable<T extends Record = Record>(resourceType: ResourceType<T>): RecordTable<T>;
+    registerRecord<T extends Record = Record>(resourceType: ResourceType<T>): void;
     mapRecord<T extends Record>(resourceType: ResourceType, record: T): boolean;
     removeRecord(resourceType: ResourceType, record: Record): boolean;
     findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number): T | null;

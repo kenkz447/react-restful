@@ -1,3 +1,8 @@
+/**
+ * ResourceType
+ * Defines the general data structure for a set of Resources.
+ */
+
 import { Record, RecordTable } from './RecordTable';
 import { Store } from './Store';
 

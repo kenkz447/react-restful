@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -44,28 +52,31 @@ class RestfulRender extends React.Component {
         return (React.createElement(Component, Object.assign({}, componentProps)));
     }
     fetching() {
-        const { fetcher, resource, parameters, onFetchCompleted } = this.state;
-        fetcher.fetchResource(resource, parameters)
-            .then((data) => {
-            if (onFetchCompleted) {
-                onFetchCompleted(data);
+        return __awaiter(this, void 0, void 0, function* () {
+            const { fetcher, resource, parameters, onFetchCompleted } = this.state;
+            try {
+                const data = yield fetcher.fetchResource(resource, parameters);
+                if (onFetchCompleted) {
+                    onFetchCompleted(data);
+                }
+                this.setState({
+                    needsUpdate: false,
+                    fetching: false,
+                    componentRenderProps: {
+                        data: data,
+                        error: null
+                    }
+                });
             }
-            this.setState({
-                needsUpdate: false,
-                fetching: false,
-                componentRenderProps: {
-                    data: data,
-                    error: null
-                }
-            });
-        }).catch((error) => {
-            this.setState({
-                fetching: false,
-                componentRenderProps: {
-                    data: null,
-                    error: error
-                }
-            });
+            catch (error) {
+                this.setState({
+                    fetching: false,
+                    componentRenderProps: {
+                        data: null,
+                        error: error
+                    }
+                });
+            }
         });
     }
 }

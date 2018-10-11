@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * Store is where data is stored from the API.
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 const RecordTable_1 = require("./RecordTable");
 class Store {
@@ -41,11 +44,9 @@ class Store {
         if (this.recordTables[resourceType.name]) {
             return;
         }
-        const primaryKey = resourceType.primaryKey;
-        if (!primaryKey) {
-            throw new Error(`${resourceType.name} has no PK field!`);
-        }
-        const newRecordTable = new RecordTable_1.RecordTable(primaryKey);
+        const newRecordTable = new RecordTable_1.RecordTable({
+            resourceType: resourceType
+        });
         this.recordTables[resourceType.name] = newRecordTable;
         this.resourceTypes.push(resourceType);
     }

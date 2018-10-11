@@ -1,3 +1,7 @@
+/**
+ * ResourceType
+ * Defines the general data structure for a set of Resources.
+ */
 import { Record } from './RecordTable';
 import { Store } from './Store';
 export interface SchemaField {

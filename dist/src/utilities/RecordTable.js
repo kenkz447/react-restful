@@ -1,8 +1,12 @@
 "use strict";
+/**
+ * @module RecordTable
+ * The same structure of data will be stored in a RecordTable
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 class RecordTable {
-    constructor(keyProperty) {
-        this.keyProperty = keyProperty;
+    constructor(props) {
+        this.props = props;
         this.recordMap = new Map();
     }
     get records() {
@@ -14,12 +18,14 @@ class RecordTable {
         return result || null;
     }
     upsert(record) {
-        const recordKey = record[this.keyProperty];
+        const { resourceType } = this.props;
+        const recordKey = resourceType.getRecordKey(record);
         this.recordMap.set(recordKey, record);
         return true;
     }
     remove(record) {
-        const recordKey = record[this.keyProperty];
+        const { resourceType } = this.props;
+        const recordKey = resourceType.getRecordKey(record);
         this.recordMap.delete(recordKey);
     }
 }

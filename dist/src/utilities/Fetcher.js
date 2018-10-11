@@ -12,6 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Fetcher {
     constructor(props) {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
+        /**
+         * Function to make request by fetch method.
+         * @param resource - Resource instance
+         * @param {RequestParameter[] | RequestParameter} [params] - Array or a single RequestParameter object,
+         * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
+         */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData } = this.props;

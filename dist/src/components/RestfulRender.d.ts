@@ -25,5 +25,5 @@ export declare class RestfulRender<T> extends React.Component<RestfulRenderProps
     componentDidMount(): void;
     componentDidUpdate(): void;
     render(): JSX.Element | null;
-    fetching(): void;
+    fetching(): Promise<void>;
 }

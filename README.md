@@ -65,6 +65,10 @@ const restfulEnv = setupEnvironment({
      *  Example: Init the bearer token into the header for authentication
      */
     beforeFetch: (url: string, requestInit: RequestInit) => {
+        const token = getToken();
+        if (token && requestInit.headers instanceof Headers) {
+            requestInit.headers.append('Authorization', `Bearer ${token}`);
+        }
         return requestInit;
     },
     /**
@@ -82,11 +86,13 @@ const restfulEnv = setupEnvironment({
     }
 });
 
+const { store, request } = setupEnvironment;
+
 // Everything from fetch API will put into store.
-export const restfulStore = restfulEnv.store;
+export const restfulStore = store;
 
 // Using request to send PUT, POST or DELETE.
-export const request = restfulEnv.request;
+export const request = request;
 ```
 
 And then, create `pet.ts`  file to define everything related to Pet API

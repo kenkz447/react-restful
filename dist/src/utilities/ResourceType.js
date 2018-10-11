@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * ResourceType
+ * Defines the general data structure for a set of Resources.
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 class ResourceType {
     constructor(props) {

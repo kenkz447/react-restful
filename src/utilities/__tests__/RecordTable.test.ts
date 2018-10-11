@@ -1,8 +1,11 @@
 import { RecordTable } from '../RecordTable';
 import { User } from '../../test-resources';
+import { ResourceType } from '../ResourceType';
 
 describe('RecordTable', () => {
-    const table = new RecordTable<User>('id');
+    const table = new RecordTable<User>({
+        resourceType: new ResourceType('User')
+    });
 
     let testUser: User = {
         id: 1,

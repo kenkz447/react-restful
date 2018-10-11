@@ -1,4 +1,8 @@
-import { findRecordPredicate, RecordTable, Record } from './RecordTable';
+/**
+ * Store is where data is stored from the API.
+ */
+
+import { RecordTable, Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 
 export interface RecordTables {
@@ -10,6 +14,8 @@ export interface SubscribeEvent<T extends Record = Record> {
     resourceType: ResourceType<T>;
     record: T;
 }
+
+type findRecordPredicate<T extends Record> = (value: T, index: number, recordMap: Array<T>) => boolean;
 
 type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
 
@@ -65,20 +71,18 @@ export class Store {
         return resourceType;
     }
 
-    getRecordTable<T = Record>(resourceType: ResourceType) {
+    getRecordTable<T extends Record = Record>(resourceType: ResourceType<T>) {
         return this.recordTables[resourceType.name] as RecordTable<T>;
     }
 
-    registerRecord(resourceType: ResourceType) {
+    registerRecord<T extends Record = Record>(resourceType: ResourceType<T>) {
         if (this.recordTables[resourceType.name]) {
             return;
         }
 
-        const primaryKey = resourceType.primaryKey;
-        if (!primaryKey) {
-            throw new Error(`${resourceType.name} has no PK field!`);
-        }
-        const newRecordTable = new RecordTable(primaryKey);
+        const newRecordTable = new RecordTable({
+            resourceType: resourceType
+        });
 
         this.recordTables[resourceType.name] = newRecordTable;
 
