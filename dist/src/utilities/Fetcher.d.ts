@@ -14,14 +14,19 @@ export interface RequestInfo<Meta> {
 export interface FetcherProps {
     store: Store;
     entry?: string;
-    bodyStringify?: (value: any) => any;
+    /**
+     * Convert your request body before send
+     * @param {string} bodyKey - body member key
+     * @param {any} value - body member value, pair with key
+     */
+    requestBodyParser?: (bodyKey: string, value: any) => any;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     /**
      * Get json data form response after fetch.
      * Will not used if Resource has own getResponseData method.
-     * Default: response.json()
+     * @param {Response} response - fetch Response instance
      */
-    defaultGetResponseData?: (response: Response) => Promise<any>;
+    getResponseData?: (response: Response) => Promise<any>;
     afterFetch?: (response: Response) => void;
 }
 export declare class Fetcher {

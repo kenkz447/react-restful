@@ -14,15 +14,16 @@ class Fetcher {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { entry, store, beforeFetch, afterFetch, bodyStringify, defaultGetResponseData } = this.props;
+                const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData } = this.props;
                 const requestParams = Array.isArray(params) ?
                     params :
                     (params && [params]);
                 let url = resource.urlReslover(requestParams);
-                if (entry) {
+                if (entry && url.startsWith('/')) {
                     url = entry + url;
                 }
-                const requestInit = resource.requestInitReslover(requestParams, bodyStringify) ||
+                const usedRequestBodyParser = resource.requestBodyParser || requestBodyParser;
+                const requestInit = resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
                     this.createDefaultRequestInit();
                 requestInit.method = resource.method;
                 const modifiedRequestInit = beforeFetch ? yield beforeFetch(url, requestInit) : requestInit;
@@ -43,9 +44,9 @@ class Fetcher {
                 }
                 const responseContentType = response.headers.get('content-type');
                 if (responseContentType && responseContentType.startsWith('application/json')) {
-                    const getResponseData = resource.getResponseData || defaultGetResponseData;
-                    const responseData = getResponseData ?
-                        yield getResponseData(response) :
+                    const usedGetResponseData = resource.getResponseData || getResponseData;
+                    const responseData = usedGetResponseData ?
+                        yield usedGetResponseData(response) :
                         yield response.json();
                     if (resource.mapDataToStore && resource.recordType) {
                         const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);

@@ -19,14 +19,19 @@ export interface RequestInfo<Meta> {
 export interface FetcherProps {
     store: Store;
     entry?: string;
-    bodyStringify?: (value: any) => any;
+    /**
+     * Convert your request body before send
+     * @param {string} bodyKey - body member key
+     * @param {any} value - body member value, pair with key
+     */
+    requestBodyParser?: (bodyKey: string, value: any) => any;
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     /**
      * Get json data form response after fetch.
      * Will not used if Resource has own getResponseData method.
-     * Default: response.json()
+     * @param {Response} response - fetch Response instance
      */
-    defaultGetResponseData?: (response: Response) => Promise<any>;
+    getResponseData?: (response: Response) => Promise<any>;
     afterFetch?: (response: Response) => void;
 }
 
@@ -51,8 +56,8 @@ export class Fetcher {
                 store,
                 beforeFetch,
                 afterFetch,
-                bodyStringify,
-                defaultGetResponseData
+                requestBodyParser,
+                getResponseData
             } = this.props;
 
             const requestParams = Array.isArray(params) ?
@@ -60,12 +65,14 @@ export class Fetcher {
                 (params && [params]);
 
             let url = resource.urlReslover(requestParams);
-            if (entry) {
+            if (entry && url.startsWith('/')) {
                 url = entry + url;
             }
 
+            const usedRequestBodyParser = resource.requestBodyParser || requestBodyParser;
+
             const requestInit: RequestInit =
-                resource.requestInitReslover(requestParams, bodyStringify) ||
+                resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
                 this.createDefaultRequestInit();
 
             requestInit.method = resource.method;
@@ -93,10 +100,10 @@ export class Fetcher {
 
             const responseContentType = response.headers.get('content-type');
             if (responseContentType && responseContentType.startsWith('application/json')) {
-                const getResponseData =  resource.getResponseData || defaultGetResponseData;
+                const usedGetResponseData = resource.getResponseData || getResponseData;
 
-                const responseData = getResponseData ?
-                    await getResponseData(response) :
+                const responseData = usedGetResponseData ?
+                    await usedGetResponseData(response) :
                     await response.json();
 
                 if (resource.mapDataToStore && resource.recordType) {

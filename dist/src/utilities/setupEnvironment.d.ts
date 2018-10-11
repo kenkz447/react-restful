@@ -1,8 +1,15 @@
-import { FetcherProps } from './Fetcher';
+import { FetcherProps, Fetcher } from './Fetcher';
 import { Store } from './Store';
 export declare let storeSymbol: symbol;
 export declare let fetcherSymbol: symbol;
-export declare const setupEnvironment: (fetcherProps: FetcherProps) => {
+interface RestfulEnvironment {
     store: Store;
-    request: <DataModel, Meta = {}>(resource: import("./Resource").Resource<DataModel, {}>, params?: import("./Fetcher").RequestParameter | import("./Fetcher").RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<any>;
-};
+    request: Fetcher['fetchResource'];
+    option: FetcherProps;
+}
+/**
+ * Quick setup for react-restful
+ * @param {FetcherProps} options
+ */
+export declare const setupEnvironment: (options: FetcherProps) => RestfulEnvironment;
+export {};

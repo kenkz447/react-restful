@@ -5,17 +5,18 @@ class Resource {
     constructor(props) {
         if (typeof props === 'string') {
             this.recordType = null;
-            this.url = props;
+            this.url = Resource.getUrl(props);
             this.method = 'GET';
         }
         else {
             this.recordType = props.resourceType || null;
-            this.url = props.url;
+            this.url = Resource.getUrl(props.url);
             this.method = props.method || 'GET';
             this.mapDataToStore = props.mapDataToStore;
             if (!this.mapDataToStore && props.resourceType) {
                 this.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
+            this.requestBodyParser = props.requestBodyParser;
             this.requestFailed = props.requestFailed;
         }
     }
@@ -37,19 +38,19 @@ class Resource {
         const searchString = searchs.toString();
         return searchString ? `${uRL}?${searchString}` : uRL;
     }
-    requestInitReslover(params = [], bodyStringify) {
+    requestInitReslover(params = [], requestBodyParser) {
         const bodyParam = params.find(param => param.type === 'body');
         if (!bodyParam) {
             return null;
         }
         const body = bodyParam.value;
         let convertedBody = null;
-        if (bodyStringify) {
+        if (requestBodyParser) {
             convertedBody = {};
             for (const key in body) {
                 if (body.hasOwnProperty(key)) {
                     const element = body[key];
-                    convertedBody[key] = bodyStringify(element);
+                    convertedBody[key] = requestBodyParser(key, element);
                 }
             }
         }
@@ -87,4 +88,8 @@ Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
         }
     }
 };
+/**
+ * Ensure url will start with '/'
+ */
+Resource.getUrl = (url) => url.startsWith('/') ? url : `/${url}`;
 exports.Resource = Resource;

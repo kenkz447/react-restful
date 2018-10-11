@@ -2,14 +2,12 @@ import { ResourceType } from './ResourceType';
 import { Store } from './Store';
 import { RequestInfo, FetcherProps, RequestParameter } from './Fetcher';
 
-export interface ResourceProps<DataModel, Meta> {
+export interface ResourceProps<DataModel, Meta> extends
+    Pick<FetcherProps, 'requestBodyParser'>,
+    Pick<FetcherProps, 'getResponseData'> {
     resourceType?: ResourceType;
     url: string;
     method?: string;
-    /**
-     * Get json data form response after fetch.
-     */
-    getResponseData?: (response: Response) => Promise<DataModel>;
     mapDataToStore?: (
         data: DataModel,
         resourceType: ResourceType,
@@ -29,6 +27,7 @@ export class Resource<DataModel, Meta = {}> {
     mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
     requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
     getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
+    requestBodyParser: ResourceProps<DataModel, Meta>['requestBodyParser'];
 
     // tslint:disable-next-line:no-any
     static defaultMapDataToStore = (resource: Resource<any, any>) => (
@@ -54,21 +53,28 @@ export class Resource<DataModel, Meta = {}> {
             }
         }
     }
+    
+    /**
+     * Ensure url will start with '/'
+     */
+    static getUrl = (url: string) => url.startsWith('/') ? url : `/${url}`;
 
     constructor(props: ResourceProps<DataModel, Meta> | string) {
         if (typeof props === 'string') {
             this.recordType = null;
-            this.url = props;
+            this.url = Resource.getUrl(props);
             this.method = 'GET';
         } else {
             this.recordType = props.resourceType || null;
-            this.url = props.url;
+            this.url = Resource.getUrl( props.url);
+
             this.method = props.method || 'GET';
 
             this.mapDataToStore = props.mapDataToStore;
             if (!this.mapDataToStore && props.resourceType) {
                 this.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
+            this.requestBodyParser = props.requestBodyParser;
             this.requestFailed = props.requestFailed;
         }
     }
@@ -95,7 +101,7 @@ export class Resource<DataModel, Meta = {}> {
 
     requestInitReslover(
         params: Array<RequestParameter> = [],
-        bodyStringify?: FetcherProps['bodyStringify']
+        requestBodyParser?: FetcherProps['requestBodyParser']
     ): RequestInit | null {
         const bodyParam = params.find(param => param.type === 'body');
 
@@ -106,12 +112,12 @@ export class Resource<DataModel, Meta = {}> {
         const body = bodyParam.value as object;
 
         let convertedBody = null;
-        if (bodyStringify) {
+        if (requestBodyParser) {
             convertedBody = {};
             for (const key in body) {
                 if (body.hasOwnProperty(key)) {
                     const element = body[key];
-                    convertedBody[key] = bodyStringify(element);
+                    convertedBody[key] = requestBodyParser(key, element);
                 }
             }
         }
