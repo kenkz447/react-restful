@@ -18,6 +18,7 @@ class Resource {
             }
             this.requestBodyParser = props.requestBodyParser;
             this.requestFailed = props.requestFailed;
+            this.requestSuccess = props.requestSuccess;
         }
     }
     urlReslover(params = []) {

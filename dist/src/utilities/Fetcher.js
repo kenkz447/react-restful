@@ -40,7 +40,7 @@ class Fetcher {
                     response
                 };
                 if (afterFetch) {
-                    yield afterFetch(response);
+                    yield afterFetch(requestInfo);
                 }
                 if (!response.ok) {
                     if (resource.requestFailed) {
@@ -52,14 +52,17 @@ class Fetcher {
                 if (responseContentType && responseContentType.startsWith('application/json')) {
                     const usedGetResponseData = resource.getResponseData || getResponseData;
                     const responseData = usedGetResponseData ?
-                        yield usedGetResponseData(response) :
+                        yield usedGetResponseData(requestInfo) :
                         yield response.json();
+                    if (resource.requestSuccess) {
+                        resource.requestSuccess(requestInfo);
+                    }
                     if (resource.mapDataToStore && resource.recordType) {
                         const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                         if (!resourceTypeHasRegistered) {
                             store.registerRecord(resource.recordType);
                         }
-                        resource.mapDataToStore(responseData, resource.recordType, store, requestInfo);
+                        resource.mapDataToStore(responseData, resource.recordType, store);
                     }
                     return responseData;
                 }

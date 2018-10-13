@@ -5,7 +5,8 @@ export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requ
     resourceType?: ResourceType;
     url: string;
     method?: string;
-    mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store, requestInfo?: RequestInfo<Meta>) => void;
+    mapDataToStore?: (data: DataModel, resourceType: ResourceType, store: Store) => void;
+    requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 }
 export declare class Resource<DataModel, Meta = {}> {
@@ -16,6 +17,7 @@ export declare class Resource<DataModel, Meta = {}> {
     requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
     getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
     requestBodyParser: ResourceProps<DataModel, Meta>['requestBodyParser'];
+    requestSuccess: ResourceProps<DataModel, Meta>['requestSuccess'];
     static defaultMapDataToStore: (resource: Resource<any, any>) => (data: {} | {}[], resourceType: ResourceType<{}>, store: Store) => void;
     /**
      * Ensure url will start with '/'

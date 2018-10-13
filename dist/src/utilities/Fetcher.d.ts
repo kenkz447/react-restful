@@ -26,7 +26,7 @@ export interface RequestParameter {
      */
     contentType?: string;
 }
-export interface RequestInfo<Meta> {
+export interface RequestInfo<Meta = {}> {
     /**
      * Meta from called request.
      */
@@ -69,14 +69,15 @@ export interface FetcherProps {
      * Get json data form Response instance after fetch.
      * Will not used if Resource has own getResponseData method.
      * If this props has not set and no Resource's getResponseData, `await response.json()` will be use.
-     * @param {Response} response - fetch Response instance
+     * @param {Response} response - fetch Response instance.
+     * @param {RequestInfo} requestInfo - object contains helpful infomation
      */
-    getResponseData?: (response: Response) => Promise<any>;
+    getResponseData?: (requestInfo: RequestInfo) => Promise<any>;
     /**
      * Excute after fetch process
      * It is suitable for side-effect processing when the request fails.
      */
-    afterFetch?: (response: Response) => Promise<void>;
+    afterFetch?: (requestInfo: RequestInfo) => Promise<void>;
 }
 export declare class Fetcher {
     props: FetcherProps;

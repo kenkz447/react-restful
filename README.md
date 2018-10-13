@@ -19,7 +19,7 @@ Another liblary for restful resources management for React app.
         - [Send a GET request](#send-a-get-request)
         - [Send POST, PUT or DELETE:](#send-post-put-or-delete)
         - [Sync restful data with view](#sync-restful-data-with-view)
-    - [Document](#document)
+    - [Documents](#documents)
 
 <!-- /TOC -->
 
@@ -323,6 +323,10 @@ export const PetList = withRestfulData<Pet, PetListsProps>({
 
 Checkout the demo above to more details.
 
-## Document
+## Documents
 
 On progress...
+
+- [request](https://github.com/kenkz447/react-restful/wiki/Documents:--request)
+
+

@@ -11,9 +11,9 @@ export interface ResourceProps<DataModel, Meta> extends
     mapDataToStore?: (
         data: DataModel,
         resourceType: ResourceType,
-        store: Store,
-        requestInfo?: RequestInfo<Meta>
+        store: Store
     ) => void;
+    requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 }
 
@@ -28,6 +28,7 @@ export class Resource<DataModel, Meta = {}> {
     requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
     getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
     requestBodyParser: ResourceProps<DataModel, Meta>['requestBodyParser'];
+    requestSuccess: ResourceProps<DataModel, Meta>['requestSuccess'];
 
     // tslint:disable-next-line:no-any
     static defaultMapDataToStore = (resource: Resource<any, any>) => (
@@ -53,7 +54,7 @@ export class Resource<DataModel, Meta = {}> {
             }
         }
     }
-    
+
     /**
      * Ensure url will start with '/'
      */
@@ -66,7 +67,7 @@ export class Resource<DataModel, Meta = {}> {
             this.method = 'GET';
         } else {
             this.recordType = props.resourceType || null;
-            this.url = Resource.getUrl( props.url);
+            this.url = Resource.getUrl(props.url);
 
             this.method = props.method || 'GET';
 
@@ -76,6 +77,7 @@ export class Resource<DataModel, Meta = {}> {
             }
             this.requestBodyParser = props.requestBodyParser;
             this.requestFailed = props.requestFailed;
+            this.requestSuccess = props.requestSuccess;
         }
     }
 

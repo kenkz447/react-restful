@@ -33,7 +33,7 @@ export interface RequestParameter {
     contentType?: string;
 }
 
-export interface RequestInfo<Meta> {
+export interface RequestInfo<Meta = {}> {
     /**
      * Meta from called request.
      */
@@ -81,16 +81,17 @@ export interface FetcherProps {
      * Get json data form Response instance after fetch.
      * Will not used if Resource has own getResponseData method.
      * If this props has not set and no Resource's getResponseData, `await response.json()` will be use.
-     * @param {Response} response - fetch Response instance
+     * @param {Response} response - fetch Response instance.
+     * @param {RequestInfo} requestInfo - object contains helpful infomation
      */
-    getResponseData?: (response: Response) => Promise<any>;
+    getResponseData?: (requestInfo: RequestInfo) => Promise<any>;
 
     /**
      * Excute after fetch process
      * It is suitable for side-effect processing when the request fails.
      */
-    afterFetch?: (response: Response) => Promise<void>;
-}
+    afterFetch?: (requestInfo: RequestInfo) => Promise<void>;
+} 
 
 export class Fetcher {
     props: FetcherProps;
@@ -149,7 +150,7 @@ export class Fetcher {
             };
 
             if (afterFetch) {
-                await afterFetch(response);
+                await afterFetch(requestInfo);
             }
 
             if (!response.ok) {
@@ -165,16 +166,20 @@ export class Fetcher {
                 const usedGetResponseData = resource.getResponseData || getResponseData;
 
                 const responseData = usedGetResponseData ?
-                    await usedGetResponseData(response) :
+                    await usedGetResponseData(requestInfo) :
                     await response.json();
 
+                if (resource.requestSuccess) {
+                    resource.requestSuccess(requestInfo);
+                }
+                
                 if (resource.mapDataToStore && resource.recordType) {
                     const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                     if (!resourceTypeHasRegistered) {
                         store.registerRecord(resource.recordType);
                     }
 
-                    resource.mapDataToStore(responseData, resource.recordType, store, requestInfo);
+                    resource.mapDataToStore(responseData, resource.recordType, store);
                 }
                 return responseData;
             }
