@@ -4,7 +4,8 @@ import { RequestInfo, FetcherProps, RequestParameter } from './Fetcher';
 
 export interface ResourceProps<DataModel, Meta> extends
     Pick<FetcherProps, 'requestBodyParser'>,
-    Pick<FetcherProps, 'getResponseData'> {
+    Pick<FetcherProps, 'getResponseData'>,
+    Pick<FetcherProps, 'onConfirm'> {
     resourceType?: ResourceType;
     url: string;
     method?: string;
@@ -29,6 +30,7 @@ export class Resource<DataModel, Meta = {}> {
     getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
     requestBodyParser: ResourceProps<DataModel, Meta>['requestBodyParser'];
     requestSuccess: ResourceProps<DataModel, Meta>['requestSuccess'];
+    onConfirm: ResourceProps<DataModel, Meta>['onConfirm'];
 
     // tslint:disable-next-line:no-any
     static defaultMapDataToStore = (resource: Resource<any, any>) => (
@@ -78,6 +80,7 @@ export class Resource<DataModel, Meta = {}> {
             this.requestBodyParser = props.requestBodyParser;
             this.requestFailed = props.requestFailed;
             this.requestSuccess = props.requestSuccess;
+            this.onConfirm = props.onConfirm;
         }
     }
 

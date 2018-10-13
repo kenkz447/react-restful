@@ -12,10 +12,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Fetcher {
     constructor(props) {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
+        this.onRequestConfirm = (confirmInfo) => __awaiter(this, void 0, void 0, function* () {
+            const { onConfirm } = this.props;
+            if (!onConfirm) {
+                return true;
+            }
+            const confirmer = confirmInfo.resource.onConfirm || onConfirm;
+            return yield confirmer(confirmInfo);
+        });
         /**
          * Function to make request by fetch method.
          * @param resource - Resource instance
-         * @param {RequestParameter[] | RequestParameter} [params] - Array or a single RequestParameter object,
+         * @param {RequestParams} [params] - Array or a single RequestParameter object,
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {

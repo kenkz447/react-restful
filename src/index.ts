@@ -16,4 +16,6 @@ export {
     ResourceProps,
     RequestParameter,
     RequestInfo,
+    RequestParams,
+    RequestConfirmInfo
 } from './utilities';

@@ -1,5 +1,14 @@
 import { Resource } from './Resource';
 import { Store } from './Store';
+import { Record } from './RecordTable';
+export declare type RequestParams = RequestParameter[] | RequestParameter;
+export interface RequestConfirmInfo<DataModel extends Record> {
+    message?: string;
+    description?: string;
+    resource: Resource<DataModel>;
+    params?: RequestParams;
+    meta: any;
+}
 export interface RequestParameter {
     /**
      * Type of a parameter, operating under special mechanism.
@@ -78,6 +87,7 @@ export interface FetcherProps {
      * It is suitable for side-effect processing when the request fails.
      */
     afterFetch?: (requestInfo: RequestInfo) => Promise<void>;
+    onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
 }
 export declare class Fetcher {
     props: FetcherProps;
@@ -85,10 +95,11 @@ export declare class Fetcher {
         headers: Headers;
     };
     constructor(props: FetcherProps);
+    onRequestConfirm: (confirmInfo: RequestConfirmInfo<any>) => Promise<boolean>;
     /**
      * Function to make request by fetch method.
      * @param resource - Resource instance
-     * @param {RequestParameter[] | RequestParameter} [params] - Array or a single RequestParameter object,
+     * @param {RequestParams} [params] - Array or a single RequestParameter object,
      * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
      */
     fetchResource: <DataModel, Meta = {}>(resource: Resource<DataModel, {}>, params?: RequestParameter | RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<any>;

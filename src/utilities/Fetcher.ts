@@ -2,6 +2,17 @@
 
 import { Resource } from './Resource';
 import { Store } from './Store';
+import { Record } from './RecordTable';
+
+export type RequestParams = RequestParameter[] | RequestParameter;
+
+export interface RequestConfirmInfo<DataModel extends Record> {
+    message?: string;
+    description?: string;
+    resource: Resource<DataModel>;
+    params?: RequestParams;
+    meta: any;
+}
 
 export interface RequestParameter {
     /**
@@ -91,7 +102,9 @@ export interface FetcherProps {
      * It is suitable for side-effect processing when the request fails.
      */
     afterFetch?: (requestInfo: RequestInfo) => Promise<void>;
-} 
+
+    onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
+}
 
 export class Fetcher {
     props: FetcherProps;
@@ -102,15 +115,27 @@ export class Fetcher {
             ...props
         };
     }
+
+    onRequestConfirm = async (confirmInfo: RequestConfirmInfo<any>) => {
+        const { onConfirm } = this.props;
+        if (!onConfirm) {
+            return true;
+        }
+
+        const confirmer = confirmInfo.resource.onConfirm || onConfirm;
+
+        return await confirmer(confirmInfo);
+    }
+
     /**
      * Function to make request by fetch method.
      * @param resource - Resource instance
-     * @param {RequestParameter[] | RequestParameter} [params] - Array or a single RequestParameter object,
+     * @param {RequestParams} [params] - Array or a single RequestParameter object,
      * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
      */
     fetchResource = async <DataModel, Meta = {}>(
         resource: Resource<DataModel>,
-        params?: RequestParameter[] | RequestParameter,
+        params?: RequestParams,
         meta?: Meta
     ) => {
         try {
@@ -172,7 +197,7 @@ export class Fetcher {
                 if (resource.requestSuccess) {
                     resource.requestSuccess(requestInfo);
                 }
-                
+
                 if (resource.mapDataToStore && resource.recordType) {
                     const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
                     if (!resourceTypeHasRegistered) {
