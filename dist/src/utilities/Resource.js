@@ -93,5 +93,5 @@ Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
 /**
  * Ensure url will start with '/'
  */
-Resource.getUrl = (url) => url.startsWith('/') ? url : `/${url}`;
+Resource.getUrl = (url) => url.startsWith('http') ? url : (url.startsWith('/') ? url : `/${url}`);
 exports.Resource = Resource;

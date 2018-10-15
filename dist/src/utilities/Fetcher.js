@@ -48,7 +48,7 @@ class Fetcher {
                     response
                 };
                 if (afterFetch) {
-                    yield afterFetch(requestInfo);
+                    afterFetch(requestInfo);
                 }
                 if (!response.ok) {
                     if (resource.requestFailed) {

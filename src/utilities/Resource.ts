@@ -60,7 +60,7 @@ export class Resource<DataModel, Meta = {}> {
     /**
      * Ensure url will start with '/'
      */
-    static getUrl = (url: string) => url.startsWith('/') ? url : `/${url}`;
+    static getUrl = (url: string) => url.startsWith('http') ? url : (url.startsWith('/') ? url : `/${url}`);
 
     constructor(props: ResourceProps<DataModel, Meta> | string) {
         if (typeof props === 'string') {

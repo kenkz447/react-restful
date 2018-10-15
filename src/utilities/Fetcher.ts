@@ -7,11 +7,17 @@ import { Record } from './RecordTable';
 export type RequestParams = RequestParameter[] | RequestParameter;
 
 export interface RequestConfirmInfo<DataModel extends Record> {
+    resource: Resource<DataModel>;
     message?: string;
     description?: string;
-    resource: Resource<DataModel>;
     params?: RequestParams;
-    meta: any;
+    meta?: any;
+}
+
+export interface RequestInfo<Meta = {}> {
+    meta?: Meta;
+    params?: RequestParameter[];
+    response: Response;
 }
 
 export interface RequestParameter {
@@ -42,21 +48,6 @@ export interface RequestParameter {
      * Only used when your want submit a FormBody instance!
      */
     contentType?: string;
-}
-
-export interface RequestInfo<Meta = {}> {
-    /**
-     * Meta from called request.
-     */
-    meta?: Meta;
-    /**
-     * Params from called request.
-     */
-    params?: RequestParameter[];
-    /**
-     * Origin Response instance after fetch.
-     */
-    response: Response;
 }
 
 export interface FetcherProps {
@@ -100,9 +91,16 @@ export interface FetcherProps {
     /**
      * Excute after fetch process
      * It is suitable for side-effect processing when the request fails.
+     * @param {RequestInfo} requestInfo
      */
-    afterFetch?: (requestInfo: RequestInfo) => Promise<void>;
+    afterFetch?: (requestInfo: RequestInfo) => void;
 
+    /**
+     * If used RequestHelper, your have option to make a confirmation message before perform the request.
+     * Using onConfirm to allow you setup a defaul confirm method for every request.
+     * @param {RequestConfirmInfo} confirmInfo - object contains confirm message, description and request resource.
+     * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.
+     */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
 }
 
@@ -175,7 +173,7 @@ export class Fetcher {
             };
 
             if (afterFetch) {
-                await afterFetch(requestInfo);
+                afterFetch(requestInfo);
             }
 
             if (!response.ok) {
