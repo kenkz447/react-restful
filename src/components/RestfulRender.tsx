@@ -1,32 +1,47 @@
 import * as React from 'react';
 import {
     Resource,
-    RequestParameter,
     Fetcher,
-    fetcherSymbol
+    fetcherSymbol,
+    RequestParams
 } from '../utilities';
 
-export interface RestfulComponentRenderProps<DataModel> {
-    data?: DataModel | null;
-    error?: Error | null;
+export interface RestfulRenderChildProps<DataModel> {
+    // Resonse result, default: null
+    data: DataModel | null;
+
+    // Request catched error, default: null
+    error: Error | null;
+
+    // RestfulRender fetch status, default: true
     fetching?: boolean;
 }
 
+export type RestfulRenderChildType<DataModel> = React.ComponentType<RestfulRenderChildProps<DataModel>>;
+
+// RestfulRender's props, don't care about <DataModel>
+// Pick one of render or children (based on your interests) for Presenter component
 export interface RestfulRenderProps<DataModel> {
+    // For user who don't wants use default Fetcher, others: don't use it
     fetcher?: Fetcher;
+
     resource: Resource<DataModel>;
-    parameters?: Array<RequestParameter> | RequestParameter;
 
-    render?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
+    parameters?: RequestParams;
+    
+    // Presenter component
+    render?: RestfulRenderChildType<DataModel> ;
 
-    children?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
+    // Like `render` prop but in children style
+    children?: RestfulRenderChildType<DataModel>;
+
     onFetchCompleted?: (data: DataModel) => void;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     needsUpdate?: boolean;
-    fetching?: boolean;
-    componentRenderProps: RestfulComponentRenderProps<DataModel>;
+    fetching: boolean;
+    componentRenderProps: RestfulRenderChildProps<DataModel>;
 }
 
 export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {

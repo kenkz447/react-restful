@@ -210,7 +210,7 @@ In case you want send GET request with query string e.g: `/pets?name='micky'`
 Or more than one `/pets?name='micky'&type='mouse'`
 
 ```tsx
-const parameters: RequestParameter[] = [{
+const parameters: RequestParams = [{
     type: 'query',
     parameter: 'name',
     value: 'micky'
@@ -236,10 +236,11 @@ const parameter: RequestParameter = {
 ### Send POST, PUT or DELETE:
 
 ```tsx
+import { RequestParams } from 'react-restful';
 import { request, petResources } from '../restful';
 
 const createNewPet = async () => {
-    const requestParams = {
+    const requestParams: RequestParams = {
         type: 'body',
         value: {
             name: 'tom',
@@ -252,7 +253,9 @@ const createNewPet = async () => {
 }
 
 const updatePet = async () => {
-    const requestParams = [{ 
+    import { RequestParams } from 'react-restful';
+
+    const requestParams: RequestParams = [{ 
             type: 'path', 
             parameter: 'id', 
             value: 1 
@@ -327,6 +330,6 @@ Checkout the demo above to more details.
 
 On progress...
 
-- [request](https://github.com/kenkz447/react-restful/wiki/Documents:--request)
+- [Check out github wiki](https://github.com/kenkz447/react-restful/wiki)
 
 

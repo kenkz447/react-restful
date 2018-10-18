@@ -1,5 +1,5 @@
 export {
-    RestfulComponentRenderProps,
+    RestfulRenderChildProps,
     RestfulRender,
     RestfulRenderProps,
     withRestfulData,

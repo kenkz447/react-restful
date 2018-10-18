@@ -1,22 +1,23 @@
 import * as React from 'react';
-import { Resource, RequestParameter, Fetcher } from '../utilities';
-export interface RestfulComponentRenderProps<DataModel> {
-    data?: DataModel | null;
-    error?: Error | null;
+import { Resource, Fetcher, RequestParams } from '../utilities';
+export interface RestfulRenderChildProps<DataModel> {
+    data: DataModel | null;
+    error: Error | null;
     fetching?: boolean;
 }
+export declare type RestfulRenderChildType<DataModel> = React.ComponentType<RestfulRenderChildProps<DataModel>>;
 export interface RestfulRenderProps<DataModel> {
     fetcher?: Fetcher;
     resource: Resource<DataModel>;
-    parameters?: Array<RequestParameter> | RequestParameter;
-    render?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
-    children?: React.ComponentType<RestfulComponentRenderProps<DataModel>>;
+    parameters?: RequestParams;
+    render?: RestfulRenderChildType<DataModel>;
+    children?: RestfulRenderChildType<DataModel>;
     onFetchCompleted?: (data: DataModel) => void;
 }
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     needsUpdate?: boolean;
-    fetching?: boolean;
-    componentRenderProps: RestfulComponentRenderProps<DataModel>;
+    fetching: boolean;
+    componentRenderProps: RestfulRenderChildProps<DataModel>;
 }
 export declare class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>>;

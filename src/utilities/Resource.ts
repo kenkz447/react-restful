@@ -81,6 +81,7 @@ export class Resource<DataModel, Meta = {}> {
             this.requestFailed = props.requestFailed;
             this.requestSuccess = props.requestSuccess;
             this.onConfirm = props.onConfirm;
+            this.getResponseData = props.getResponseData;
         }
     }
 
