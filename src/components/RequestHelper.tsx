@@ -67,7 +67,6 @@ export class RequestHelper<DataModel extends Record, Meta> extends React.PureCom
         const requestMeta = meta || defaultRequestMeta;
 
         if (needsConfirm || confirmMessage || confirmDescription) {
-
             const confirmed = await onRequestConfirm({
                 message: confirmMessage,
                 description: confirmDescription,
@@ -75,6 +74,7 @@ export class RequestHelper<DataModel extends Record, Meta> extends React.PureCom
                 params: requestParams,
                 meta: requestMeta
             });
+
             if (!confirmed) {
                 return false;
             }

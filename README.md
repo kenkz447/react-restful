@@ -74,7 +74,9 @@ const restfulEnv = setupEnvironment({
     /**
      * Called after the fetch
      */
-    afterFetch: async (response: Response) => {
+    afterFetch: async (requestInfo) => {
+        const { response } = requestInfo
+        
         if (response.ok) {
             return;
         }
@@ -86,10 +88,7 @@ const restfulEnv = setupEnvironment({
     }
 });
 
-const { store, request } = setupEnvironment;
-
-// Everything from fetch API will put into store.
-export const restfulStore = store;
+const { request } = setupEnvironment;
 
 // Using request to send PUT, POST or DELETE.
 export const request = request;
