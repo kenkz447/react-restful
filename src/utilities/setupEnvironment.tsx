@@ -10,7 +10,8 @@ interface RestfulEnvironment {
 }
 
 export const setupEnvironment = (options: FetcherProps): RestfulEnvironment => {
-    const store = new Store();
+    const { store } = options;
+    
     const fetcher = new Fetcher({
         store: store,
         ...options,
