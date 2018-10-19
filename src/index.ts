@@ -3,6 +3,8 @@ export {
     RestfulRender,
     RestfulRenderProps,
     withRestfulData,
+    RequestHelper,
+    RequestHelperProps
 } from './components';
 
 export {
