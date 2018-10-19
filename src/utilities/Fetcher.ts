@@ -102,6 +102,8 @@ export interface FetcherProps {
      * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
+
+    requestFailed?: (requestInfo: RequestInfo) => void;
 }
 
 export class Fetcher {
@@ -142,79 +144,82 @@ export class Fetcher {
             beforeFetch,
             afterFetch,
             requestBodyParser,
-            getResponseData
+            getResponseData,
+            requestFailed
         } = this.props;
 
-        try {
-            const requestParams = Array.isArray(params) ?
-                params :
-                (params && [params]);
+        const requestParams = Array.isArray(params) ?
+            params :
+            (params && [params]);
 
-            let url = resource.urlReslover(requestParams);
-            if (entry && url.startsWith('/')) {
-                url = entry + url;
-            }
-
-            const usedRequestBodyParser = resource.requestBodyParser || requestBodyParser;
-
-            const requestInit: RequestInit =
-                resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
-                this.createDefaultRequestInit();
-
-            requestInit.method = resource.method;
-
-            const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
-            const response = await fetch(url, modifiedRequestInit);
-
-            const requestInfo: RequestInfo<Meta> = {
-                meta,
-                params: requestParams,
-                response
-            };
-
-            if (afterFetch) {
-                afterFetch(requestInfo);
-            }
-
-            if (!response.ok) {
-                if (resource.requestFailed) {
-                    resource.requestFailed(requestInfo);
-                }
-
-                throw response;
-            }
-
-            const responseContentType = response.headers.get('content-type');
-            if (responseContentType && responseContentType.startsWith('application/json')) {
-                const usedGetResponseData = resource.getResponseData || getResponseData;
-
-                const responseData = usedGetResponseData ?
-                    await usedGetResponseData(requestInfo) :
-                    await response.json();
-
-                if (resource.requestSuccess) {
-                    resource.requestSuccess(requestInfo);
-                }
-
-                if (resource.mapDataToStore && resource.recordType) {
-                    const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
-                    if (!resourceTypeHasRegistered) {
-                        store.registerRecord(resource.recordType);
-                    }
-
-                    resource.mapDataToStore(responseData, resource.recordType, store);
-                }
-                return responseData;
-            }
-
-            return await response.text();
-            
-        } catch (error) {
-            if (afterFetch) {
-                afterFetch(error);
-            }
-
-            throw error;
+        let url = resource.urlReslover(requestParams);
+        if (entry && url.startsWith('/')) {
+            url = entry + url;
         }
+
+        const usedRequestBodyParser = resource.requestBodyParser || requestBodyParser;
+
+        const requestInit: RequestInit =
+            resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
+            this.createDefaultRequestInit();
+
+        requestInit.method = resource.method;
+
+        const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
+        let response!: Response;
+        
+        try {
+            response = await fetch(url, modifiedRequestInit);
+        } catch (error) {
+            throw new Error(error);
+        }
+
+        const requestInfo: RequestInfo<Meta> = {
+            meta,
+            params: requestParams,
+            response
+        };
+
+        if (!response.ok) {
+            if (resource.requestFailed) {
+                resource.requestFailed(requestInfo);
+            }
+
+            if (requestFailed) {
+                requestFailed(requestInfo);
+            }
+
+            throw response;
+        }
+
+        if (afterFetch) {
+            afterFetch(requestInfo);
+        }
+
+        const responseContentType = response.headers.get('content-type');
+        if (responseContentType && responseContentType.startsWith('application/json')) {
+            const usedGetResponseData = resource.getResponseData || getResponseData;
+
+            const responseData = usedGetResponseData ?
+                await usedGetResponseData(requestInfo) :
+                await response.json();
+
+            if (resource.requestSuccess) {
+                resource.requestSuccess(requestInfo);
+            }
+
+            if (resource.mapDataToStore && resource.recordType) {
+                const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
+                if (!resourceTypeHasRegistered) {
+                    store.registerRecord(resource.recordType);
+                }
+
+                resource.mapDataToStore(responseData, resource.recordType, store);
+            }
+
+            return responseData;
+        }
+
+        return await response.text();
     }
 }

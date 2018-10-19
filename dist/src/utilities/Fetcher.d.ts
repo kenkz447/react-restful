@@ -86,6 +86,7 @@ export interface FetcherProps {
      * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
+    requestFailed?: (requestInfo: RequestInfo) => void;
 }
 export declare class Fetcher {
     props: FetcherProps;
