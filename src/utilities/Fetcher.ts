@@ -136,16 +136,16 @@ export class Fetcher {
         params?: RequestParams,
         meta?: Meta
     ) => {
-        try {
-            const {
-                entry,
-                store,
-                beforeFetch,
-                afterFetch,
-                requestBodyParser,
-                getResponseData
-            } = this.props;
+        const {
+            entry,
+            store,
+            beforeFetch,
+            afterFetch,
+            requestBodyParser,
+            getResponseData
+        } = this.props;
 
+        try {
             const requestParams = Array.isArray(params) ?
                 params :
                 (params && [params]);
@@ -206,9 +206,14 @@ export class Fetcher {
                 }
                 return responseData;
             }
-            const responseText = await response.text();
-            return responseText;
+
+            return await response.text();
+            
         } catch (error) {
+            if (afterFetch) {
+                afterFetch(error);
+            }
+
             throw error;
         }
     }

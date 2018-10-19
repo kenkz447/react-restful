@@ -27,8 +27,8 @@ class Fetcher {
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
+            const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData } = this.props;
             try {
-                const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData } = this.props;
                 const requestParams = Array.isArray(params) ?
                     params :
                     (params && [params]);
@@ -74,10 +74,12 @@ class Fetcher {
                     }
                     return responseData;
                 }
-                const responseText = yield response.text();
-                return responseText;
+                return yield response.text();
             }
             catch (error) {
+                if (afterFetch) {
+                    afterFetch(error);
+                }
                 throw error;
             }
         });
