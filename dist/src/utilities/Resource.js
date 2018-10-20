@@ -4,7 +4,7 @@ const shouldParmeterIgnore = (param) => !param || param.type === 'body' || param
 class Resource {
     constructor(props) {
         this.mixinWithDefaultParams = (requestParams) => {
-            let params = this.props.getDefaulParams();
+            let params = this.props.getDefaultParams();
             if (Array.isArray(params)) {
                 return [...requestParams, ...params];
             }
@@ -25,10 +25,10 @@ class Resource {
         }
     }
     urlReslover(params = []) {
-        const { getDefaulParams, url } = this.props;
+        const { getDefaultParams, url } = this.props;
         let uRL = url;
         const searchs = new URLSearchParams();
-        const mixedRequestParams = getDefaulParams ? this.mixinWithDefaultParams(params) : params;
+        const mixedRequestParams = getDefaultParams ? this.mixinWithDefaultParams(params) : params;
         for (const param of mixedRequestParams) {
             const ignore = shouldParmeterIgnore(param);
             if (ignore) {

@@ -1,6 +1,6 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo, FetcherProps, RequestParameter } from './Fetcher';
+import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
 
 export interface ResourceProps<DataModel, Meta> extends
     Pick<FetcherProps, 'requestBodyParser'>,
@@ -18,7 +18,7 @@ export interface ResourceProps<DataModel, Meta> extends
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 
     getDefaultMeta?: () => {};
-    getDefaulParams?: () => RequestParameter;
+    getDefaultParams?: () => RequestParams;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
@@ -79,7 +79,7 @@ export class Resource<DataModel, Meta = {}> {
     }
 
     mixinWithDefaultParams = (requestParams: RequestParameter[]) => {
-        let params = this.props.getDefaulParams!();
+        let params = this.props.getDefaultParams!();
 
         if (Array.isArray(params)) {
             return [...requestParams, ...params];
@@ -89,12 +89,12 @@ export class Resource<DataModel, Meta = {}> {
     }
 
     urlReslover(params: Array<RequestParameter> = []): string {
-        const { getDefaulParams, url } = this.props;
+        const { getDefaultParams, url } = this.props;
 
         let uRL: string = url;
         const searchs: URLSearchParams = new URLSearchParams();
 
-        const mixedRequestParams = getDefaulParams ? this.mixinWithDefaultParams(params) : params;
+        const mixedRequestParams = getDefaultParams ? this.mixinWithDefaultParams(params) : params;
 
         for (const param of mixedRequestParams) {
             const ignore = shouldParmeterIgnore(param);

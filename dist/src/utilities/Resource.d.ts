@@ -1,6 +1,6 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo, FetcherProps, RequestParameter } from './Fetcher';
+import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
 export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requestBodyParser'>, Pick<FetcherProps, 'getResponseData'>, Pick<FetcherProps, 'onConfirm'> {
     resourceType?: ResourceType | null;
     url: string;
@@ -9,7 +9,7 @@ export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requ
     requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
     getDefaultMeta?: () => {};
-    getDefaulParams?: () => RequestParameter;
+    getDefaultParams?: () => RequestParams;
 }
 export declare class Resource<DataModel, Meta = {}> {
     props: ResourceProps<DataModel, Meta>;
@@ -19,7 +19,7 @@ export declare class Resource<DataModel, Meta = {}> {
      */
     static getUrl: (url: string) => string;
     constructor(props: ResourceProps<DataModel, Meta> | string);
-    mixinWithDefaultParams: (requestParams: RequestParameter[]) => any[];
+    mixinWithDefaultParams: (requestParams: RequestParameter[]) => RequestParameter[];
     urlReslover(params?: Array<RequestParameter>): string;
     requestInitReslover(params?: Array<RequestParameter>, requestBodyParser?: FetcherProps['requestBodyParser']): RequestInit | null;
 }
