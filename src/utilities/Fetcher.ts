@@ -104,6 +104,8 @@ export interface FetcherProps {
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
 
     requestFailed?: (requestInfo: RequestInfo) => void;
+
+    unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
 }
 
 export class Fetcher {
@@ -145,7 +147,8 @@ export class Fetcher {
             afterFetch,
             requestBodyParser,
             getResponseData,
-            requestFailed
+            requestFailed,
+            unexpectedErrorCatched
         } = this.props;
 
         const requestParams = Array.isArray(params) ?
@@ -166,14 +169,23 @@ export class Fetcher {
         requestInit.method = resource.method;
 
         const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
+
         let response!: Response;
-        
+
         try {
             response = await fetch(url, modifiedRequestInit);
         } catch (error) {
+            if (unexpectedErrorCatched) {
+                throw unexpectedErrorCatched(url, modifiedRequestInit, error);
+            }
+
+            if (error instanceof Error) {
+                throw error;
+            }
+
             throw new Error(error);
         }
-
+        
         const requestInfo: RequestInfo<Meta> = {
             meta,
             params: requestParams,

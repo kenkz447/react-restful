@@ -39,11 +39,12 @@ describe('RestfulRender', () => {
 
     let paramsProps = [pathParam];
 
-    let render = jest.fn((renderProps) => {
-        return 'loading';
-    });
+    let render = jest.fn((renderProps) => null);
+
     const onFetchCompleted = jest.fn();
+
     const mockResponseDataStr = JSON.stringify(testUserData);
+    
     mockResponse(mockResponseDataStr, {
         headers: { 'content-type': 'application/json' }
     });
