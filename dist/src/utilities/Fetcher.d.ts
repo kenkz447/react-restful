@@ -87,6 +87,7 @@ export interface FetcherProps {
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
     requestFailed?: (requestInfo: RequestInfo) => void;
+    unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
 }
 export declare class Fetcher {
     props: FetcherProps;

@@ -3,30 +3,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const shouldParmeterIgnore = (param) => !param || param.type === 'body' || param.value === undefined || param.value === '';
 class Resource {
     constructor(props) {
+        this.mixinWithDefaultParams = (requestParams) => {
+            let params = this.props.getDefaulParams();
+            if (Array.isArray(params)) {
+                return [...requestParams, ...params];
+            }
+            return [...requestParams, params];
+        };
         if (typeof props === 'string') {
-            this.recordType = null;
-            this.url = Resource.getUrl(props);
-            this.method = 'GET';
+            this.props = {
+                resourceType: null,
+                url: Resource.getUrl(props),
+                method: 'GET'
+            };
         }
         else {
-            this.recordType = props.resourceType || null;
-            this.url = Resource.getUrl(props.url);
-            this.method = props.method || 'GET';
-            this.mapDataToStore = props.mapDataToStore;
-            if (!this.mapDataToStore && props.resourceType) {
-                this.mapDataToStore = Resource.defaultMapDataToStore(this);
+            this.props = Object.assign({}, props, { resourceType: props.resourceType || null, url: Resource.getUrl(props.url), method: props.method || 'GET' });
+            if (!props.mapDataToStore && props.resourceType) {
+                this.props.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
-            this.requestBodyParser = props.requestBodyParser;
-            this.requestFailed = props.requestFailed;
-            this.requestSuccess = props.requestSuccess;
-            this.onConfirm = props.onConfirm;
-            this.getResponseData = props.getResponseData;
         }
     }
     urlReslover(params = []) {
-        let uRL = this.url;
+        const { getDefaulParams, url } = this.props;
+        let uRL = url;
         const searchs = new URLSearchParams();
-        for (const param of params) {
+        const mixedRequestParams = getDefaulParams ? this.mixinWithDefaultParams(params) : params;
+        for (const param of mixedRequestParams) {
             const ignore = shouldParmeterIgnore(param);
             if (ignore) {
                 continue;
@@ -62,7 +65,7 @@ class Resource {
                 'Content-Type': bodyParam.contentType
             }),
             body: JSON.stringify(convertedBody || body),
-            method: this.method
+            method: this.props.method
         };
         if (!bodyParam.contentType &&
             requestInit.headers instanceof Headers) {
@@ -83,7 +86,7 @@ Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
         if (!hasKey) {
             return;
         }
-        if (resource.method === 'DELETE') {
+        if (resource.props.method === 'DELETE') {
             store.removeRecord(resourceType, data);
         }
         else {

@@ -17,7 +17,7 @@ class Fetcher {
             if (!onConfirm) {
                 return true;
             }
-            const confirmer = confirmInfo.resource.onConfirm || onConfirm;
+            const confirmer = confirmInfo.resource.props.onConfirm || onConfirm;
             return yield confirmer(confirmInfo);
         });
         /**
@@ -27,7 +27,8 @@ class Fetcher {
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
-            const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed } = this.props;
+            const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed, unexpectedErrorCatched } = this.props;
+            const resourceProps = resource.props;
             const requestParams = Array.isArray(params) ?
                 params :
                 (params && [params]);
@@ -35,26 +36,35 @@ class Fetcher {
             if (entry && url.startsWith('/')) {
                 url = entry + url;
             }
-            const usedRequestBodyParser = resource.requestBodyParser || requestBodyParser;
+            const usedRequestBodyParser = resourceProps.requestBodyParser || requestBodyParser;
             const requestInit = resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
                 this.createDefaultRequestInit();
-            requestInit.method = resource.method;
+            requestInit.method = resourceProps.method;
             const modifiedRequestInit = beforeFetch ? yield beforeFetch(url, requestInit) : requestInit;
             let response;
             try {
                 response = yield fetch(url, modifiedRequestInit);
             }
             catch (error) {
+                if (unexpectedErrorCatched) {
+                    throw unexpectedErrorCatched(url, modifiedRequestInit, error);
+                }
+                if (error instanceof Error) {
+                    throw error;
+                }
                 throw new Error(error);
             }
+            const requestMeta = resourceProps.getDefaultMeta ?
+                resourceProps.getDefaultMeta() :
+                meta;
             const requestInfo = {
-                meta,
+                meta: requestMeta,
                 params: requestParams,
                 response
             };
             if (!response.ok) {
-                if (resource.requestFailed) {
-                    resource.requestFailed(requestInfo);
+                if (resourceProps.requestFailed) {
+                    resourceProps.requestFailed(requestInfo);
                 }
                 if (requestFailed) {
                     requestFailed(requestInfo);
@@ -66,19 +76,19 @@ class Fetcher {
             }
             const responseContentType = response.headers.get('content-type');
             if (responseContentType && responseContentType.startsWith('application/json')) {
-                const usedGetResponseData = resource.getResponseData || getResponseData;
+                const usedGetResponseData = resourceProps.getResponseData || getResponseData;
                 const responseData = usedGetResponseData ?
                     yield usedGetResponseData(requestInfo) :
                     yield response.json();
-                if (resource.requestSuccess) {
-                    resource.requestSuccess(requestInfo);
+                if (resourceProps.requestSuccess) {
+                    resourceProps.requestSuccess(requestInfo);
                 }
-                if (resource.mapDataToStore && resource.recordType) {
-                    const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
+                if (resourceProps.mapDataToStore && resourceProps.resourceType) {
+                    const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resourceProps.resourceType.name);
                     if (!resourceTypeHasRegistered) {
-                        store.registerRecord(resource.recordType);
+                        store.registerRecord(resourceProps.resourceType);
                     }
-                    resource.mapDataToStore(responseData, resource.recordType, store);
+                    resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
                 }
                 return responseData;
             }

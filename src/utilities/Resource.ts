@@ -6,7 +6,7 @@ export interface ResourceProps<DataModel, Meta> extends
     Pick<FetcherProps, 'requestBodyParser'>,
     Pick<FetcherProps, 'getResponseData'>,
     Pick<FetcherProps, 'onConfirm'> {
-    resourceType?: ResourceType;
+    resourceType?: ResourceType | null;
     url: string;
     method?: string;
     mapDataToStore?: (
@@ -16,21 +16,16 @@ export interface ResourceProps<DataModel, Meta> extends
     ) => void;
     requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
+
+    getDefaultMeta?: () => {};
+    getDefaulParams?: () => RequestParameter;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
     !param || param.type === 'body' || param.value === undefined || param.value === '';
 
 export class Resource<DataModel, Meta = {}> {
-    recordType: ResourceType | null;
-    url: string;
-    method: string;
-    mapDataToStore: ResourceProps<DataModel, Meta>['mapDataToStore'];
-    requestFailed: ResourceProps<DataModel, Meta>['requestFailed'];
-    getResponseData: ResourceProps<DataModel, Meta>['getResponseData'];
-    requestBodyParser: ResourceProps<DataModel, Meta>['requestBodyParser'];
-    requestSuccess: ResourceProps<DataModel, Meta>['requestSuccess'];
-    onConfirm: ResourceProps<DataModel, Meta>['onConfirm'];
+    props: ResourceProps<DataModel, Meta>;
 
     // tslint:disable-next-line:no-any
     static defaultMapDataToStore = (resource: Resource<any, any>) => (
@@ -49,7 +44,7 @@ export class Resource<DataModel, Meta = {}> {
                 return;
             }
 
-            if (resource.method === 'DELETE') {
+            if (resource.props.method === 'DELETE') {
                 store.removeRecord(resourceType, data);
             } else {
                 store.mapRecord(resourceType, data);
@@ -64,31 +59,44 @@ export class Resource<DataModel, Meta = {}> {
 
     constructor(props: ResourceProps<DataModel, Meta> | string) {
         if (typeof props === 'string') {
-            this.recordType = null;
-            this.url = Resource.getUrl(props);
-            this.method = 'GET';
+            this.props = {
+                resourceType: null,
+                url: Resource.getUrl(props),
+                method: 'GET'
+            };
         } else {
-            this.recordType = props.resourceType || null;
-            this.url = Resource.getUrl(props.url);
+            this.props = {
+                ...props,
+                resourceType: props.resourceType || null,
+                url: Resource.getUrl(props.url),
+                method: props.method || 'GET',
+            };
 
-            this.method = props.method || 'GET';
-
-            this.mapDataToStore = props.mapDataToStore;
-            if (!this.mapDataToStore && props.resourceType) {
-                this.mapDataToStore = Resource.defaultMapDataToStore(this);
+            if (!props.mapDataToStore && props.resourceType) {
+                this.props.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
-            this.requestBodyParser = props.requestBodyParser;
-            this.requestFailed = props.requestFailed;
-            this.requestSuccess = props.requestSuccess;
-            this.onConfirm = props.onConfirm;
-            this.getResponseData = props.getResponseData;
         }
     }
 
+    mixinWithDefaultParams = (requestParams: RequestParameter[]) => {
+        let params = this.props.getDefaulParams!();
+
+        if (Array.isArray(params)) {
+            return [...requestParams, ...params];
+        }
+
+        return [...requestParams, params];
+    }
+
     urlReslover(params: Array<RequestParameter> = []): string {
-        let uRL: string = this.url;
+        const { getDefaulParams, url } = this.props;
+
+        let uRL: string = url;
         const searchs: URLSearchParams = new URLSearchParams();
-        for (const param of params) {
+
+        const mixedRequestParams = getDefaulParams ? this.mixinWithDefaultParams(params) : params;
+
+        for (const param of mixedRequestParams) {
             const ignore = shouldParmeterIgnore(param);
             if (ignore) {
                 continue;
@@ -97,7 +105,7 @@ export class Resource<DataModel, Meta = {}> {
             if (param.type === 'path') {
                 uRL = uRL.replace(`/:${param.parameter}`, `/${param.value}`);
             } else {
-                searchs.append(param.parameter as string, param.value as string);
+                searchs.append(param.parameter!, param.value as string);
             }
         }
 
@@ -133,7 +141,7 @@ export class Resource<DataModel, Meta = {}> {
                 'Content-Type': bodyParam.contentType as string
             }),
             body: JSON.stringify(convertedBody || body),
-            method: this.method
+            method: this.props.method
         };
 
         if (

@@ -35,7 +35,7 @@ describe('Resource', () => {
             const requestheaders = requestInit.headers as Headers;
             const requestContentType = requestheaders.get('Content-Type');
 
-            expect(requestInit.method).toBe(createUserResource.method!);
+            expect(requestInit.method).toBe(createUserResource.props.method!);
             expect(requestContentType).toBe('application/json');
             expect(requestInit.body).toBe(JSON.stringify(bodyParams.value));
         });

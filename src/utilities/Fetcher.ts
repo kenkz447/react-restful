@@ -124,7 +124,7 @@ export class Fetcher {
             return true;
         }
 
-        const confirmer = confirmInfo.resource.onConfirm || onConfirm;
+        const confirmer = confirmInfo.resource.props.onConfirm || onConfirm;
 
         return await confirmer(confirmInfo);
     }
@@ -151,6 +151,8 @@ export class Fetcher {
             unexpectedErrorCatched
         } = this.props;
 
+        const resourceProps = resource.props;
+
         const requestParams = Array.isArray(params) ?
             params :
             (params && [params]);
@@ -160,13 +162,13 @@ export class Fetcher {
             url = entry + url;
         }
 
-        const usedRequestBodyParser = resource.requestBodyParser || requestBodyParser;
+        const usedRequestBodyParser = resourceProps.requestBodyParser || requestBodyParser;
 
         const requestInit: RequestInit =
             resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
             this.createDefaultRequestInit();
 
-        requestInit.method = resource.method;
+        requestInit.method = resourceProps.method;
 
         const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
 
@@ -186,15 +188,19 @@ export class Fetcher {
             throw new Error(error);
         }
         
+        const requestMeta = resourceProps.getDefaultMeta ?
+            resourceProps.getDefaultMeta() as Meta :
+            meta;
+
         const requestInfo: RequestInfo<Meta> = {
-            meta,
+            meta: requestMeta,
             params: requestParams,
             response
         };
 
         if (!response.ok) {
-            if (resource.requestFailed) {
-                resource.requestFailed(requestInfo);
+            if (resourceProps.requestFailed) {
+                resourceProps.requestFailed(requestInfo);
             }
 
             if (requestFailed) {
@@ -210,23 +216,23 @@ export class Fetcher {
 
         const responseContentType = response.headers.get('content-type');
         if (responseContentType && responseContentType.startsWith('application/json')) {
-            const usedGetResponseData = resource.getResponseData || getResponseData;
+            const usedGetResponseData = resourceProps.getResponseData || getResponseData;
 
             const responseData = usedGetResponseData ?
                 await usedGetResponseData(requestInfo) :
                 await response.json();
 
-            if (resource.requestSuccess) {
-                resource.requestSuccess(requestInfo);
+            if (resourceProps.requestSuccess) {
+                resourceProps.requestSuccess(requestInfo);
             }
 
-            if (resource.mapDataToStore && resource.recordType) {
-                const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resource.recordType.name);
+            if (resourceProps.mapDataToStore && resourceProps.resourceType) {
+                const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resourceProps.resourceType.name);
                 if (!resourceTypeHasRegistered) {
-                    store.registerRecord(resource.recordType);
+                    store.registerRecord(resourceProps.resourceType);
                 }
 
-                resource.mapDataToStore(responseData, resource.recordType, store);
+                resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
             }
 
             return responseData;

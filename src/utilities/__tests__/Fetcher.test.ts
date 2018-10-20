@@ -50,7 +50,7 @@ describe('Fetcher', () => {
             const requestInit = createUserResource.requestInitReslover(fetchParams);
 
             expect(fetcher.props.beforeFetch).toBeCalledWith(
-                createUserResource.url,
+                createUserResource.props.url,
                 requestInit
             );
 
