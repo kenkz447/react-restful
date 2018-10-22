@@ -1,15 +1,14 @@
 /// <reference types="node" />
 import * as React from 'react';
 import { Record, ResourceType, Store, SubscribeEvent } from '../utilities';
-declare type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (record: DataModel, ownProps: OwnProps, trackedData: Array<DataModel>) => boolean;
-declare type ShouldTrackingNewRecord<DataModel, OwnProps> = shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
-interface ContainerProps<DataModel extends Record, MappingProps, OwnProps = MappingProps> {
+declare type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (record: DataModel, ownProps: Readonly<OwnProps>, trackedData: Array<DataModel>) => boolean;
+interface ContainerProps<DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps> {
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
-    readonly shouldTrackingNewRecord?: ShouldTrackingNewRecord<DataModel, OwnProps>;
-    readonly registerToTracking?: (props: OwnProps, current?: Array<DataModel>, event?: SubscribeEvent) => Array<DataModel>;
+    readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
+    readonly registerToTracking?: (props: Readonly<OwnProps>, current?: Array<DataModel>, event?: SubscribeEvent) => Array<DataModel>;
     readonly sort?: (a: DataModel, b: DataModel) => number;
-    readonly mapToProps: (data: Array<DataModel>, ownProps: OwnProps) => MappingProps;
+    readonly mapToProps: (data: Array<DataModel>, ownProps: Readonly<OwnProps>) => MappingProps;
 }
 interface RestfulDataContainerState<DataModel, OwnProps> {
     readonly props: OwnProps;
@@ -17,11 +16,10 @@ interface RestfulDataContainerState<DataModel, OwnProps> {
 }
 /**
  * @deprecated, use withRestfulData instead
- * !Will be removed at version 2.0
  */
 export declare function restfulDataContainer<DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
-        readonly shouldTrackingNewRecord: ShouldTrackingNewRecord<DataModel, OwnProps>;
+        readonly shouldTrackingNewRecord: boolean | shouldTrackingNewRecordFunc<DataModel, OwnProps>;
         readonly store: Store;
         readonly unsubscribeStore: () => void;
         mappingTimeout: NodeJS.Timer;
@@ -48,7 +46,7 @@ export declare function restfulDataContainer<DataModel extends Record, MappingPr
     getDerivedStateFromProps(nextProps: OwnProps, state: RestfulDataContainerState<DataModel, OwnProps>): {
         props: OwnProps;
         trackingData: DataModel[];
-    } | null | undefined;
+    } | null;
 };
 export declare const withRestfulData: typeof restfulDataContainer;
 export {};

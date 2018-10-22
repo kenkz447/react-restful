@@ -187,7 +187,7 @@ export class Fetcher {
 
             throw new Error(error);
         }
-        
+
         const requestMeta = resourceProps.getDefaultMeta ?
             resourceProps.getDefaultMeta() as Meta :
             meta;

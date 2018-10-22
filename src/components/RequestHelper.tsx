@@ -6,8 +6,7 @@ interface RequestHelperChildProps<DataModel, Meta> {
     sending: boolean;
 }
 
-// tslint:disable-next-line:no-any
-export interface RequestHelperProps<DataModel extends Record = any, Meta = {}> {
+export interface RequestHelperProps<DataModel extends Record = {}, Meta = {}> {
     resource: Resource<DataModel>;
     defaultRequestParams?: RequestParams;
     defaultRequestMeta?: Meta;

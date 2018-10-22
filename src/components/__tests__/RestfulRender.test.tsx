@@ -3,7 +3,8 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { Resource, RequestParameter, Store, Fetcher } from '../../utilities';
 import { PropsSetter } from '../PropsSetter';
-import { RestfulRender, RestfulRenderProps } from '../RestfulRender';
+import { RestfulRender, RestfulRenderProps, RestfulRenderChildProps } from '../RestfulRender';
+import { withRestfulData } from '../restfulDataContainer';
 
 import { userResourceType, User } from '../../test-resources';
 
@@ -44,9 +45,20 @@ describe('RestfulRender', () => {
     const onFetchCompleted = jest.fn();
 
     const mockResponseDataStr = JSON.stringify(testUserData);
-    
+
     mockResponse(mockResponseDataStr, {
         headers: { 'content-type': 'application/json' }
+    });
+
+    const Container = withRestfulData<User, RestfulRenderChildProps<User[]>>({
+        store: restfulStore,
+        resourceType: userResourceType,
+        registerToTracking: (ownProps) => {
+            return ownProps.data || [];
+        },
+        mapToProps: (users, ownProps) => {
+            return ownProps;
+        }
     });
 
     const restfulRender = ReactTestRenderer.create(
@@ -56,6 +68,7 @@ describe('RestfulRender', () => {
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
                 onFetchCompleted={onFetchCompleted}
+                Container={Container}
             >
                 {render}
             </RestfulRender>
@@ -76,7 +89,7 @@ describe('RestfulRender', () => {
             expect(render.mock.calls[1][0]).toEqual({
                 error: null,
                 data: testUserData,
-                fetching: false 
+                fetching: false
             });
             expect(onFetchCompleted).toBeCalledWith(testUserData);
         });

@@ -4,7 +4,7 @@ interface RequestHelperChildProps<DataModel, Meta> {
     sendRequest: (params?: RequestParams, meta?: Meta) => Promise<DataModel | false>;
     sending: boolean;
 }
-export interface RequestHelperProps<DataModel extends Record = any, Meta = {}> {
+export interface RequestHelperProps<DataModel extends Record = {}, Meta = {}> {
     resource: Resource<DataModel>;
     defaultRequestParams?: RequestParams;
     defaultRequestMeta?: Meta;

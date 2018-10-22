@@ -6,6 +6,11 @@ import {
     RequestParams
 } from '../utilities';
 
+export interface RestfulRenderMetaData {
+    currentParams?: RequestParams;
+    oldParams?: RequestParams;
+}
+
 export interface RestfulRenderChildProps<DataModel> {
     // Resonse result, default: null
     data: DataModel | null;
@@ -28,17 +33,21 @@ export interface RestfulRenderProps<DataModel> {
     resource: Resource<DataModel>;
 
     parameters?: RequestParams;
-    
+
     // Presenter component
-    render?: RestfulRenderChildType<DataModel> ;
+    render?: RestfulRenderChildType<DataModel>;
 
     // Like `render` prop but in children style
     children?: RestfulRenderChildType<DataModel>;
 
     onFetchCompleted?: (data: DataModel) => void;
+
+    // tslint:disable-next-line:no-any
+    Container?: (Component: RestfulRenderChildType<DataModel>) => any;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
+    prevParams?: RequestParams;
     needsUpdate?: boolean;
     fetching: boolean;
     componentRenderProps: RestfulRenderChildProps<DataModel>;
@@ -49,6 +58,9 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         parameters: []
     };
 
+    // tslint:disable-next-line:no-any
+    Component: React.ComponentType<any>;
+
     static getDerivedStateFromProps<DataModel>(
         nextProps: RestfulRenderProps<DataModel>,
         prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null {
@@ -57,6 +69,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         ) {
             return {
                 ...nextProps,
+                prevParams: prevState.parameters,
                 componentRenderProps: prevState.componentRenderProps,
                 needsUpdate: true,
                 fetching: true
@@ -68,6 +81,17 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
 
     constructor(props: RestfulRenderProps<T>) {
         super(props);
+
+        const { render, children, Container } = props;
+
+        const RenderComponent = children || render;
+
+        if (!RenderComponent) {
+            throw new Error('`children` or `render` required!');
+        }
+
+        this.Component = Container ? Container(RenderComponent) : RenderComponent;
+
         this.state = {
             ...props,
             fetcher: props.fetcher || global[fetcherSymbol],
@@ -91,10 +115,9 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     }
 
     render() {
-        const { children } = this.props;
-        const { render, componentRenderProps, fetching } = this.state;
+        const { componentRenderProps, fetching } = this.state;
 
-        const Component = children || render;
+        const { Component } = this;
 
         if (!Component) {
             return null;
@@ -111,7 +134,11 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     }
 
     async fetching() {
-        const { fetcher, resource, parameters, onFetchCompleted } = this.state;
+        const { fetcher, resource, parameters, onFetchCompleted, prevParams } = this.state;
+        const metaData = {
+            currentParams: parameters,
+            oldParams: prevParams
+        };
 
         try {
             const data = await fetcher!.fetchResource<T>(resource, parameters);

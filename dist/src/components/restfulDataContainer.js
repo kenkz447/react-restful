@@ -11,7 +11,6 @@ const React = __importStar(require("react"));
 const utilities_1 = require("../utilities");
 /**
  * @deprecated, use withRestfulData instead
- * !Will be removed at version 2.0
  */
 function restfulDataContainer(containerProps) {
     return (Component) => class RestfulDataContainer extends React.PureComponent {
@@ -141,18 +140,15 @@ function restfulDataContainer(containerProps) {
             if (!registerToTracking) {
                 return null;
             }
-            for (const nextPropKey in nextProps) {
-                if (!nextProps.hasOwnProperty(nextPropKey)) {
-                    continue;
+            const collectionKey = Object.keys(nextProps)[0];
+            if (state.props[collectionKey] !== nextProps[collectionKey]) {
+                let newTrackingData = registerToTracking && registerToTracking(nextProps, []);
+                if (newTrackingData && sort) {
+                    newTrackingData = newTrackingData.sort(sort);
                 }
-                if (state.props[nextPropKey] !== nextProps[nextPropKey]) {
-                    let newTrackingData = registerToTracking && registerToTracking(nextProps, []);
-                    if (newTrackingData && sort) {
-                        newTrackingData = newTrackingData.sort(sort);
-                    }
-                    return Object.assign({}, state, { props: nextProps, trackingData: newTrackingData });
-                }
+                return Object.assign({}, state, { props: nextProps, trackingData: newTrackingData });
             }
+            return null;
         }
         componentWillUnmount() {
             this.unsubscribeStore();

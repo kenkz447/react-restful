@@ -20,6 +20,12 @@ const utilities_1 = require("../utilities");
 class RestfulRender extends React.Component {
     constructor(props) {
         super(props);
+        const { render, children, Container } = props;
+        const RenderComponent = children || render;
+        if (!RenderComponent) {
+            throw new Error('`children` or `render` required!');
+        }
+        this.Component = Container ? Container(RenderComponent) : RenderComponent;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: true, componentRenderProps: {
                 data: null,
                 error: null
@@ -28,7 +34,7 @@ class RestfulRender extends React.Component {
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.resource !== prevState.resource ||
             nextProps.parameters !== prevState.parameters) {
-            return Object.assign({}, nextProps, { componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
+            return Object.assign({}, nextProps, { prevParams: prevState.parameters, componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
         }
         return null;
     }
@@ -42,9 +48,8 @@ class RestfulRender extends React.Component {
         }
     }
     render() {
-        const { children } = this.props;
-        const { render, componentRenderProps, fetching } = this.state;
-        const Component = children || render;
+        const { componentRenderProps, fetching } = this.state;
+        const { Component } = this;
         if (!Component) {
             return null;
         }
@@ -53,7 +58,11 @@ class RestfulRender extends React.Component {
     }
     fetching() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { fetcher, resource, parameters, onFetchCompleted } = this.state;
+            const { fetcher, resource, parameters, onFetchCompleted, prevParams } = this.state;
+            const metaData = {
+                currentParams: parameters,
+                oldParams: prevParams
+            };
             try {
                 const data = yield fetcher.fetchResource(resource, parameters);
                 if (onFetchCompleted) {
