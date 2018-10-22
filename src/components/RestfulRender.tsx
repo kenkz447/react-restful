@@ -6,11 +6,6 @@ import {
     RequestParams
 } from '../utilities';
 
-export interface RestfulRenderMetaData {
-    currentParams?: RequestParams;
-    oldParams?: RequestParams;
-}
-
 export interface RestfulRenderChildProps<DataModel> {
     // Resonse result, default: null
     data: DataModel | null;
@@ -41,9 +36,6 @@ export interface RestfulRenderProps<DataModel> {
     children?: RestfulRenderChildType<DataModel>;
 
     onFetchCompleted?: (data: DataModel) => void;
-
-    // tslint:disable-next-line:no-any
-    Container?: (Component: RestfulRenderChildType<DataModel>) => any;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
@@ -59,7 +51,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     };
 
     // tslint:disable-next-line:no-any
-    Component: React.ComponentType<any>;
+    Component: RestfulRenderChildType<T>;
 
     static getDerivedStateFromProps<DataModel>(
         nextProps: RestfulRenderProps<DataModel>,
@@ -82,15 +74,13 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     constructor(props: RestfulRenderProps<T>) {
         super(props);
 
-        const { render, children, Container } = props;
+        const { children, render } = props;
 
-        const RenderComponent = children || render;
-
-        if (!RenderComponent) {
+        if (!children && !render) {
             throw new Error('`children` or `render` required!');
         }
 
-        this.Component = Container ? Container(RenderComponent) : RenderComponent;
+        this.Component = children || render!;
 
         this.state = {
             ...props,
@@ -134,11 +124,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     }
 
     async fetching() {
-        const { fetcher, resource, parameters, onFetchCompleted, prevParams } = this.state;
-        const metaData = {
-            currentParams: parameters,
-            oldParams: prevParams
-        };
+        const { fetcher, resource, parameters, onFetchCompleted } = this.state;
 
         try {
             const data = await fetcher!.fetchResource<T>(resource, parameters);

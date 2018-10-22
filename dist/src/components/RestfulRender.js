@@ -20,12 +20,11 @@ const utilities_1 = require("../utilities");
 class RestfulRender extends React.Component {
     constructor(props) {
         super(props);
-        const { render, children, Container } = props;
-        const RenderComponent = children || render;
-        if (!RenderComponent) {
+        const { children, render } = props;
+        if (!children && !render) {
             throw new Error('`children` or `render` required!');
         }
-        this.Component = Container ? Container(RenderComponent) : RenderComponent;
+        this.Component = children || render;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: true, componentRenderProps: {
                 data: null,
                 error: null
@@ -58,11 +57,7 @@ class RestfulRender extends React.Component {
     }
     fetching() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { fetcher, resource, parameters, onFetchCompleted, prevParams } = this.state;
-            const metaData = {
-                currentParams: parameters,
-                oldParams: prevParams
-            };
+            const { fetcher, resource, parameters, onFetchCompleted } = this.state;
             try {
                 const data = yield fetcher.fetchResource(resource, parameters);
                 if (onFetchCompleted) {

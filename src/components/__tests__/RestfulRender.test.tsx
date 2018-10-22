@@ -3,13 +3,11 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { Resource, RequestParameter, Store, Fetcher } from '../../utilities';
 import { PropsSetter } from '../PropsSetter';
-import { RestfulRender, RestfulRenderProps, RestfulRenderChildProps } from '../RestfulRender';
-import { withRestfulData } from '../restfulDataContainer';
+import { RestfulRender, RestfulRenderProps } from '../RestfulRender';
 
 import { userResourceType, User } from '../../test-resources';
 
 describe('RestfulRender', () => {
-
     const restfulStore = new Store();
     const fetcher = new Fetcher({
         store: restfulStore
@@ -40,7 +38,7 @@ describe('RestfulRender', () => {
 
     let paramsProps = [pathParam];
 
-    let render = jest.fn((renderProps) => null);
+    let render = jest.fn(() => null);
 
     const onFetchCompleted = jest.fn();
 
@@ -50,17 +48,6 @@ describe('RestfulRender', () => {
         headers: { 'content-type': 'application/json' }
     });
 
-    const Container = withRestfulData<User, RestfulRenderChildProps<User[]>>({
-        store: restfulStore,
-        resourceType: userResourceType,
-        registerToTracking: (ownProps) => {
-            return ownProps.data || [];
-        },
-        mapToProps: (users, ownProps) => {
-            return ownProps;
-        }
-    });
-
     const restfulRender = ReactTestRenderer.create(
         <PropsSetter>
             <RestfulRender
@@ -68,7 +55,6 @@ describe('RestfulRender', () => {
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
                 onFetchCompleted={onFetchCompleted}
-                Container={Container}
             >
                 {render}
             </RestfulRender>

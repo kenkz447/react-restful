@@ -1,9 +1,5 @@
 import * as React from 'react';
 import { Resource, Fetcher, RequestParams } from '../utilities';
-export interface RestfulRenderMetaData {
-    currentParams?: RequestParams;
-    oldParams?: RequestParams;
-}
 export interface RestfulRenderChildProps<DataModel> {
     data: DataModel | null;
     error: Error | null;
@@ -17,7 +13,6 @@ export interface RestfulRenderProps<DataModel> {
     render?: RestfulRenderChildType<DataModel>;
     children?: RestfulRenderChildType<DataModel>;
     onFetchCompleted?: (data: DataModel) => void;
-    Container?: (Component: RestfulRenderChildType<DataModel>) => any;
 }
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     prevParams?: RequestParams;
@@ -27,7 +22,7 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
 }
 export declare class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: Partial<RestfulRenderProps<{}>>;
-    Component: React.ComponentType<any>;
+    Component: RestfulRenderChildType<T>;
     static getDerivedStateFromProps<DataModel>(nextProps: RestfulRenderProps<DataModel>, prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null;
     constructor(props: RestfulRenderProps<T>);
     componentDidMount(): void;
