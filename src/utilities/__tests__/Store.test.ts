@@ -26,7 +26,7 @@ describe('Store', () => {
         it('register record type', () => {
             store.registerRecord(userResourceType);
             table = store.getRecordTable(userResourceType);
-            const registeredResourceType = store.getRegisteredResourceType(userResourceType.name);
+            const registeredResourceType = store.getRegisteredResourceType(userResourceType.props.name);
 
             expect(table instanceof RecordTable).toBe(true);
             expect(registeredResourceType).toBe(userResourceType);

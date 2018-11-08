@@ -9,7 +9,7 @@ export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
 
-export interface SubscribeEvent<T extends Record = Record> {
+export interface SubscribeEvent<T> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
     record: T;
@@ -20,13 +20,13 @@ type findRecordPredicate<T extends Record> = (value: T, index: number, recordMap
 type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
 
 interface SubscribeStack<T> {
-    resourceTypes: ResourceType[];
+    resourceTypes: ResourceType<T>[];
     callback: SubscribeCallback<T>;
     subscribeId: Symbol;
 }
 
 export class Store {
-    private resourceTypes: Array<ResourceType>;
+    private resourceTypes: Array<ResourceType<{}>>;
     private recordTables: RecordTables;
 
     // tslint:disable-next-line:no-any
@@ -41,7 +41,7 @@ export class Store {
         this.getRecordTable = this.getRecordTable.bind(this);
     }
 
-    subscribe<T>(resourceTypes: ResourceType[], callback: SubscribeCallback<T>) {
+    subscribe<T>(resourceTypes: ResourceType<{}>[], callback: SubscribeCallback<T>) {
         const subscribeId = Symbol();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
@@ -58,12 +58,12 @@ export class Store {
     }
 
     resourceTypeHasRegistered(resourceTypeName: string) {
-        const found = this.resourceTypes.find(o => o.name === resourceTypeName);
+        const found = this.resourceTypes.find(o => o.props.name === resourceTypeName);
         return found !== undefined;
     }
 
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}> {
-        const resourceType = this.resourceTypes.find(o => o.name === resourceTypeName);
+        const resourceType = this.resourceTypes.find(o => o.props.name === resourceTypeName);
         if (!resourceType) {
             throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
         }
@@ -71,12 +71,12 @@ export class Store {
         return resourceType;
     }
 
-    getRecordTable<T extends Record = Record>(resourceType: ResourceType<T>) {
-        return this.recordTables[resourceType.name] as RecordTable<T>;
+    getRecordTable<T>(resourceType: ResourceType<T>) {
+        return this.recordTables[resourceType.props.name] as RecordTable<T>;
     }
 
-    registerRecord<T extends Record = Record>(resourceType: ResourceType<T>) {
-        if (this.recordTables[resourceType.name]) {
+    registerRecord<T>(resourceType: ResourceType<T>) {
+        if (this.recordTables[resourceType.props.name]) {
             return;
         }
 
@@ -84,13 +84,13 @@ export class Store {
             resourceType: resourceType
         });
 
-        this.recordTables[resourceType.name] = newRecordTable;
+        this.recordTables[resourceType.props.name] = newRecordTable;
 
         this.resourceTypes.push(resourceType);
     }
 
-    mapRecord<T extends Record>(resourceType: ResourceType, record: T) {
-        const table = this.recordTables[resourceType.name];
+    mapRecord<T>(resourceType: ResourceType<T>, record: T) {
+        const table = this.recordTables[resourceType.props.name];
 
         const upsertResult = table.upsert(record);
 
@@ -107,8 +107,8 @@ export class Store {
         return true;
     }
 
-    removeRecord(resourceType: ResourceType, record: Record) {
-        const table = this.recordTables[resourceType.name];
+    removeRecord<T>(resourceType: ResourceType<T>, record: T) {
+        const table = this.recordTables[resourceType.props.name];
         table.remove(record);
         this.doSubcribleCallbacks({
             type: 'remove',
@@ -145,12 +145,12 @@ export class Store {
         }
     }
 
-    dataMapping<T extends Record>(resourceType: ResourceType, record: T) {
+    dataMapping<T>(resourceType: ResourceType<T>, record: T) {
         const recordToMapping = Object.assign({}, record);
         this.mapRecord(resourceType, recordToMapping);
     }
 
-    private doSubcribleCallbacks(event: SubscribeEvent) {
+    private doSubcribleCallbacks(event: SubscribeEvent<Record>) {
         for (const subscribeStack of this.subscribeStacks) {
             if (subscribeStack.resourceTypes.includes(event.resourceType)) {
                 subscribeStack.callback(event);

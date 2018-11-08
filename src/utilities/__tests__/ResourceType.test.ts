@@ -1,5 +1,4 @@
-import { RecordTable } from '../RecordTable';
-import { ResourceType, SchemaField } from '../ResourceType';
+import { ResourceType } from '../ResourceType';
 import { Store } from '../Store';
 import { User } from '../../test-resources';
 

@@ -227,8 +227,9 @@ export class Fetcher {
             }
 
             if (resourceProps.mapDataToStore && resourceProps.resourceType) {
-                const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resourceProps.resourceType.name);
-                if (!resourceTypeHasRegistered) {
+                const registeredResourceType = store.resourceTypeHasRegistered(resourceProps.resourceType.props.name);
+
+                if (!registeredResourceType) {
                     store.registerRecord(resourceProps.resourceType);
                 }
 
