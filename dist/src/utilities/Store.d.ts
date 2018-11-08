@@ -28,10 +28,6 @@ export declare class Store {
     removeRecord(resourceType: ResourceType, record: Record): boolean;
     findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number): T | null;
     findOneRecord<T extends Record>(resourceType: ResourceType<T>, specs: findRecordPredicate<T> | T | string | number): T | null;
-    /**
-     * Map a fetched data of type to store
-     * * For FK, we only update primitive fields of FK record
-     */
     dataMapping<T extends Record>(resourceType: ResourceType, record: T): void;
     private doSubcribleCallbacks;
 }

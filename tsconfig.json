@@ -64,5 +64,6 @@
     "dist",
     "**/*.test.ts",
     "**/*.test.tsx",
+    "**/test-resources/*",
   ]
 }

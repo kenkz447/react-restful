@@ -6,7 +6,7 @@ interface ContainerProps<DataModel extends Record, MappingProps, OwnProps extend
     readonly store?: Store;
     readonly resourceType: ResourceType<DataModel>;
     readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
-    readonly registerToTracking?: (props: Readonly<OwnProps>, current?: Array<DataModel>, event?: SubscribeEvent) => Array<DataModel>;
+    readonly registerToTracking: (props: Readonly<OwnProps>, current?: Array<DataModel>, event?: SubscribeEvent) => Array<DataModel>;
     readonly sort?: (a: DataModel, b: DataModel) => number;
     readonly mapToProps: (data: Array<DataModel>, ownProps: Readonly<OwnProps>) => MappingProps;
 }
@@ -14,10 +14,7 @@ interface RestfulDataContainerState<DataModel, OwnProps> {
     readonly props: OwnProps;
     readonly trackingData: Array<DataModel>;
 }
-/**
- * @deprecated, use withRestfulData instead
- */
-export declare function restfulDataContainer<DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
+export declare function withRestfulData<DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>(containerProps: ContainerProps<DataModel, MappingProps, OwnProps>): (Component: React.ComponentType<OwnProps>) => {
     new (props: OwnProps, context: {}): {
         readonly shouldTrackingNewRecord: boolean | shouldTrackingNewRecordFunc<DataModel, OwnProps>;
         readonly store: Store;
@@ -28,9 +25,8 @@ export declare function restfulDataContainer<DataModel extends Record, MappingPr
         render(): JSX.Element;
         isTracked: (record: DataModel) => boolean;
         onStoreEvent: (e: SubscribeEvent<DataModel>) => void;
-        manualMapping: (e: SubscribeEvent<DataModel>) => undefined;
+        manualMapping: (e: SubscribeEvent<DataModel>) => void;
         deferererSetState: (data: DataModel[]) => void;
-        autoMapping: (e: SubscribeEvent<DataModel>) => void;
         onDataRemove: (record: DataModel) => void;
         setState<K extends "props" | "trackingData">(state: RestfulDataContainerState<DataModel, OwnProps> | ((prevState: Readonly<RestfulDataContainerState<DataModel, OwnProps>>, props: Readonly<OwnProps>) => RestfulDataContainerState<DataModel, OwnProps> | Pick<RestfulDataContainerState<DataModel, OwnProps>, K> | null) | Pick<RestfulDataContainerState<DataModel, OwnProps>, K> | null, callback?: (() => void) | undefined): void;
         forceUpdate(callBack?: (() => void) | undefined): void;
@@ -48,5 +44,4 @@ export declare function restfulDataContainer<DataModel extends Record, MappingPr
         trackingData: DataModel[];
     } | null;
 };
-export declare const withRestfulData: typeof restfulDataContainer;
 export {};

@@ -22,7 +22,6 @@ export declare class ResourceType<T extends Record = {}> {
     static findPKField(schema: ResourceTypeProps['schema']): SchemaField;
     constructor(props: ResourceTypeProps | string);
     getAllRecords(store: Store, predicate?: (record: T) => boolean): T[];
-    populate(store: Store, record: T): T;
     getAllChildType(store: Store): ResourceType<{}>[];
     getChildTypeSchemafield(childType: ResourceType): SchemaField;
     getRecordKey(record: T): any;

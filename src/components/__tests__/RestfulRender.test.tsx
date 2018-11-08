@@ -2,8 +2,7 @@ import fetch, { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { Resource, RequestParameter, Store, Fetcher } from '../../utilities';
-import { PropsSetter } from '../PropsSetter';
-import { RestfulRender, RestfulRenderProps } from '../RestfulRender';
+import { RestfulRender } from '../RestfulRender';
 
 import { userResourceType, User } from '../../test-resources';
 
@@ -49,21 +48,15 @@ describe('RestfulRender', () => {
     });
 
     const restfulRender = ReactTestRenderer.create(
-        <PropsSetter>
-            <RestfulRender
-                fetcher={fetcher}
-                resource={getUserByBranchResource}
-                parameters={paramsProps}
-                onFetchCompleted={onFetchCompleted}
-            >
-                {render}
-            </RestfulRender>
-        </PropsSetter>
+        <RestfulRender
+            fetcher={fetcher}
+            resource={getUserByBranchResource}
+            parameters={paramsProps}
+            onFetchCompleted={onFetchCompleted}
+        >
+            {render}
+        </RestfulRender>
     );
-
-    const restfulRenderInstance
-        // tslint:disable-next-line:no-any
-        = restfulRender.getInstance() as any as PropsSetter<Partial<RestfulRenderProps<User[]>>>;
 
     describe('init props', () => {
         it('Props as first render', () => {
@@ -86,10 +79,16 @@ describe('RestfulRender', () => {
 
         beforeAll(() => {
             fetch.mockRejectOnce(error);
-
-            restfulRenderInstance.setProps({
-                parameters: [pathParam]
-            });
+            restfulRender.update(
+                <RestfulRender
+                    fetcher={fetcher}
+                    resource={getUserByBranchResource}
+                    parameters={[pathParam]}
+                    onFetchCompleted={onFetchCompleted}
+                >
+                    {render}
+                </RestfulRender>
+            );
         });
 
         it('fetch failed', () => {

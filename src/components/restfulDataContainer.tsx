@@ -14,7 +14,7 @@ interface ContainerProps<DataModel extends Record, MappingProps, OwnProps extend
 
     readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
 
-    readonly registerToTracking?: (
+    readonly registerToTracking: (
         props: Readonly<OwnProps>,
         current?: Array<DataModel>,
         event?: SubscribeEvent
@@ -30,10 +30,7 @@ interface RestfulDataContainerState<DataModel, OwnProps> {
     readonly trackingData: Array<DataModel>;
 }
 
-/**
- * @deprecated, use withRestfulData instead
- */
-export function restfulDataContainer
+export function withRestfulData
     <DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>
     (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
     return (Component: React.ComponentType<OwnProps>) =>
@@ -66,7 +63,7 @@ export function restfulDataContainer
                 if (state.props[collectionKey] !== nextProps[collectionKey]) {
 
                     let newTrackingData = registerToTracking && registerToTracking(nextProps, []);
-                        
+
                     if (newTrackingData && sort) {
                         newTrackingData = newTrackingData.sort(sort);
                     }
@@ -145,22 +142,12 @@ export function restfulDataContainer
                     return this.onDataRemove(e.record);
                 }
 
-                const { registerToTracking } = containerProps;
-
-                if (registerToTracking) {
-                    return this.manualMapping(e);
-                }
-
-                return this.autoMapping(e);
+                return this.manualMapping(e);
             }
 
             manualMapping = (e: SubscribeEvent<DataModel>) => {
                 const { resourceType, registerToTracking, sort } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
-
-                if (!registerToTracking) {
-                    return void this.autoMapping(e);
-                }
 
                 if (!this.tempData) {
                     this.tempData = [...this.state.trackingData];
@@ -228,45 +215,6 @@ export function restfulDataContainer
                 );
             }
 
-            autoMapping = (e: SubscribeEvent<DataModel>) => {
-                const { resourceType } = containerProps;
-
-                const eventRecordKey = resourceType.getRecordKey(e.record);
-
-                const existingRecordIndex = this.state.trackingData.findIndex(o => {
-                    return eventRecordKey === resourceType.getRecordKey(o);
-                });
-
-                if (existingRecordIndex < 0) {
-                    return this.setState({
-                        ...this.state,
-                        trackingData: [...this.state.trackingData, e.record]
-                    });
-                }
-
-                const newStateData = [...this.state.trackingData];
-                newStateData[existingRecordIndex] = e.record;
-
-                if (this.mappingTimeout) {
-                    clearTimeout(this.mappingTimeout);
-                }
-
-                this.mappingTimeout = setTimeout(
-                    () => {
-                        const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
-
-                        const data = resourceType.getAllRecords(this.store, (record) =>
-                            dataIds.includes(resourceType.getRecordKey(record)));
-
-                        this.setState({
-                            ...this.state,
-                            trackingData: data
-                        });
-                    },
-                    100
-                );
-            }
-
             onDataRemove = (record: DataModel) => {
                 const { resourceType } = containerProps;
 
@@ -288,5 +236,3 @@ export function restfulDataContainer
             }
         };
 }
-
-export const withRestfulData = restfulDataContainer;

@@ -13,8 +13,8 @@ describe('RequestHelper', () => {
     });
 
     const renderChild = jest.fn((props) => <button>button</button>);
-    const requestHelperProps: RequestHelperProps = {
-        resource: new Resource<User>('/user'),
+    const requestHelperProps: RequestHelperProps<User> = {
+        resource: new Resource('/user'),
         children: (props) => {
             return renderChild(props);
         }

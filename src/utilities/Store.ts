@@ -145,75 +145,8 @@ export class Store {
         }
     }
 
-    /**
-     * Map a fetched data of type to store
-     * * For FK, we only update primitive fields of FK record
-     */
     dataMapping<T extends Record>(resourceType: ResourceType, record: T) {
-        const recordToMapping = Object.assign({}, record) as T;
-        const recordKey = resourceType.getRecordKey(record);
-
-        for (const schemaField of resourceType.schema!) {
-            const resourceTypeName = schemaField.resourceType as string;
-
-            switch (schemaField.type) {
-                case 'FK':
-                    let fkValue = recordToMapping[schemaField.field];
-                    const fkIsObject = (typeof fkValue === 'object');
-                    if (!fkIsObject) {
-                        continue;
-                    }
-
-                    const fkResourceType = this.getRegisteredResourceType(resourceTypeName);
-
-                    // We need update MANY field FKResource
-                    const fkValueKey = fkResourceType.getRecordKey(fkValue);
-                    const tryGetFKObjectFormStore = this.findRecordByKey(fkResourceType, fkValueKey);
-                    if (tryGetFKObjectFormStore) {
-                        fkValue = tryGetFKObjectFormStore;
-                    }
-                    const fkChildSchemaField = fkResourceType.getChildTypeSchemafield(resourceType);
-                    if (fkValue[fkChildSchemaField.field]) {
-                        if (!fkValue[fkChildSchemaField.field].includes(recordKey)) {
-                            fkValue[fkChildSchemaField.field].push(recordKey);
-                        }
-                    } else {
-                        fkValue[fkChildSchemaField.field] = [recordKey];
-                    }
-
-                    this.dataMapping(fkResourceType, fkValue);
-                    // Replace the original object with their id
-                    recordToMapping[schemaField.field] = fkResourceType.getRecordKey(fkValue);
-                    break;
-                case 'MANY':
-                    const childValue = recordToMapping[schemaField.field];
-                    if (!childValue) {
-                        continue;
-                    }
-
-                    if (!Array.isArray(childValue)) {
-                        throw new Error('MANY related but received something is not an array!');
-                    }
-
-                    const childValueIsArrayObject = (typeof childValue[0] === 'object');
-                    if (!childValueIsArrayObject) {
-                        continue;
-                    }
-
-                    // TODO: We need update FK field of childResource to map with parent record
-
-                    const childResourceType = this.getRegisteredResourceType(resourceTypeName);
-                    for (const relatedRecord of childValue) {
-                        this.dataMapping(childResourceType, relatedRecord);
-                    }
-
-                    // Replace the original object array with their ID array
-                    recordToMapping[schemaField.field] = childValue.map((o: T) => childResourceType.getRecordKey(o));
-                    break;
-                default:
-                    break;
-            }
-        }
+        const recordToMapping = Object.assign({}, record);
         this.mapRecord(resourceType, recordToMapping);
     }
 

@@ -6,7 +6,7 @@ interface RequestHelperChildProps<DataModel, Meta> {
     sending: boolean;
 }
 
-export interface RequestHelperProps<DataModel extends Record = {}, Meta = {}> {
+export interface RequestHelperProps<DataModel, Meta = {}> {
     resource: Resource<DataModel>;
     defaultRequestParams?: RequestParams;
     defaultRequestMeta?: Meta;

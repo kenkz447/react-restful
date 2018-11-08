@@ -9,10 +9,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __importStar(require("react"));
 const utilities_1 = require("../utilities");
-/**
- * @deprecated, use withRestfulData instead
- */
-function restfulDataContainer(containerProps) {
+function withRestfulData(containerProps) {
     return (Component) => class RestfulDataContainer extends React.PureComponent {
         constructor(props, context) {
             super(props, context);
@@ -31,18 +28,11 @@ function restfulDataContainer(containerProps) {
                 if (e.type === 'remove') {
                     return this.onDataRemove(e.record);
                 }
-                const { registerToTracking } = containerProps;
-                if (registerToTracking) {
-                    return this.manualMapping(e);
-                }
-                return this.autoMapping(e);
+                return this.manualMapping(e);
             };
             this.manualMapping = (e) => {
                 const { resourceType, registerToTracking, sort } = containerProps;
                 const eventRecordKey = resourceType.getRecordKey(e.record);
-                if (!registerToTracking) {
-                    return void this.autoMapping(e);
-                }
                 if (!this.tempData) {
                     this.tempData = [...this.state.trackingData];
                 }
@@ -86,26 +76,6 @@ function restfulDataContainer(containerProps) {
                         };
                     });
                     this.tempData = null;
-                }, 100);
-            };
-            this.autoMapping = (e) => {
-                const { resourceType } = containerProps;
-                const eventRecordKey = resourceType.getRecordKey(e.record);
-                const existingRecordIndex = this.state.trackingData.findIndex(o => {
-                    return eventRecordKey === resourceType.getRecordKey(o);
-                });
-                if (existingRecordIndex < 0) {
-                    return this.setState(Object.assign({}, this.state, { trackingData: [...this.state.trackingData, e.record] }));
-                }
-                const newStateData = [...this.state.trackingData];
-                newStateData[existingRecordIndex] = e.record;
-                if (this.mappingTimeout) {
-                    clearTimeout(this.mappingTimeout);
-                }
-                this.mappingTimeout = setTimeout(() => {
-                    const dataIds = newStateData.map(newStateRecord => resourceType.getRecordKey(newStateRecord));
-                    const data = resourceType.getAllRecords(this.store, (record) => dataIds.includes(resourceType.getRecordKey(record)));
-                    this.setState(Object.assign({}, this.state, { trackingData: data }));
                 }, 100);
             };
             this.onDataRemove = (record) => {
@@ -162,5 +132,4 @@ function restfulDataContainer(containerProps) {
         }
     };
 }
-exports.restfulDataContainer = restfulDataContainer;
-exports.withRestfulData = restfulDataContainer;
+exports.withRestfulData = withRestfulData;
