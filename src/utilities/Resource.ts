@@ -6,12 +6,12 @@ export interface ResourceProps<DataModel, Meta> extends
     Pick<FetcherProps, 'requestBodyParser'>,
     Pick<FetcherProps, 'getResponseData'>,
     Pick<FetcherProps, 'onConfirm'> {
-    resourceType?: ResourceType | null;
+    resourceType?: ResourceType<{}>;
     url: string;
     method?: string;
     mapDataToStore?: (
         data: DataModel,
-        resourceType: ResourceType,
+        resourceType: ResourceType<{}>,
         store: Store
     ) => void;
     requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
@@ -30,25 +30,13 @@ export class Resource<DataModel, Meta = {}> {
     // tslint:disable-next-line:no-any
     static defaultMapDataToStore = (resource: Resource<any, any>) => (
         data: {} | Array<{}>,
-        resourceType: ResourceType,
+        resourceType: ResourceType<{}>,
         store: Store
     ) => {
-        if (Array.isArray(data)) {
-            for (const record of data) {
-                store.mapRecord(resourceType, record);
-            }
+        if (resource.props.method === 'DELETE') {
+            store.removeRecord(resourceType, data);
         } else {
-            const hasKey = resourceType.getRecordKey(data);
-
-            if (!hasKey) {
-                return;
-            }
-
-            if (resource.props.method === 'DELETE') {
-                store.removeRecord(resourceType, data);
-            } else {
-                store.mapRecord(resourceType, data);
-            }
+            store.mapRecord(resourceType, data);
         }
     }
 
@@ -60,14 +48,13 @@ export class Resource<DataModel, Meta = {}> {
     constructor(props: ResourceProps<DataModel, Meta> | string) {
         if (typeof props === 'string') {
             this.props = {
-                resourceType: null,
                 url: Resource.getUrl(props),
                 method: 'GET'
             };
         } else {
             this.props = {
                 ...props,
-                resourceType: props.resourceType || null,
+                resourceType: props.resourceType,
                 url: Resource.getUrl(props.url),
                 method: props.method || 'GET',
             };

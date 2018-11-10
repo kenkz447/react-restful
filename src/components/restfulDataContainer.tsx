@@ -1,238 +1,195 @@
 import * as React from 'react';
-import { Record, ResourceType, Store, SubscribeEvent, storeSymbol } from '../utilities';
+import { Record, ResourceType, storeSymbol, Store, SubscribeEvent } from '../utilities';
 
-type shouldTrackingNewRecordFunc<DataModel, OwnProps> = (
-    record: DataModel,
-    ownProps: Readonly<OwnProps>,
-    trackedData: Array<DataModel>
-) => boolean;
-
-interface ContainerProps<DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps> {
-    readonly store?: Store;
-
-    readonly resourceType: ResourceType<DataModel>;
-
-    readonly shouldTrackingNewRecord?: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
-
-    readonly registerToTracking: (
-        props: Readonly<OwnProps>,
-        current?: Array<DataModel>,
-        event?: SubscribeEvent
-    ) => Array<DataModel>;
-
-    readonly sort?: (a: DataModel, b: DataModel) => number;
-
-    readonly mapToProps: (data: Array<DataModel>, ownProps: Readonly<OwnProps>) => MappingProps;
+export interface RestfulDataContainerProps<T extends Record> {
+    resourceType: ResourceType<T>;
+    dataSource: Array<T>;
+    shouldConcatSources?: boolean;
+    shouldAppendNewRecord?: (newRecord: T, index: number) => boolean;
+    sort?: (first: T, second: T) => number;
+    children?: (data: Array<T>) => JSX.Element;
+    onRecordRemove?: (record: T) => void;
 }
 
-interface RestfulDataContainerState<DataModel, OwnProps> {
-    readonly props: OwnProps;
-    readonly trackingData: Array<DataModel>;
+interface RestfulDataContainerState<T extends Record> {
+    needsUpdateSource?: boolean;
+    dataSource: Array<T>;
 }
 
-export function withRestfulData
-    <DataModel extends Record, MappingProps, OwnProps extends MappingProps = MappingProps>
-    (containerProps: ContainerProps<DataModel, MappingProps, OwnProps>) {
-    return (Component: React.ComponentType<OwnProps>) =>
-        class RestfulDataContainer extends React.PureComponent<
-            OwnProps,
-            RestfulDataContainerState<DataModel, OwnProps>
-            > {
+export class RestfulDataContainer<T> extends React.PureComponent<
+    RestfulDataContainerProps<T>,
+    RestfulDataContainerState<T>> {
 
-            readonly shouldTrackingNewRecord: shouldTrackingNewRecordFunc<DataModel, OwnProps> | boolean;
+    private isUnmounting = false;
+    private store: Store = global[storeSymbol];
+    private unsubscribeStore!: () => void;
 
-            readonly store: Store;
+    static getDerivedStateFromProps(
+        nextProps: RestfulDataContainerProps<{}>,
+        currentState: RestfulDataContainerState<{}>
+    ) {
+        const { dataSource, shouldConcatSources } = nextProps;
 
-            readonly unsubscribeStore: () => void;
+        if (currentState.needsUpdateSource) {
+            return {
+                dataSource: currentState.dataSource,
+                needsUpdateSource: false
+            };
+        }
 
-            mappingTimeout!: NodeJS.Timer;
-            tempData!: DataModel[] | null;
+        if (dataSource === currentState.dataSource) {
+            return null;
+        }
 
-            static getDerivedStateFromProps(
-                nextProps: OwnProps,
-                state: RestfulDataContainerState<DataModel, OwnProps>
-            ) {
-                const { registerToTracking, sort } = containerProps;
+        if (shouldConcatSources) {
+            let nextSource = [...currentState.dataSource, ...dataSource];
+            return {
+                dataSource: nextSource
+            };
+        }
 
-                if (!registerToTracking) {
-                    return null;
-                }
-
-                const collectionKey = Object.keys(nextProps)[0];
-
-                if (state.props[collectionKey] !== nextProps[collectionKey]) {
-
-                    let newTrackingData = registerToTracking && registerToTracking(nextProps, []);
-
-                    if (newTrackingData && sort) {
-                        newTrackingData = newTrackingData.sort(sort);
-                    }
-
-                    return {
-                        ...state,
-                        props: nextProps,
-                        trackingData: newTrackingData
-                    };
-                }
-
-                return null;
-            }
-
-            componentWillUnmount() {
-                this.unsubscribeStore();
-            }
-
-            constructor(props: OwnProps, context: {}) {
-                super(props, context);
-
-                const {
-                    store,
-                    resourceType,
-                    registerToTracking,
-                    shouldTrackingNewRecord
-                } = containerProps;
-
-                this.store = store || global[storeSymbol];
-                this.shouldTrackingNewRecord = shouldTrackingNewRecord || true;
-
-                this.unsubscribeStore = this.store.subscribe([resourceType], this.onStoreEvent);
-
-                const data = registerToTracking && registerToTracking(props);
-                const propDataIdMap = data && data.map(o => resourceType.getRecordKey(o));
-
-                const mappingData = propDataIdMap ?
-                    resourceType.getAllRecords(this.store, (recordInstance) => {
-                        const recordInstanceKey = resourceType.getRecordKey(recordInstance);
-                        return propDataIdMap.includes(recordInstanceKey);
-                    }) :
-                    resourceType.getAllRecords(this.store);
-
-                this.state = {
-                    props: props,
-                    trackingData: mappingData
-                };
-            }
-
-            render() {
-                const { mapToProps } = containerProps;
-                const { trackingData } = this.state;
-
-                const mapedProps = mapToProps(trackingData, this.props);
-
-                const props = Object.assign({}, this.props, mapedProps);
-
-                return (<Component {...props} />);
-            }
-
-            isTracked = (record: DataModel) => {
-                const { resourceType } = containerProps;
-                const checkingRecordKey = resourceType.getRecordKey(record);
-                for (const stateRecord of this.state.trackingData) {
-                    const inStateRecordKey = resourceType.getRecordKey(stateRecord);
-                    if (checkingRecordKey === inStateRecordKey) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            onStoreEvent = (e: SubscribeEvent<DataModel>) => {
-                if (e.type === 'remove') {
-                    return this.onDataRemove(e.record);
-                }
-
-                return this.manualMapping(e);
-            }
-
-            manualMapping = (e: SubscribeEvent<DataModel>) => {
-                const { resourceType, registerToTracking, sort } = containerProps;
-                const eventRecordKey = resourceType.getRecordKey(e.record);
-
-                if (!this.tempData) {
-                    this.tempData = [...this.state.trackingData];
-                }
-
-                const nextTrackingData = this.tempData.map(o => {
-                    if (resourceType.getRecordKey(o) === eventRecordKey) {
-                        return e.record;
-                    }
-                    return o;
-                });
-
-                const recordExistedInTrackingList =
-                    nextTrackingData.find(o => resourceType.getRecordKey(o) === eventRecordKey);
-
-                const allowTrackingNewRecord = (!recordExistedInTrackingList && this.shouldTrackingNewRecord)
-                    && (
-                        typeof this.shouldTrackingNewRecord === 'boolean' ?
-                            this.shouldTrackingNewRecord :
-                            this.shouldTrackingNewRecord(e.record, this.props, this.state.trackingData)
-                    );
-
-                let data = allowTrackingNewRecord ?
-                    registerToTracking(this.props, [...nextTrackingData, e.record], e) :
-                    registerToTracking(this.props, nextTrackingData, e);
-
-                if (sort) {
-                    data = data.sort(sort);
-                }
-
-                const hasAddToTracking = data.find(o =>
-                    resourceType.getRecordKey(o) === eventRecordKey
-                );
-
-                if (!hasAddToTracking) {
-                    this.tempData = null;
-                    return;
-                }
-
-                this.deferererSetState(data);
-                this.tempData = data;
-            }
-
-            deferererSetState = (data: Array<DataModel>) => {
-                if (this.mappingTimeout) {
-                    clearTimeout(this.mappingTimeout);
-                }
-
-                const snapshotTrackingData = this.state.trackingData;
-
-                this.mappingTimeout = setTimeout(
-                    () => {
-                        this.setState((stateNow) => {
-                            if (stateNow.trackingData !== snapshotTrackingData) {
-                                return null;
-                            }
-
-                            return {
-                                trackingData: data
-                            };
-                        });
-                        this.tempData = null;
-                    },
-                    100
-                );
-            }
-
-            onDataRemove = (record: DataModel) => {
-                const { resourceType } = containerProps;
-
-                const isRecordExit = this.isTracked(record);
-
-                if (!isRecordExit) {
-                    return;
-                }
-
-                const deletedRecordKey = resourceType.getRecordKey(record);
-
-                const updatedStateRecords = this.state.trackingData.filter(o =>
-                    resourceType.getRecordKey(o) !== deletedRecordKey);
-
-                this.setState({
-                    ...this.state,
-                    trackingData: updatedStateRecords
-                });
-            }
+        return {
+            dataSource: dataSource
         };
+    }
+
+    constructor(props: RestfulDataContainerProps<T>) {
+        super(props);
+        const { dataSource } = props;
+        this.state = {
+            dataSource: dataSource
+        };
+    }
+
+    componentDidMount() {
+        const { resourceType } = this.props;
+
+        this.unsubscribeStore = this.store.subscribe([resourceType], this.onStoreEvent);
+    }
+
+    componentWillUnmount() {
+        this.isUnmounting = true;
+        this.unsubscribeStore();
+    }
+
+    private onStoreEvent = (e: SubscribeEvent<T>) => {
+        if (e.type === 'remove') {
+            return this.onDataRemove(e.value as T);
+        }
+
+        return this.manualMapping(e);
+    }
+
+    private onDataRemove = (record: T) => {
+        const { resourceType } = this.props;
+
+        const isRecordExist = this.isRecordExist(record);
+
+        if (!isRecordExist) {
+            return;
+        }
+
+        const deletedRecordKey = resourceType.getRecordKey(record);
+
+        const updatedStateRecords = this.state.dataSource.filter(o =>
+            resourceType.getRecordKey(o) !== deletedRecordKey);
+
+        this.setState({
+            dataSource: updatedStateRecords
+        });
+    }
+
+    private isRecordExist = (record: T) => {
+        const { resourceType } = this.props;
+
+        const checkingRecordKey = resourceType.getRecordKey(record);
+        for (const stateRecord of this.state.dataSource) {
+            const inStateRecordKey = resourceType.getRecordKey(stateRecord);
+            if (checkingRecordKey === inStateRecordKey) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private manualMapping = (e: SubscribeEvent<T>) => {
+
+        if (this.isUnmounting) {
+            return;
+        }
+
+        const eventRecords = this.getEventRecords(e);
+        if (!eventRecords.length) {
+            return;
+        }
+
+        let nextDataSource = [...this.state.dataSource];
+
+        for (const record of eventRecords) {
+            const isRecordExist = this.isRecordExist(record);
+            if (isRecordExist) {
+                nextDataSource = this.replaceRecord(nextDataSource, record);
+                continue;
+            }
+
+            nextDataSource.push(record);
+        }
+
+        this.setState({
+            needsUpdateSource: true,
+            dataSource: nextDataSource
+        });
+    }
+
+    private getEventRecords = (e: SubscribeEvent<T>) => {
+        const { shouldAppendNewRecord } = this.props;
+
+        if (!Array.isArray(e.value)) {
+            if (shouldAppendNewRecord && !shouldAppendNewRecord(e.value, 0)) {
+                return [];
+            }
+
+            return [e.value];
+        }
+
+        if (shouldAppendNewRecord) {
+            return e.value.filter(shouldAppendNewRecord);
+        }
+
+        return e.value;
+    }
+
+    private replaceRecord = (source: Array<T>, newRecord: T) => {
+        const { resourceType } = this.props;
+        const newRecordKey = resourceType.getRecordKey(newRecord);
+
+        return source.map(existRecord => {
+            if (resourceType.getRecordKey(existRecord) === newRecordKey) {
+                return newRecord;
+            }
+            return existRecord;
+        });
+    }
+
+    public render() {
+        const { children } = this.props;
+        if (!children) {
+            return null;
+        }
+
+        const dataSource = this.getRenderDataSource();
+        return children(dataSource);
+    }
+
+    private getRenderDataSource = () => {
+        const { dataSource } = this.state;
+
+        const { sort } = this.props;
+        if (sort) {
+            return dataSource.sort(sort);
+        }
+
+        return [...dataSource];
+    }
 }

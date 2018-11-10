@@ -2,9 +2,10 @@ export {
     RestfulRenderChildProps,
     RestfulRender,
     RestfulRenderProps,
-    withRestfulData,
     RequestHelper,
-    RequestHelperProps
+    RequestHelperProps,
+    RestfulDataContainer,
+    RestfulDataContainerProps
 } from './components';
 
 export {

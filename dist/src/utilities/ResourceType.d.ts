@@ -4,26 +4,15 @@
  */
 import { Record } from './RecordTable';
 import { Store } from './Store';
-export interface SchemaField {
-    field: string;
-    type: 'PK' | 'FK' | 'MANY';
-    resourceType?: string;
-}
 interface ResourceTypeProps {
     name: string;
-    schema?: SchemaField[];
+    keyProperty?: string;
     store?: Store;
 }
-export declare class ResourceType<T extends Record = {}> {
-    static defaultProps: Partial<ResourceTypeProps>;
-    name: string;
-    schema: ResourceTypeProps['schema'];
-    primaryKey: string;
-    static findPKField(schema: ResourceTypeProps['schema']): SchemaField;
+export declare class ResourceType<T extends Record> {
+    readonly props: ResourceTypeProps;
     constructor(props: ResourceTypeProps | string);
     getAllRecords(store: Store, predicate?: (record: T) => boolean): T[];
-    getAllChildType(store: Store): ResourceType<{}>[];
-    getChildTypeSchemafield(childType: ResourceType): SchemaField;
     getRecordKey(record: T): any;
 }
 export {};

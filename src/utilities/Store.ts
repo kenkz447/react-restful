@@ -12,7 +12,7 @@ export interface RecordTables {
 export interface SubscribeEvent<T> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
-    record: T;
+    value: T | Array<T>;
 }
 
 type findRecordPredicate<T extends Record> = (value: T, index: number, recordMap: Array<T>) => boolean;
@@ -101,10 +101,25 @@ export class Store {
         this.doSubcribleCallbacks({
             type: 'mapping',
             resourceType: resourceType,
-            record: record
+            value: record
         });
 
         return true;
+    }
+
+    mapRecords<T>(resourceType: ResourceType<T>, records: Array<T>) {
+        if (!Array.isArray(records)) {
+            return;
+        }
+
+        const table = this.recordTables[resourceType.props.name];
+        records.forEach(record => table.upsert(record));
+
+        this.doSubcribleCallbacks({
+            type: 'mapping',
+            resourceType: resourceType,
+            value: records
+        });
     }
 
     removeRecord<T>(resourceType: ResourceType<T>, record: T) {
@@ -113,7 +128,7 @@ export class Store {
         this.doSubcribleCallbacks({
             type: 'remove',
             resourceType: resourceType,
-            record: record
+            value: record
         });
         return true;
     }
@@ -145,9 +160,12 @@ export class Store {
         }
     }
 
-    dataMapping<T>(resourceType: ResourceType<T>, record: T) {
-        const recordToMapping = Object.assign({}, record);
-        this.mapRecord(resourceType, recordToMapping);
+    dataMapping<T>(resourceType: ResourceType<T>, data: T | Array<T>) {
+        if (Array.isArray(data)) {
+            this.mapRecords(resourceType, data);
+        } else {
+            this.mapRecord(resourceType, data);
+        }
     }
 
     private doSubcribleCallbacks(event: SubscribeEvent<Record>) {

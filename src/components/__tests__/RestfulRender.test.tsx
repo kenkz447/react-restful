@@ -18,9 +18,7 @@ describe('RestfulRender', () => {
         method: 'GET',
         url: '/api/users/{branch}',
         mapDataToStore: (users, resourceType, store) => {
-            for (const user of users) {
-                store.dataMapping(resourceType, user);
-            }
+            store.dataMapping(resourceType, users);
         }
     });
 

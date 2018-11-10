@@ -12,13 +12,12 @@ class Resource {
         };
         if (typeof props === 'string') {
             this.props = {
-                resourceType: null,
                 url: Resource.getUrl(props),
                 method: 'GET'
             };
         }
         else {
-            this.props = Object.assign({}, props, { resourceType: props.resourceType || null, url: Resource.getUrl(props.url), method: props.method || 'GET' });
+            this.props = Object.assign({}, props, { resourceType: props.resourceType, url: Resource.getUrl(props.url), method: props.method || 'GET' });
             if (!props.mapDataToStore && props.resourceType) {
                 this.props.mapDataToStore = Resource.defaultMapDataToStore(this);
             }
@@ -76,22 +75,11 @@ class Resource {
 }
 // tslint:disable-next-line:no-any
 Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
-    if (Array.isArray(data)) {
-        for (const record of data) {
-            store.mapRecord(resourceType, record);
-        }
+    if (resource.props.method === 'DELETE') {
+        store.removeRecord(resourceType, data);
     }
     else {
-        const hasKey = resourceType.getRecordKey(data);
-        if (!hasKey) {
-            return;
-        }
-        if (resource.props.method === 'DELETE') {
-            store.removeRecord(resourceType, data);
-        }
-        else {
-            store.mapRecord(resourceType, data);
-        }
+        store.mapRecord(resourceType, data);
     }
 };
 /**

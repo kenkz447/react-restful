@@ -27,31 +27,31 @@ class Store {
         this.subscribeStacks = this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
     resourceTypeHasRegistered(resourceTypeName) {
-        const found = this.resourceTypes.find(o => o.name === resourceTypeName);
+        const found = this.resourceTypes.find(o => o.props.name === resourceTypeName);
         return found !== undefined;
     }
     getRegisteredResourceType(resourceTypeName) {
-        const resourceType = this.resourceTypes.find(o => o.name === resourceTypeName);
+        const resourceType = this.resourceTypes.find(o => o.props.name === resourceTypeName);
         if (!resourceType) {
             throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
         }
         return resourceType;
     }
     getRecordTable(resourceType) {
-        return this.recordTables[resourceType.name];
+        return this.recordTables[resourceType.props.name];
     }
     registerRecord(resourceType) {
-        if (this.recordTables[resourceType.name]) {
+        if (this.recordTables[resourceType.props.name]) {
             return;
         }
         const newRecordTable = new RecordTable_1.RecordTable({
             resourceType: resourceType
         });
-        this.recordTables[resourceType.name] = newRecordTable;
+        this.recordTables[resourceType.props.name] = newRecordTable;
         this.resourceTypes.push(resourceType);
     }
     mapRecord(resourceType, record) {
-        const table = this.recordTables[resourceType.name];
+        const table = this.recordTables[resourceType.props.name];
         const upsertResult = table.upsert(record);
         if (!upsertResult) {
             throw new Error('upsert not working!');
@@ -59,17 +59,29 @@ class Store {
         this.doSubcribleCallbacks({
             type: 'mapping',
             resourceType: resourceType,
-            record: record
+            value: record
         });
         return true;
     }
+    mapRecords(resourceType, records) {
+        if (!Array.isArray(records)) {
+            return;
+        }
+        const table = this.recordTables[resourceType.props.name];
+        records.forEach(record => table.upsert(record));
+        this.doSubcribleCallbacks({
+            type: 'mapping',
+            resourceType: resourceType,
+            value: records
+        });
+    }
     removeRecord(resourceType, record) {
-        const table = this.recordTables[resourceType.name];
+        const table = this.recordTables[resourceType.props.name];
         table.remove(record);
         this.doSubcribleCallbacks({
             type: 'remove',
             resourceType: resourceType,
-            record: record
+            value: record
         });
         return true;
     }
@@ -95,9 +107,13 @@ class Store {
                 return table.records.find(specs) || null;
         }
     }
-    dataMapping(resourceType, record) {
-        const recordToMapping = Object.assign({}, record);
-        this.mapRecord(resourceType, recordToMapping);
+    dataMapping(resourceType, data) {
+        if (Array.isArray(data)) {
+            this.mapRecords(resourceType, data);
+        }
+        else {
+            this.mapRecord(resourceType, data);
+        }
     }
     doSubcribleCallbacks(event) {
         for (const subscribeStack of this.subscribeStacks) {

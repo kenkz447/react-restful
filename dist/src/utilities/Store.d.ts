@@ -6,10 +6,10 @@ import { ResourceType } from './ResourceType';
 export interface RecordTables {
     [key: string]: RecordTable<{}>;
 }
-export interface SubscribeEvent<T extends Record = Record> {
+export interface SubscribeEvent<T> {
     type: 'mapping' | 'remove';
     resourceType: ResourceType<T>;
-    record: T;
+    value: T | Array<T>;
 }
 declare type findRecordPredicate<T extends Record> = (value: T, index: number, recordMap: Array<T>) => boolean;
 declare type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
@@ -18,17 +18,18 @@ export declare class Store {
     private recordTables;
     private subscribeStacks;
     constructor();
-    subscribe<T>(resourceTypes: ResourceType[], callback: SubscribeCallback<T>): () => void;
+    subscribe<T>(resourceTypes: ResourceType<{}>[], callback: SubscribeCallback<T>): () => void;
     unSubscribe(subscribeId: Symbol): void;
     resourceTypeHasRegistered(resourceTypeName: string): boolean;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
-    getRecordTable<T extends Record = Record>(resourceType: ResourceType<T>): RecordTable<T>;
-    registerRecord<T extends Record = Record>(resourceType: ResourceType<T>): void;
-    mapRecord<T extends Record>(resourceType: ResourceType, record: T): boolean;
-    removeRecord(resourceType: ResourceType, record: Record): boolean;
+    getRecordTable<T>(resourceType: ResourceType<T>): RecordTable<T>;
+    registerRecord<T>(resourceType: ResourceType<T>): void;
+    mapRecord<T>(resourceType: ResourceType<T>, record: T): boolean;
+    mapRecords<T>(resourceType: ResourceType<T>, records: Array<T>): void;
+    removeRecord<T>(resourceType: ResourceType<T>, record: T): boolean;
     findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number): T | null;
     findOneRecord<T extends Record>(resourceType: ResourceType<T>, specs: findRecordPredicate<T> | T | string | number): T | null;
-    dataMapping<T extends Record>(resourceType: ResourceType, record: T): void;
+    dataMapping<T>(resourceType: ResourceType<T>, data: T | Array<T>): void;
     private doSubcribleCallbacks;
 }
 export {};

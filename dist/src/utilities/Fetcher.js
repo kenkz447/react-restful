@@ -84,8 +84,8 @@ class Fetcher {
                     resourceProps.requestSuccess(requestInfo);
                 }
                 if (resourceProps.mapDataToStore && resourceProps.resourceType) {
-                    const resourceTypeHasRegistered = store.resourceTypeHasRegistered(resourceProps.resourceType.name);
-                    if (!resourceTypeHasRegistered) {
+                    const registeredResourceType = store.resourceTypeHasRegistered(resourceProps.resourceType.props.name);
+                    if (!registeredResourceType) {
                         store.registerRecord(resourceProps.resourceType);
                     }
                     resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
