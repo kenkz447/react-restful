@@ -52,6 +52,12 @@ export interface RequestParameter {
 
 export interface FetcherProps {
     /**
+     * Fetch method
+     * Default: window.fetch
+     */
+    fetchMethod?: GlobalFetch['fetch'];
+
+    /**
      * Store instance
      */
     store: Store;
@@ -110,6 +116,7 @@ export interface FetcherProps {
 
 export class Fetcher {
     props: FetcherProps;
+
     createDefaultRequestInit = () => ({ headers: new Headers() });
 
     constructor(props: FetcherProps) {
@@ -148,7 +155,8 @@ export class Fetcher {
             requestBodyParser,
             getResponseData,
             requestFailed,
-            unexpectedErrorCatched
+            unexpectedErrorCatched,
+            fetchMethod
         } = this.props;
 
         const resourceProps = resource.props;
@@ -174,8 +182,10 @@ export class Fetcher {
 
         let response!: Response;
 
+        const useFetchMethod = fetchMethod || fetch;
+
         try {
-            response = await fetch(url, modifiedRequestInit);
+            response = await useFetchMethod(url, modifiedRequestInit);
         } catch (error) {
             if (unexpectedErrorCatched) {
                 throw unexpectedErrorCatched(url, modifiedRequestInit, error);

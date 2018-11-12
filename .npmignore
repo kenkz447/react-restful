@@ -14,5 +14,8 @@ npm-debug.log
 __mocks__
 .github
 .vscode
+.travis.yml
+jest.config.json
+tsconfig.json
+tslint.json
 coverage
-src

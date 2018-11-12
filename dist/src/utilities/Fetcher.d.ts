@@ -42,6 +42,11 @@ export interface RequestParameter {
 }
 export interface FetcherProps {
     /**
+     * Fetch method
+     * Default: window.fetch
+     */
+    fetchMethod?: GlobalFetch['fetch'];
+    /**
      * Store instance
      */
     store: Store;

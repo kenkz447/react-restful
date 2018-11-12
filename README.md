@@ -7,8 +7,6 @@ Another liblary for restful resources management for React app.
 [![Coverage Status](https://coveralls.io/repos/github/kenkz447/react-restful/badge.svg?branch=master)](https://coveralls.io/github/kenkz447/react-restful?branch=master)
 
 
-![readme.png](https://2.pik.vn/2018d9c3d431-98f3-4de3-8189-9332ee83ddc2.png)*Are you familiar with Swagger?*
-
 <!-- TOC -->
 
 - [react-restful](#react-restful)
