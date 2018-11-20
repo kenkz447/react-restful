@@ -44,6 +44,11 @@ describe('RestfulRender', () => {
     mockResponse(mockResponseDataStr, {
         headers: { 'content-type': 'application/json' }
     });
+    
+    const defaultData: User[] = [{
+        id: 999,
+        name: 'default'
+    }];
 
     const restfulRender = ReactTestRenderer.create(
         <RestfulRender
@@ -51,6 +56,7 @@ describe('RestfulRender', () => {
             resource={getUserByBranchResource}
             parameters={paramsProps}
             onFetchCompleted={onFetchCompleted}
+            defaultData={defaultData}
         >
             {render}
         </RestfulRender>
@@ -60,7 +66,7 @@ describe('RestfulRender', () => {
         it('Props as first render', () => {
             expect(render.mock.calls[0][0]).toEqual({
                 error: null,
-                data: null,
+                data: defaultData,
                 fetching: true
             });
             expect(render.mock.calls[1][0]).toEqual({

@@ -28,6 +28,7 @@ describe('RestfulDataContainer', () => {
     const restfulDataContainer = ReactTestRenderer.create(
         <RestfulDataContainer
             {...restfulDataContainerProps}
+            shouldConcatSources={false}
         />
     );
 
@@ -135,6 +136,8 @@ describe('RestfulDataContainer', () => {
     });
 
     it('should push to source if new record mapping', () => {
+        render.mockClear();
+
         const newUser = { id: 100, name: 'user100' };
         store.dataMapping(userResourceType, newUser);
 
@@ -145,6 +148,8 @@ describe('RestfulDataContainer', () => {
     });
 
     it('should remove from source if existing record un-mapping', () => {
+        render.mockClear();
+
         const newUser = { id: 100, name: 'user100' };
         store.removeRecord(userResourceType, newUser);
 

@@ -199,7 +199,7 @@ export class Fetcher {
         }
 
         const requestMeta = resourceProps.getDefaultMeta ?
-            resourceProps.getDefaultMeta() as Meta :
+            resourceProps.getDefaultMeta(requestParams) as Meta :
             meta;
 
         const requestInfo: RequestInfo<Meta> = {

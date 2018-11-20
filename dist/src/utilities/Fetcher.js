@@ -56,7 +56,7 @@ class Fetcher {
                 throw new Error(error);
             }
             const requestMeta = resourceProps.getDefaultMeta ?
-                resourceProps.getDefaultMeta() :
+                resourceProps.getDefaultMeta(requestParams) :
                 meta;
             const requestInfo = {
                 meta: requestMeta,

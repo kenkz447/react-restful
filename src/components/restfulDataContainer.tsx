@@ -7,7 +7,7 @@ export interface RestfulDataContainerProps<T extends Record> {
     shouldConcatSources?: boolean;
     shouldAppendNewRecord?: (newRecord: T, index: number) => boolean;
     sort?: (first: T, second: T) => number;
-    children?: (data: Array<T>) => JSX.Element;
+    children: (data: Array<T>) => JSX.Element;
     onRecordRemove?: (record: T) => void;
 }
 
@@ -95,7 +95,8 @@ export class RestfulDataContainer<T> extends React.PureComponent<
             resourceType.getRecordKey(o) !== deletedRecordKey);
 
         this.setState({
-            dataSource: updatedStateRecords
+            dataSource: updatedStateRecords,
+            needsUpdateSource: true
         });
     }
 

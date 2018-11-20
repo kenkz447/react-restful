@@ -6,6 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const RecordTable_1 = require("./RecordTable");
 class Store {
     constructor() {
+        this.findManyRecords = (resourceType, predicate) => {
+            const table = this.getRecordTable(resourceType);
+            if (!table) {
+                return [];
+            }
+            return table.records.filter(predicate);
+        };
         this.resourceTypes = [];
         this.recordTables = {};
         this.subscribeStacks = [];

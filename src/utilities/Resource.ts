@@ -17,8 +17,8 @@ export interface ResourceProps<DataModel, Meta> extends
     requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
 
-    getDefaultMeta?: () => {};
-    getDefaultParams?: () => RequestParams;
+    getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
+    getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
@@ -36,7 +36,7 @@ export class Resource<DataModel, Meta = {}> {
         if (resource.props.method === 'DELETE') {
             store.removeRecord(resourceType, data);
         } else {
-            store.mapRecord(resourceType, data);
+            store.dataMapping(resourceType, data);
         }
     }
 
@@ -66,7 +66,7 @@ export class Resource<DataModel, Meta = {}> {
     }
 
     mixinWithDefaultParams = (requestParams: RequestParameter[]) => {
-        let params = this.props.getDefaultParams!();
+        let params = this.props.getDefaultParams!(requestParams);
 
         if (Array.isArray(params)) {
             return [...requestParams, ...params];

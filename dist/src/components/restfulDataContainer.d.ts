@@ -6,7 +6,7 @@ export interface RestfulDataContainerProps<T extends Record> {
     shouldConcatSources?: boolean;
     shouldAppendNewRecord?: (newRecord: T, index: number) => boolean;
     sort?: (first: T, second: T) => number;
-    children?: (data: Array<T>) => JSX.Element;
+    children: (data: Array<T>) => JSX.Element;
     onRecordRemove?: (record: T) => void;
 }
 interface RestfulDataContainerState<T extends Record> {

@@ -4,7 +4,7 @@ const shouldParmeterIgnore = (param) => !param || param.type === 'body' || param
 class Resource {
     constructor(props) {
         this.mixinWithDefaultParams = (requestParams) => {
-            let params = this.props.getDefaultParams();
+            let params = this.props.getDefaultParams(requestParams);
             if (Array.isArray(params)) {
                 return [...requestParams, ...params];
             }
@@ -79,7 +79,7 @@ Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
         store.removeRecord(resourceType, data);
     }
     else {
-        store.mapRecord(resourceType, data);
+        store.dataMapping(resourceType, data);
     }
 };
 /**

@@ -26,7 +26,7 @@ class RestfulRender extends React.Component {
         }
         this.Component = children || render;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: true, componentRenderProps: {
-                data: null,
+                data: props.defaultData || null,
                 error: null
             } });
     }

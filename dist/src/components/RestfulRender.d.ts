@@ -13,6 +13,7 @@ export interface RestfulRenderProps<DataModel> {
     render?: RestfulRenderChildType<DataModel>;
     children?: RestfulRenderChildType<DataModel>;
     onFetchCompleted?: (data: DataModel) => void;
+    defaultData?: DataModel;
 }
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
     prevParams?: RequestParams;

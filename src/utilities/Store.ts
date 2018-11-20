@@ -15,7 +15,7 @@ export interface SubscribeEvent<T> {
     value: T | Array<T>;
 }
 
-type findRecordPredicate<T extends Record> = (value: T, index: number, recordMap: Array<T>) => boolean;
+type findRecordPredicate<T> = (this: void, value: T, index: number, array: T[]) => boolean;
 
 type SubscribeCallback<T> = (event: SubscribeEvent<T>) => void;
 
@@ -158,6 +158,18 @@ export class Store {
                 const table = this.getRecordTable<T>(resourceType);
                 return table.records.find(specs as findRecordPredicate<T>) || null;
         }
+    }
+
+    findManyRecords = <T extends Record>(
+        resourceType: ResourceType<T>,
+        predicate: findRecordPredicate<T>
+    ): T[] => {
+        const table = this.getRecordTable<T>(resourceType);
+        if (!table) {
+            return [];
+        }
+        
+        return table.records.filter(predicate);
     }
 
     dataMapping<T>(resourceType: ResourceType<T>, data: T | Array<T>) {

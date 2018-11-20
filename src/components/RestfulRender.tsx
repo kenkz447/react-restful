@@ -36,6 +36,8 @@ export interface RestfulRenderProps<DataModel> {
     children?: RestfulRenderChildType<DataModel>;
 
     onFetchCompleted?: (data: DataModel) => void;
+
+    defaultData?: DataModel;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
@@ -87,7 +89,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
             fetcher: props.fetcher || global[fetcherSymbol],
             fetching: true,
             componentRenderProps: {
-                data: null,
+                data: props.defaultData || null,
                 error: null
             }
         };

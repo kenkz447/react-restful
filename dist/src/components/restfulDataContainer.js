@@ -29,7 +29,8 @@ class RestfulDataContainer extends React.PureComponent {
             const deletedRecordKey = resourceType.getRecordKey(record);
             const updatedStateRecords = this.state.dataSource.filter(o => resourceType.getRecordKey(o) !== deletedRecordKey);
             this.setState({
-                dataSource: updatedStateRecords
+                dataSource: updatedStateRecords,
+                needsUpdateSource: true
             });
         };
         this.isRecordExist = (record) => {

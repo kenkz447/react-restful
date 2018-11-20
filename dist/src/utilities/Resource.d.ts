@@ -8,8 +8,8 @@ export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requ
     mapDataToStore?: (data: DataModel, resourceType: ResourceType<{}>, store: Store) => void;
     requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
-    getDefaultMeta?: () => {};
-    getDefaultParams?: () => RequestParams;
+    getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
+    getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
 }
 export declare class Resource<DataModel, Meta = {}> {
     props: ResourceProps<DataModel, Meta>;

@@ -49,6 +49,13 @@ describe('Store', () => {
             expect(storedUser).toEqual(testUser);
         });
 
+        it('find many records', () => {
+            const storedUser = store.findManyRecords(userResourceType, (user) => {
+                return user.name.includes('tes');
+            });
+            expect(storedUser).toEqual([testUser]);
+        });
+
         it('remove record from table', () => {
             const removeResult = store.removeRecord(userResourceType, testUser);
             const storedUser = store.findRecordByKey(userResourceType, testUser.id);
