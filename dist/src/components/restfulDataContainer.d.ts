@@ -2,27 +2,28 @@ import * as React from 'react';
 import { Record, ResourceType } from '../utilities';
 export interface RestfulDataContainerProps<T extends Record> {
     resourceType: ResourceType<T>;
-    dataSource: Array<T>;
-    shouldConcatSources?: boolean;
-    shouldAppendNewRecord?: (newRecord: T, index: number) => boolean;
+    initDataSource: Array<T>;
+    shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
     sort?: (first: T, second: T) => number;
+    filter?: (record: T, index: number, dataSource: T[]) => boolean;
     children: (data: Array<T>) => JSX.Element;
     onRecordRemove?: (record: T) => void;
+    onNewRecordsMapping?: (records: T[]) => void;
 }
 interface RestfulDataContainerState<T extends Record> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
 }
 export declare class RestfulDataContainer<T> extends React.PureComponent<RestfulDataContainerProps<T>, RestfulDataContainerState<T>> {
+    static defaultProps: {
+        shouldAppendNewRecord: boolean;
+    };
     private isUnmounting;
     private store;
     private unsubscribeStore;
-    static getDerivedStateFromProps(nextProps: RestfulDataContainerProps<{}>, currentState: RestfulDataContainerState<{}>): {
+    static getDerivedStateFromProps(currentState: RestfulDataContainerState<{}>): {
         dataSource: {}[];
         needsUpdateSource: boolean;
-    } | {
-        dataSource: {}[];
-        needsUpdateSource?: undefined;
     } | null;
     constructor(props: RestfulDataContainerProps<T>);
     componentDidMount(): void;
@@ -32,6 +33,7 @@ export declare class RestfulDataContainer<T> extends React.PureComponent<Restful
     private isRecordExist;
     private manualMapping;
     private getEventRecords;
+    private shouldAppendRecord;
     private replaceRecord;
     render(): JSX.Element | null;
     private getRenderDataSource;

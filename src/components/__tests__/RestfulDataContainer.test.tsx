@@ -8,182 +8,81 @@ import { setupEnvironment, Store } from '../../utilities';
 describe('RestfulDataContainer', () => {
     const initDataSource: User[] = [{
         id: 1,
-        name: 'test'
+        name: 'test1'
+    }, {
+        id: 2,
+        name: 'test2'
+    }, {
+        id: 3,
+        name: 'test3'
     }];
 
-    const { store } = setupEnvironment({
-        store: new Store()
+    const store = new Store();
+    setupEnvironment({
+        store: store
     });
 
     store.registerRecord(userResourceType);
     store.dataMapping(userResourceType, initDataSource);
 
-    const render = jest.fn((props) => null);
-    const restfulDataContainerProps: RestfulDataContainerProps<User> = {
-        dataSource: initDataSource,
-        resourceType: userResourceType,
-        children: render
-    };
+    describe('Multi record', () => {
+        const render = jest.fn(() => null);
 
-    const restfulDataContainer = ReactTestRenderer.create(
-        <RestfulDataContainer
-            {...restfulDataContainerProps}
-            shouldConcatSources={false}
-        />
-    );
-
-    it('should render without error', () => {
-        expect(render).toBeCalledWith(initDataSource);
-    });
-
-    it('should replace old source', () => {
-        jest.clearAllMocks();
-
-        const updatedDataSource: User[] = [{
-            id: 2,
-            name: 'test2'
-        }];
-
-        restfulDataContainer.update(
+        ReactTestRenderer.create(
             <RestfulDataContainer
-                {...restfulDataContainerProps}
-                dataSource={updatedDataSource}
+                initDataSource={initDataSource}
+                resourceType={userResourceType}
+                children={render}
             />
         );
 
-        expect(render).toBeCalledWith(updatedDataSource);
+        it('should render without error', () => {
+            expect(render).toBeCalledWith(initDataSource);
+        });
+
+        let user4 = { id: 4, name: 'user4' };
+        let nextDataSource = [...initDataSource, user4];
+        it('should re-render when new record mapped', () => {
+            render.mockClear();
+            store.dataMapping(userResourceType, user4);
+            expect(render).toBeCalledWith(nextDataSource);
+        });
+
+        it('should re-render when exist record update', () => {
+            render.mockClear();
+
+            const updatedUser4 = { ...user4, name: 'user 4 Updated' };
+            nextDataSource = nextDataSource.map(o => o.id === 4 ? updatedUser4 : o);
+
+            store.dataMapping(userResourceType, updatedUser4);
+            expect(render).toBeCalledWith(nextDataSource);
+        });
     });
 
-    it('should concat new source and old source', () => {
-        const updatedDataSource: User[] = [{
-            id: 3,
-            name: 'test3'
-        }];
-
-        restfulDataContainer.update(
+    describe('single record', () => {
+        const initSingleRecord = { id: 99, name: 'user 99' };
+        const singleInitDataSource = [initSingleRecord];
+        const singleRecordRenderer = jest.fn(() => null);
+        ReactTestRenderer.create(
             <RestfulDataContainer
-                {...restfulDataContainerProps}
-                shouldConcatSources={true}
-                dataSource={updatedDataSource}
+                initDataSource={singleInitDataSource}
+                resourceType={userResourceType}
+                shouldAppendNewRecord={() => false}
+                children={singleRecordRenderer}
             />
         );
 
-        expect(render).toBeCalledWith([
-            {
-                id: 2,
-                name: 'test2'
-            },
-            ...updatedDataSource,
-        ]);
-    });
+        it('should render with init record', () => {
+            expect(singleRecordRenderer).toBeCalledWith(singleInitDataSource);
+        });
 
-    it('should sorting source', () => {
-        render.mockClear();
+        it('should re-render when exist record was updated', () => {
+            singleRecordRenderer.mockClear();
 
-        const updatedDataSource: User[] = [{
-            id: 1,
-            name: 'test1'
-        }, {
-            id: 3,
-            name: 'test3'
-        }, {
-            id: 2,
-            name: 'test2'
-        }];
+            const updatedUser = { ...initSingleRecord, name: 'user 99 updated' };
+            store.dataMapping(userResourceType, updatedUser);
 
-        restfulDataContainer.update(
-            <RestfulDataContainer
-                {...restfulDataContainerProps}
-                dataSource={updatedDataSource}
-                sort={(item, item2) => {
-                    if (item.id < item2.id) {
-                        return 1;
-                    }
-
-                    if (item.id < item2.id) {
-                        return -1;
-                    }
-
-                    return 0;
-                }}
-            />
-        );
-
-        expect(render.mock.calls[0][0]).toEqual([{
-            id: 3,
-            name: 'test3'
-        }, {
-            id: 2,
-            name: 'test2'
-        }, {
-            id: 1,
-            name: 'test1'
-        }]);
-    });
-
-    it('should update data source if existing record re-mapping', () => {
-        restfulDataContainer.update(
-            <RestfulDataContainer
-                {...restfulDataContainerProps}
-                dataSource={[{ id: 1, name: 'user1' }]}
-            />
-        );
-
-        const updateUser = { id: 1, name: 'user1Updated' };
-        store.dataMapping(userResourceType, updateUser);
-
-        expect(render).toBeCalledWith([updateUser]);
-    });
-
-    it('should push to source if new record mapping', () => {
-        render.mockClear();
-
-        const newUser = { id: 100, name: 'user100' };
-        store.dataMapping(userResourceType, newUser);
-
-        expect(render).toBeCalledWith([
-            { id: 1, name: 'user1Updated' },
-            newUser
-        ]);
-    });
-
-    it('should remove from source if existing record un-mapping', () => {
-        render.mockClear();
-
-        const newUser = { id: 100, name: 'user100' };
-        store.removeRecord(userResourceType, newUser);
-
-        expect(render).toBeCalledWith([
-            { id: 1, name: 'user1Updated' }
-        ]);
-    });
-
-    it('should not redender if not match filter', () => {
-        restfulDataContainer.update(
-            <RestfulDataContainer
-                {...restfulDataContainerProps}
-                dataSource={[{ id: 1, name: 'user1' }]}
-                shouldAppendNewRecord={(record) => record.name.startsWith('user')}
-            />
-        );
-
-        render.mockClear();
-
-        const updateUser = { id: 99, name: '_user99' };
-        store.dataMapping(userResourceType, updateUser);
-
-        expect(render).not.toBeCalled();
-    });
-
-    it('should redender if event records match filter', () => {
-        render.mockClear();
-
-        const updateUser = { id: 99, name: 'user99' };
-        store.dataMapping(userResourceType, [updateUser]);
-
-        expect(render).toBeCalledWith([
-            { id: 1, name: 'user1' },
-            updateUser
-        ]);
+            expect(singleRecordRenderer).toBeCalledWith([updatedUser]);
+        });
     });
 });

@@ -58,9 +58,11 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     static getDerivedStateFromProps<DataModel>(
         nextProps: RestfulRenderProps<DataModel>,
         prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null {
-        if (nextProps.resource !== prevState.resource ||
-            nextProps.parameters !== prevState.parameters
-        ) {
+            
+        const isResourceChanged = nextProps.resource !== prevState.resource;
+        const isParamsChanged = JSON.stringify(nextProps.parameters) !== JSON.stringify(prevState.parameters);
+
+        if (isResourceChanged || isParamsChanged) {
             return {
                 ...nextProps,
                 prevParams: prevState.parameters,

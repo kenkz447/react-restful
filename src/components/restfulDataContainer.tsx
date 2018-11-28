@@ -3,12 +3,13 @@ import { Record, ResourceType, storeSymbol, Store, SubscribeEvent } from '../uti
 
 export interface RestfulDataContainerProps<T extends Record> {
     resourceType: ResourceType<T>;
-    dataSource: Array<T>;
-    shouldConcatSources?: boolean;
-    shouldAppendNewRecord?: (newRecord: T, index: number) => boolean;
+    initDataSource: Array<T>;
+    shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
     sort?: (first: T, second: T) => number;
+    filter?: (record: T, index: number, dataSource: T[]) => boolean;
     children: (data: Array<T>) => JSX.Element;
     onRecordRemove?: (record: T) => void;
+    onNewRecordsMapping?: (records: T[]) => void;
 }
 
 interface RestfulDataContainerState<T extends Record> {
@@ -19,17 +20,17 @@ interface RestfulDataContainerState<T extends Record> {
 export class RestfulDataContainer<T> extends React.PureComponent<
     RestfulDataContainerProps<T>,
     RestfulDataContainerState<T>> {
+    static defaultProps = {
+        shouldAppendNewRecord: true
+    };
 
     private isUnmounting = false;
     private store: Store = global[storeSymbol];
     private unsubscribeStore!: () => void;
 
     static getDerivedStateFromProps(
-        nextProps: RestfulDataContainerProps<{}>,
         currentState: RestfulDataContainerState<{}>
     ) {
-        const { dataSource, shouldConcatSources } = nextProps;
-
         if (currentState.needsUpdateSource) {
             return {
                 dataSource: currentState.dataSource,
@@ -37,27 +38,14 @@ export class RestfulDataContainer<T> extends React.PureComponent<
             };
         }
 
-        if (dataSource === currentState.dataSource) {
-            return null;
-        }
-
-        if (shouldConcatSources) {
-            let nextSource = [...currentState.dataSource, ...dataSource];
-            return {
-                dataSource: nextSource
-            };
-        }
-
-        return {
-            dataSource: dataSource
-        };
+        return null;
     }
 
     constructor(props: RestfulDataContainerProps<T>) {
         super(props);
-        const { dataSource } = props;
+        const { initDataSource } = props;
         this.state = {
-            dataSource: dataSource
+            dataSource: initDataSource
         };
     }
 
@@ -126,6 +114,7 @@ export class RestfulDataContainer<T> extends React.PureComponent<
         }
 
         let nextDataSource = [...this.state.dataSource];
+        let newRecords = [];
 
         for (const record of eventRecords) {
             const isRecordExist = this.isRecordExist(record);
@@ -134,7 +123,14 @@ export class RestfulDataContainer<T> extends React.PureComponent<
                 continue;
             }
 
-            nextDataSource.push(record);
+            newRecords.push(record);
+        }
+
+        nextDataSource = nextDataSource.concat(newRecords);
+
+        const { onNewRecordsMapping } = this.props;
+        if (onNewRecordsMapping && newRecords.length) {
+            onNewRecordsMapping(newRecords);
         }
 
         this.setState({
@@ -146,19 +142,47 @@ export class RestfulDataContainer<T> extends React.PureComponent<
     private getEventRecords = (e: SubscribeEvent<T>) => {
         const { shouldAppendNewRecord } = this.props;
 
-        if (!Array.isArray(e.value)) {
-            if (shouldAppendNewRecord && !shouldAppendNewRecord(e.value, 0)) {
-                return [];
+        const isSingleRecord = !Array.isArray(e.value);
+
+        if (isSingleRecord) {
+            const record = e.value as T;
+            const isRecordExisting = this.isRecordExist(record);
+
+            if (isRecordExisting) {
+                return [record];
             }
 
-            return [e.value];
+            const isShouldAppendNewRecord = this.shouldAppendRecord(record);
+            if (isShouldAppendNewRecord) {
+                return [record];
+            }
+
+            return [];
         }
 
-        if (shouldAppendNewRecord) {
-            return e.value.filter(shouldAppendNewRecord);
+        const records = e.value as Array<T>;
+
+        return records.filter((o, index) => {
+            if (this.isRecordExist(o)) {
+                return true;
+            }
+
+            return this.shouldAppendRecord(o, index);
+        });
+    }
+
+    private shouldAppendRecord = (record: T, index?: number) => {
+        const { shouldAppendNewRecord } = this.props;
+
+        if (!shouldAppendNewRecord) {
+            return false;
         }
 
-        return e.value;
+        if (typeof shouldAppendNewRecord === 'boolean') {
+            return shouldAppendNewRecord;
+        }
+
+        return shouldAppendNewRecord(record, index || 0);
     }
 
     private replaceRecord = (source: Array<T>, newRecord: T) => {
@@ -184,13 +208,19 @@ export class RestfulDataContainer<T> extends React.PureComponent<
     }
 
     private getRenderDataSource = () => {
+        const { sort, filter } = this.props;
         const { dataSource } = this.state;
 
-        const { sort } = this.props;
-        if (sort) {
-            return dataSource.sort(sort);
+        let renderDataSource: Array<T> = [...dataSource];
+
+        if (filter) {
+            renderDataSource = renderDataSource.filter(filter, this);
         }
 
-        return [...dataSource];
+        if (sort) {
+            renderDataSource = dataSource.sort(sort);
+        }
+
+        return renderDataSource;
     }
 }

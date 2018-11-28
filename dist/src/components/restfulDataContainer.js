@@ -53,13 +53,19 @@ class RestfulDataContainer extends React.PureComponent {
                 return;
             }
             let nextDataSource = [...this.state.dataSource];
+            let newRecords = [];
             for (const record of eventRecords) {
                 const isRecordExist = this.isRecordExist(record);
                 if (isRecordExist) {
                     nextDataSource = this.replaceRecord(nextDataSource, record);
                     continue;
                 }
-                nextDataSource.push(record);
+                newRecords.push(record);
+            }
+            nextDataSource = nextDataSource.concat(newRecords);
+            const { onNewRecordsMapping } = this.props;
+            if (onNewRecordsMapping && newRecords.length) {
+                onNewRecordsMapping(newRecords);
             }
             this.setState({
                 needsUpdateSource: true,
@@ -68,16 +74,36 @@ class RestfulDataContainer extends React.PureComponent {
         };
         this.getEventRecords = (e) => {
             const { shouldAppendNewRecord } = this.props;
-            if (!Array.isArray(e.value)) {
-                if (shouldAppendNewRecord && !shouldAppendNewRecord(e.value, 0)) {
-                    return [];
+            const isSingleRecord = !Array.isArray(e.value);
+            if (isSingleRecord) {
+                const record = e.value;
+                const isRecordExisting = this.isRecordExist(record);
+                if (isRecordExisting) {
+                    return [record];
                 }
-                return [e.value];
+                const isShouldAppendNewRecord = this.shouldAppendRecord(record);
+                if (isShouldAppendNewRecord) {
+                    return [record];
+                }
+                return [];
             }
-            if (shouldAppendNewRecord) {
-                return e.value.filter(shouldAppendNewRecord);
+            const records = e.value;
+            return records.filter((o, index) => {
+                if (this.isRecordExist(o)) {
+                    return true;
+                }
+                return this.shouldAppendRecord(o, index);
+            });
+        };
+        this.shouldAppendRecord = (record, index) => {
+            const { shouldAppendNewRecord } = this.props;
+            if (!shouldAppendNewRecord) {
+                return false;
             }
-            return e.value;
+            if (typeof shouldAppendNewRecord === 'boolean') {
+                return shouldAppendNewRecord;
+            }
+            return shouldAppendNewRecord(record, index || 0);
         };
         this.replaceRecord = (source, newRecord) => {
             const { resourceType } = this.props;
@@ -90,38 +116,30 @@ class RestfulDataContainer extends React.PureComponent {
             });
         };
         this.getRenderDataSource = () => {
+            const { sort, filter } = this.props;
             const { dataSource } = this.state;
-            const { sort } = this.props;
-            if (sort) {
-                return dataSource.sort(sort);
+            let renderDataSource = [...dataSource];
+            if (filter) {
+                renderDataSource = renderDataSource.filter(filter, this);
             }
-            return [...dataSource];
+            if (sort) {
+                renderDataSource = dataSource.sort(sort);
+            }
+            return renderDataSource;
         };
-        const { dataSource } = props;
+        const { initDataSource } = props;
         this.state = {
-            dataSource: dataSource
+            dataSource: initDataSource
         };
     }
-    static getDerivedStateFromProps(nextProps, currentState) {
-        const { dataSource, shouldConcatSources } = nextProps;
+    static getDerivedStateFromProps(currentState) {
         if (currentState.needsUpdateSource) {
             return {
                 dataSource: currentState.dataSource,
                 needsUpdateSource: false
             };
         }
-        if (dataSource === currentState.dataSource) {
-            return null;
-        }
-        if (shouldConcatSources) {
-            let nextSource = [...currentState.dataSource, ...dataSource];
-            return {
-                dataSource: nextSource
-            };
-        }
-        return {
-            dataSource: dataSource
-        };
+        return null;
     }
     componentDidMount() {
         const { resourceType } = this.props;
@@ -140,4 +158,7 @@ class RestfulDataContainer extends React.PureComponent {
         return children(dataSource);
     }
 }
+RestfulDataContainer.defaultProps = {
+    shouldAppendNewRecord: true
+};
 exports.RestfulDataContainer = RestfulDataContainer;

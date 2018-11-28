@@ -31,8 +31,9 @@ class RestfulRender extends React.Component {
             } });
     }
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.resource !== prevState.resource ||
-            nextProps.parameters !== prevState.parameters) {
+        const isResourceChanged = nextProps.resource !== prevState.resource;
+        const isParamsChanged = JSON.stringify(nextProps.parameters) !== JSON.stringify(prevState.parameters);
+        if (isResourceChanged || isParamsChanged) {
             return Object.assign({}, nextProps, { prevParams: prevState.parameters, componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
         }
         return null;
