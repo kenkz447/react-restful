@@ -9,3 +9,4 @@ __export(require("./Resource"));
 __export(require("./ResourceType"));
 __export(require("./Store"));
 __export(require("./setupEnvironment"));
+__export(require("./utils"));

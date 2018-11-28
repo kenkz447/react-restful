@@ -4,3 +4,4 @@ export * from './Resource';
 export * from './ResourceType';
 export * from './Store';
 export * from './setupEnvironment';
+export * from './utils';
