@@ -5,6 +5,7 @@
 
 import { Record, RecordTable } from './RecordTable';
 import { Store } from './Store';
+import { storeSymbol } from './setupEnvironment';
 
 interface ResourceTypeProps {
     name: string;
@@ -13,6 +14,8 @@ interface ResourceTypeProps {
 }
 
 export class ResourceType<T extends Record> {
+    static unRegisterTypes: ResourceType<{}>[] = [];
+
     readonly props: ResourceTypeProps;
 
     constructor(props: ResourceTypeProps | string) {
@@ -23,14 +26,26 @@ export class ResourceType<T extends Record> {
             };
         } else {
             const { store } = props;
-            this.props = { 
+            this.props = {
                 keyProperty: 'id',
-                ...props 
+                ...props
             };
-            if (store) {
-                store.registerRecord(this);
-            }
+
+            this.registerToStore(store);
         }
+    }
+
+    registerToStore = (store?: Store): void => {
+        if (store) {
+            return void store.registerResourceType(this);
+        }
+
+        if (!global[storeSymbol]) {
+            return void ResourceType.unRegisterTypes.push(this);
+        }
+
+        const globalStore = global[storeSymbol] as Store;
+        return void globalStore.registerResourceType(this);
     }
 
     getAllRecords(store: Store, predicate?: (record: T) => boolean) {

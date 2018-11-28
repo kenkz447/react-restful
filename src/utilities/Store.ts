@@ -75,7 +75,7 @@ export class Store {
         return this.recordTables[resourceType.props.name] as RecordTable<T>;
     }
 
-    registerRecord<T>(resourceType: ResourceType<T>) {
+    registerResourceType<T>(resourceType: ResourceType<T>) {
         if (this.recordTables[resourceType.props.name]) {
             return;
         }
@@ -168,7 +168,7 @@ export class Store {
         if (!table) {
             return [];
         }
-        
+
         return table.records.filter(predicate);
     }
 

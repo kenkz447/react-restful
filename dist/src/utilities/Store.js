@@ -47,7 +47,7 @@ class Store {
     getRecordTable(resourceType) {
         return this.recordTables[resourceType.props.name];
     }
-    registerRecord(resourceType) {
+    registerResourceType(resourceType) {
         if (this.recordTables[resourceType.props.name]) {
             return;
         }

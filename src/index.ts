@@ -20,5 +20,6 @@ export {
     RequestParameter,
     RequestInfo,
     RequestParams,
-    RequestConfirmInfo
+    RequestConfirmInfo,
+    upsertRequestParams
 } from './utilities';

@@ -23,7 +23,7 @@ export declare class Store {
     resourceTypeHasRegistered(resourceTypeName: string): boolean;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
     getRecordTable<T>(resourceType: ResourceType<T>): RecordTable<T>;
-    registerRecord<T>(resourceType: ResourceType<T>): void;
+    registerResourceType<T>(resourceType: ResourceType<T>): void;
     mapRecord<T>(resourceType: ResourceType<T>, record: T): boolean;
     mapRecords<T>(resourceType: ResourceType<T>, records: Array<T>): void;
     removeRecord<T>(resourceType: ResourceType<T>, record: T): boolean;

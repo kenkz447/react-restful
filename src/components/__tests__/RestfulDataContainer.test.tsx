@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 
-import { RestfulDataContainer, RestfulDataContainerProps } from '../RestfulDataContainer';
+import { RestfulDataContainer } from '../RestfulDataContainer';
 import { User, userResourceType } from '../../test-resources';
 import { setupEnvironment, Store } from '../../utilities';
 
@@ -22,7 +22,7 @@ describe('RestfulDataContainer', () => {
         store: store
     });
 
-    store.registerRecord(userResourceType);
+    store.registerResourceType(userResourceType);
     store.dataMapping(userResourceType, initDataSource);
 
     describe('Multi record', () => {

@@ -24,7 +24,7 @@ describe('Store', () => {
 
     describe('instance', () => {
         it('register record type', () => {
-            store.registerRecord(userResourceType);
+            store.registerResourceType(userResourceType);
             table = store.getRecordTable(userResourceType);
             const registeredResourceType = store.getRegisteredResourceType(userResourceType.props.name);
 
