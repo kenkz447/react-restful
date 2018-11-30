@@ -171,7 +171,7 @@ export class Fetcher {
         resource: Resource<DataModel>,
         params?: RequestParams,
         meta?: Meta
-    ) => {
+    ): Promise<DataModel> => {
         const {
             entry,
             store,
@@ -251,28 +251,30 @@ export class Fetcher {
         }
 
         const responseContentType = response.headers.get('content-type');
-        if (responseContentType && responseContentType.startsWith('application/json')) {
-            const usedGetResponseData = resourceProps.getResponseData || getResponseData;
 
-            const responseData = usedGetResponseData ?
-                await usedGetResponseData(requestInfo) :
-                await response.json();
-
-            if (resourceProps.requestSuccess) {
-                resourceProps.requestSuccess(requestInfo);
-            }
-
-            if (resourceProps.resourceType) {
-                if (resourceProps.mapDataToStore) {
-                    resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
-                } else if (defaultMapDataToProps) {
-                    defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
-                }
-            }
-
-            return responseData;
+        if (!responseContentType || !responseContentType.startsWith('application/json')) {
+            const text = await response.text();
+            return { text } as any;
         }
 
-        return await response.text();
+        const usedGetResponseData = resourceProps.getResponseData || getResponseData;
+
+        const responseData = usedGetResponseData ?
+            await usedGetResponseData(requestInfo) :
+            await response.json();
+
+        if (resourceProps.requestSuccess) {
+            resourceProps.requestSuccess(requestInfo);
+        }
+
+        if (resourceProps.resourceType) {
+            if (resourceProps.mapDataToStore) {
+                resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
+            } else if (defaultMapDataToProps) {
+                defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
+            }
+        }
+
+        return responseData;
     }
 }

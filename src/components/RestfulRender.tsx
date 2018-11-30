@@ -14,7 +14,7 @@ export interface RestfulRenderChildProps<DataModel> {
     error: Error | null;
 
     // RestfulRender fetch status, default: true
-    fetching?: boolean;
+    fetching: boolean;
 
     refetch: () => void;
 }
@@ -68,7 +68,10 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
             return {
                 ...nextProps,
                 prevParams: prevState.parameters,
-                componentRenderProps: prevState.componentRenderProps,
+                componentRenderProps: {
+                    ...prevState.componentRenderProps,
+                    fetching: true
+                },
                 needsUpdate: true,
                 fetching: true
             };
@@ -83,7 +86,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         const { children, render, defaultData } = props;
 
         if (!children && !render) {
-            throw new Error('`children` or `render` required!');
+            throw new Error('`children` or `render` are required!');
         }
 
         this.Component = children || render!;
@@ -96,7 +99,8 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
             componentRenderProps: {
                 data: defaultData || null,
                 error: null,
-                refetch: this.fetching
+                refetch: this.fetching,
+                fetching: needsFetching
             }
         };
 
@@ -113,7 +117,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     }
 
     render() {
-        const { componentRenderProps, fetching } = this.state;
+        const { componentRenderProps } = this.state;
 
         const { Component } = this;
 
@@ -121,13 +125,8 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
             return null;
         }
 
-        const componentProps = {
-            ...componentRenderProps,
-            fetching: fetching
-        };
-
         return (
-            <Component {...componentProps} />
+            <Component {...componentRenderProps} />
         );
     }
 
@@ -147,7 +146,8 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 componentRenderProps: {
                     data: data,
                     error: null,
-                    refetch: this.fetching
+                    refetch: this.fetching,
+                    fetching: false
                 }
             });
         } catch (error) {
@@ -156,7 +156,8 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 componentRenderProps: {
                     data: componentRenderProps.data,
                     error: error,
-                    refetch: this.fetching
+                    refetch: this.fetching,
+                    fetching: false
                 }
             });
         }
