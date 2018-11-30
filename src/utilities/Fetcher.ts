@@ -4,6 +4,7 @@ import { Resource } from './Resource';
 import { Store } from './Store';
 import { Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
+import { getParamsValue } from './utils';
 
 export type RequestParams = RequestParameter[] | RequestParameter;
 
@@ -172,6 +173,12 @@ export class Fetcher {
         params?: RequestParams,
         meta?: Meta
     ): Promise<DataModel> => {
+        try {
+            await this.validate(resource, params);
+        } catch (error) {
+            throw error;
+        }
+
         const {
             entry,
             store,
@@ -276,5 +283,27 @@ export class Fetcher {
         }
 
         return responseData;
+    }
+
+    validate = async <T>(resource: Resource<T>, params?: RequestParams) => {
+        if (!resource.props.bodySchema) {
+            return;
+        }
+
+        if (!params) {
+            throw Error('Resource bodySchema found but missing request params!');
+        }
+
+        const body = getParamsValue<T>(params, 'body');
+
+        if (!body) {
+            throw Error('Resource bodySchema found but missing request body!');
+        }
+
+        try {
+            await resource.props.bodySchema.validate(body, { abortEarly: false });
+        } catch (validationError) {
+            throw validationError;
+        }
     }
 }

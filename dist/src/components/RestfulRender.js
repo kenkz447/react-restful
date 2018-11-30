@@ -22,14 +22,15 @@ class RestfulRender extends React.Component {
         super(props);
         const { children, render, defaultData } = props;
         if (!children && !render) {
-            throw new Error('`children` or `render` required!');
+            throw new Error('`children` or `render` are required!');
         }
         this.Component = children || render;
         const needsFetching = !defaultData;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: needsFetching, componentRenderProps: {
                 data: defaultData || null,
                 error: null,
-                refetch: this.fetching
+                refetch: this.fetching,
+                fetching: needsFetching
             } });
         if (needsFetching) {
             this.fetching();
@@ -39,7 +40,7 @@ class RestfulRender extends React.Component {
         const isResourceChanged = nextProps.resource !== prevState.resource;
         const isParamsChanged = JSON.stringify(nextProps.parameters) !== JSON.stringify(prevState.parameters);
         if (isResourceChanged || isParamsChanged) {
-            return Object.assign({}, nextProps, { prevParams: prevState.parameters, componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
+            return Object.assign({}, nextProps, { prevParams: prevState.parameters, componentRenderProps: Object.assign({}, prevState.componentRenderProps, { fetching: true }), needsUpdate: true, fetching: true });
         }
         return null;
     }
@@ -50,13 +51,12 @@ class RestfulRender extends React.Component {
         }
     }
     render() {
-        const { componentRenderProps, fetching } = this.state;
+        const { componentRenderProps } = this.state;
         const { Component } = this;
         if (!Component) {
             return null;
         }
-        const componentProps = Object.assign({}, componentRenderProps, { fetching: fetching });
-        return (React.createElement(Component, Object.assign({}, componentProps)));
+        return (React.createElement(Component, Object.assign({}, componentRenderProps)));
     }
     fetching() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -72,7 +72,8 @@ class RestfulRender extends React.Component {
                     componentRenderProps: {
                         data: data,
                         error: null,
-                        refetch: this.fetching
+                        refetch: this.fetching,
+                        fetching: false
                     }
                 });
             }
@@ -82,7 +83,8 @@ class RestfulRender extends React.Component {
                     componentRenderProps: {
                         data: componentRenderProps.data,
                         error: error,
-                        refetch: this.fetching
+                        refetch: this.fetching,
+                        fetching: false
                     }
                 });
             }

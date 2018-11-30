@@ -19,6 +19,6 @@ interface RequestHelperState<DataModel extends Record, Meta> {
 export declare class RequestHelper<DataModel extends Record, Meta> extends React.PureComponent<RequestHelperProps<DataModel, Meta>, RequestHelperState<DataModel, Meta>> {
     constructor(props: RequestHelperProps<DataModel, Meta>);
     render(): JSX.Element;
-    sendRequest: (params?: import("../utilities/Fetcher").RequestParameter | import("../utilities/Fetcher").RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<any>;
+    sendRequest: (params?: import("../utilities/Fetcher").RequestParameter | import("../utilities/Fetcher").RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<false | DataModel>;
 }
 export {};

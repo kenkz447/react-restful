@@ -3,7 +3,7 @@ import { Resource, Fetcher, RequestParams } from '../utilities';
 export interface RestfulRenderChildProps<DataModel> {
     data: DataModel | null;
     error: Error | null;
-    fetching?: boolean;
+    fetching: boolean;
     refetch: () => void;
 }
 export declare type RestfulRenderChildType<DataModel> = React.ComponentType<RestfulRenderChildProps<DataModel>>;

@@ -1,6 +1,7 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
 import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
+import { ObjectSchema } from 'yup';
 export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requestBodyParser'>, Pick<FetcherProps, 'getResponseData'>, Pick<FetcherProps, 'onConfirm'> {
     resourceType?: ResourceType<{}>;
     url: string;
@@ -10,6 +11,7 @@ export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requ
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
+    bodySchema?: ObjectSchema<DataModel>;
 }
 export declare class Resource<DataModel, Meta = {}> {
     props: ResourceProps<DataModel, Meta>;

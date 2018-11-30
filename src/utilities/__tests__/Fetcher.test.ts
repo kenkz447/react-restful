@@ -1,3 +1,4 @@
+import  * as yup from 'yup';
 import { mockResponseOnce } from 'jest-fetch-mock';
 import { Fetcher, RequestParameter } from '../Fetcher';
 import { Resource } from '../Resource';
@@ -61,6 +62,36 @@ describe('Fetcher', () => {
     describe('data mapping', () => {
         it('after fetch', () => {
             expect(mapDataToStore).toBeCalled();
+        });
+    });
+
+    describe('validate', () => {
+        const validateResource = new Resource({
+            method: 'POST',
+            url: '/api/users',
+            bodySchema: yup.object().shape({
+                username: yup.string().required(),
+                age: yup.number().min(18),
+                email: yup.string().email()
+            })
+        });
+
+        const postBody = {
+            id: 1,
+            username: 'test',
+            age: 11,
+            email: 'abc'
+        };
+
+        it('should validation fail', async () => {
+            try {
+                await fetcher.fetchResource(validateResource, {
+                    type: 'body',
+                    value: postBody
+                });
+            } catch (error) {
+                expect(error).toBeInstanceOf(yup.ValidationError);
+            }
         });
     });
 });

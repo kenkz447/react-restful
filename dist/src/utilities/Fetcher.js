@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const utils_1 = require("./utils");
 class Fetcher {
     constructor(props) {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
@@ -27,6 +28,12 @@ class Fetcher {
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.validate(resource, params);
+            }
+            catch (error) {
+                throw error;
+            }
             const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed, unexpectedErrorCatched, fetchMethod, defaultMapDataToProps } = this.props;
             const resourceProps = resource.props;
             const requestParams = Array.isArray(params) ?
@@ -76,25 +83,44 @@ class Fetcher {
                 afterFetch(requestInfo);
             }
             const responseContentType = response.headers.get('content-type');
-            if (responseContentType && responseContentType.startsWith('application/json')) {
-                const usedGetResponseData = resourceProps.getResponseData || getResponseData;
-                const responseData = usedGetResponseData ?
-                    yield usedGetResponseData(requestInfo) :
-                    yield response.json();
-                if (resourceProps.requestSuccess) {
-                    resourceProps.requestSuccess(requestInfo);
-                }
-                if (resourceProps.resourceType) {
-                    if (resourceProps.mapDataToStore) {
-                        resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
-                    }
-                    else if (defaultMapDataToProps) {
-                        defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
-                    }
-                }
-                return responseData;
+            if (!responseContentType || !responseContentType.startsWith('application/json')) {
+                const text = yield response.text();
+                return { text };
             }
-            return yield response.text();
+            const usedGetResponseData = resourceProps.getResponseData || getResponseData;
+            const responseData = usedGetResponseData ?
+                yield usedGetResponseData(requestInfo) :
+                yield response.json();
+            if (resourceProps.requestSuccess) {
+                resourceProps.requestSuccess(requestInfo);
+            }
+            if (resourceProps.resourceType) {
+                if (resourceProps.mapDataToStore) {
+                    resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
+                }
+                else if (defaultMapDataToProps) {
+                    defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
+                }
+            }
+            return responseData;
+        });
+        this.validate = (resource, params) => __awaiter(this, void 0, void 0, function* () {
+            if (!resource.props.bodySchema) {
+                return;
+            }
+            if (!params) {
+                throw Error('Resource bodySchema found but missing request params!');
+            }
+            const body = utils_1.getParamsValue(params, 'body');
+            if (!body) {
+                throw Error('Resource bodySchema found but missing request body!');
+            }
+            try {
+                yield resource.props.bodySchema.validate(body, { abortEarly: false });
+            }
+            catch (validationError) {
+                throw validationError;
+            }
         });
         this.props = Object.assign({}, props);
         if (!props.defaultMapDataToProps) {

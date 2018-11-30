@@ -28,7 +28,8 @@ exports.getParamsValue = (params, type, parameter) => {
         return null;
     }
     if (Array.isArray(params)) {
-        return params.find(o => o.parameter === parameter && o.type === type) || null;
+        const param = params.find(o => o.parameter === parameter && o.type === type);
+        return param ? param.value : null;
     }
     return params.value;
 };

@@ -110,5 +110,6 @@ export declare class Fetcher {
      * @param {RequestParams} [params] - Array or a single RequestParameter object,
      * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
      */
-    fetchResource: <DataModel, Meta = {}>(resource: Resource<DataModel, {}>, params?: RequestParameter | RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<any>;
+    fetchResource: <DataModel, Meta = {}>(resource: Resource<DataModel, {}>, params?: RequestParameter | RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<DataModel>;
+    validate: <T>(resource: Resource<T, {}>, params?: RequestParameter | RequestParameter[] | undefined) => Promise<void>;
 }

@@ -1,6 +1,7 @@
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
 import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
+import { ObjectSchema } from 'yup';
 
 export interface ResourceProps<DataModel, Meta> extends
     Pick<FetcherProps, 'requestBodyParser'>,
@@ -19,6 +20,7 @@ export interface ResourceProps<DataModel, Meta> extends
 
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
+    bodySchema?: ObjectSchema<DataModel>;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
