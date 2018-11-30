@@ -18,9 +18,6 @@ class Resource {
         }
         else {
             this.props = Object.assign({}, props, { resourceType: props.resourceType, url: Resource.getUrl(props.url), method: props.method || 'GET' });
-            if (!props.mapDataToStore && props.resourceType) {
-                this.props.mapDataToStore = Resource.defaultMapDataToStore(this);
-            }
         }
     }
     urlReslover(params = []) {
@@ -73,15 +70,6 @@ class Resource {
         return requestInit;
     }
 }
-// tslint:disable-next-line:no-any
-Resource.defaultMapDataToStore = (resource) => (data, resourceType, store) => {
-    if (resource.props.method === 'DELETE') {
-        store.removeRecord(resourceType, data);
-    }
-    else {
-        store.dataMapping(resourceType, data);
-    }
-};
 /**
  * Ensure url will start with '/'
  */

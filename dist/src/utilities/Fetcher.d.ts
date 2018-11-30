@@ -1,6 +1,7 @@
 import { Resource } from './Resource';
 import { Store } from './Store';
 import { Record } from './RecordTable';
+import { ResourceType } from './ResourceType';
 export declare type RequestParams = RequestParameter[] | RequestParameter;
 export interface RequestConfirmInfo<DataModel extends Record> {
     resource: Resource<DataModel>;
@@ -93,9 +94,11 @@ export interface FetcherProps {
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
     requestFailed?: (requestInfo: RequestInfo) => void;
     unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
+    defaultMapDataToProps?: (data: {} | Array<{}>, resource: Resource<any, {}>, resourceType: ResourceType<{}>, store: Store) => void;
 }
 export declare class Fetcher {
     props: FetcherProps;
+    static defaultMapDataToStore: (data: {} | {}[], resource: Resource<{}, {}>, resourceType: ResourceType<{}>, store: Store) => void;
     createDefaultRequestInit: () => {
         headers: Headers;
     };

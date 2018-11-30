@@ -24,6 +24,8 @@ export class ResourceType<T extends Record> {
                 name: props,
                 keyProperty: 'id'
             };
+            
+            this.registerToStore();
         } else {
             const { store } = props;
             this.props = {

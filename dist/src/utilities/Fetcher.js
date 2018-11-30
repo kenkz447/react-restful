@@ -27,7 +27,7 @@ class Fetcher {
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
-            const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed, unexpectedErrorCatched, fetchMethod } = this.props;
+            const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed, unexpectedErrorCatched, fetchMethod, defaultMapDataToProps } = this.props;
             const resourceProps = resource.props;
             const requestParams = Array.isArray(params) ?
                 params :
@@ -84,18 +84,30 @@ class Fetcher {
                 if (resourceProps.requestSuccess) {
                     resourceProps.requestSuccess(requestInfo);
                 }
-                if (resourceProps.mapDataToStore && resourceProps.resourceType) {
-                    const registeredResourceType = store.resourceTypeHasRegistered(resourceProps.resourceType.props.name);
-                    if (!registeredResourceType) {
-                        store.registerResourceType(resourceProps.resourceType);
+                if (resourceProps.resourceType) {
+                    if (resourceProps.mapDataToStore) {
+                        resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
                     }
-                    resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
+                    else if (defaultMapDataToProps) {
+                        defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
+                    }
                 }
                 return responseData;
             }
             return yield response.text();
         });
         this.props = Object.assign({}, props);
+        if (!props.defaultMapDataToProps) {
+            this.props.defaultMapDataToProps = Fetcher.defaultMapDataToStore;
+        }
     }
 }
+Fetcher.defaultMapDataToStore = (data, resource, resourceType, store) => {
+    if (resource.props.method === 'DELETE') {
+        store.removeRecord(resourceType, data);
+    }
+    else {
+        store.dataMapping(resourceType, data);
+    }
+};
 exports.Fetcher = Fetcher;

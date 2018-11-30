@@ -36,3 +36,15 @@ export const upsertRequestParams = (
 
     return nextParams as RequestParameter[];
 };
+
+export const getParamsValue = (params: RequestParams, type: RequestParameter['type'], parameter: string) => {
+    if (!params) {
+        return null;
+    }
+
+    if (Array.isArray(params)) {
+        return params.find(o => o.parameter === parameter && o.type === type) || null;
+    }
+
+    return params.value;
+};

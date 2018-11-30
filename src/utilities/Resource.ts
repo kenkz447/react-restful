@@ -27,19 +27,6 @@ const shouldParmeterIgnore = (param: RequestParameter) =>
 export class Resource<DataModel, Meta = {}> {
     props: ResourceProps<DataModel, Meta>;
 
-    // tslint:disable-next-line:no-any
-    static defaultMapDataToStore = (resource: Resource<any, any>) => (
-        data: {} | Array<{}>,
-        resourceType: ResourceType<{}>,
-        store: Store
-    ) => {
-        if (resource.props.method === 'DELETE') {
-            store.removeRecord(resourceType, data);
-        } else {
-            store.dataMapping(resourceType, data);
-        }
-    }
-
     /**
      * Ensure url will start with '/'
      */
@@ -58,10 +45,6 @@ export class Resource<DataModel, Meta = {}> {
                 url: Resource.getUrl(props.url),
                 method: props.method || 'GET',
             };
-
-            if (!props.mapDataToStore && props.resourceType) {
-                this.props.mapDataToStore = Resource.defaultMapDataToStore(this);
-            }
         }
     }
 

@@ -13,7 +13,6 @@ export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requ
 }
 export declare class Resource<DataModel, Meta = {}> {
     props: ResourceProps<DataModel, Meta>;
-    static defaultMapDataToStore: (resource: Resource<any, any>) => (data: {} | {}[], resourceType: ResourceType<{}>, store: Store) => void;
     /**
      * Ensure url will start with '/'
      */

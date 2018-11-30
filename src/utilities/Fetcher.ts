@@ -3,6 +3,7 @@
 import { Resource } from './Resource';
 import { Store } from './Store';
 import { Record } from './RecordTable';
+import { ResourceType } from './ResourceType';
 
 export type RequestParams = RequestParameter[] | RequestParameter;
 
@@ -112,10 +113,30 @@ export interface FetcherProps {
     requestFailed?: (requestInfo: RequestInfo) => void;
 
     unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
+
+    defaultMapDataToProps?: (
+        data: {} | Array<{}>,
+        resource: Resource<any, {}>,
+        resourceType: ResourceType<{}>,
+        store: Store
+    ) => void;
 }
 
 export class Fetcher {
     props: FetcherProps;
+
+    static defaultMapDataToStore = (
+        data: {} | Array<{}>,
+        resource: Resource<{}>,
+        resourceType: ResourceType<{}>,
+        store: Store
+    ) => {
+        if (resource.props.method === 'DELETE') {
+            store.removeRecord(resourceType, data);
+        } else {
+            store.dataMapping(resourceType, data);
+        }
+    }
 
     createDefaultRequestInit = () => ({ headers: new Headers() });
 
@@ -123,6 +144,10 @@ export class Fetcher {
         this.props = {
             ...props
         };
+
+        if (!props.defaultMapDataToProps) {
+            this.props.defaultMapDataToProps = Fetcher.defaultMapDataToStore;
+        }
     }
 
     onRequestConfirm = async (confirmInfo: RequestConfirmInfo<any>) => {
@@ -156,7 +181,8 @@ export class Fetcher {
             getResponseData,
             requestFailed,
             unexpectedErrorCatched,
-            fetchMethod
+            fetchMethod,
+            defaultMapDataToProps
         } = this.props;
 
         const resourceProps = resource.props;
@@ -236,14 +262,12 @@ export class Fetcher {
                 resourceProps.requestSuccess(requestInfo);
             }
 
-            if (resourceProps.mapDataToStore && resourceProps.resourceType) {
-                const registeredResourceType = store.resourceTypeHasRegistered(resourceProps.resourceType.props.name);
-
-                if (!registeredResourceType) {
-                    store.registerResourceType(resourceProps.resourceType);
+            if (resourceProps.resourceType) {
+                if (resourceProps.mapDataToStore) {
+                    resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
+                } else if (defaultMapDataToProps) {
+                    defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
                 }
-
-                resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
             }
 
             return responseData;

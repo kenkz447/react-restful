@@ -85,4 +85,40 @@ describe('RestfulDataContainer', () => {
             expect(singleRecordRenderer).toBeCalledWith([updatedUser]);
         });
     });
+
+    describe('Pagination mode', () => {
+        const user100 = { id: 100, name: 'user 100' };
+        const user101 = { id: 101, name: 'user 101' };
+        const user102 = { id: 102, name: 'user 102' };
+        const paginationInitDataSource = [user100, user101];
+        const paginationRenderer = jest.fn(() => null);
+
+        ReactTestRenderer.create(
+            <RestfulDataContainer
+                initDataSource={paginationInitDataSource}
+                resourceType={userResourceType}
+                enablePaginationMode={true}
+                children={paginationRenderer}
+            />
+        );
+
+        it('should render with init record', () => {
+            expect(paginationRenderer).toBeCalledWith(paginationInitDataSource);
+        });
+
+        it('should replace with new records', () => {
+            paginationRenderer.mockClear();
+
+            ReactTestRenderer.create(
+                <RestfulDataContainer
+                    initDataSource={[user102]}
+                    resourceType={userResourceType}
+                    enablePaginationMode={true}
+                    children={paginationRenderer}
+                />
+            );
+
+            expect(paginationRenderer).toBeCalledWith([user102]);
+        });   
+    });
 });

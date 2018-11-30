@@ -15,6 +15,8 @@ export interface RestfulRenderChildProps<DataModel> {
 
     // RestfulRender fetch status, default: true
     fetching?: boolean;
+
+    refetch: () => void;
 }
 
 export type RestfulRenderChildType<DataModel> = React.ComponentType<RestfulRenderChildProps<DataModel>>;
@@ -48,7 +50,7 @@ export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataMo
 }
 
 export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
-    static defaultProps: Partial<RestfulRenderProps<{}>> = {
+    static defaultProps = {
         parameters: []
     };
 
@@ -58,7 +60,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     static getDerivedStateFromProps<DataModel>(
         nextProps: RestfulRenderProps<DataModel>,
         prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null {
-            
+
         const isResourceChanged = nextProps.resource !== prevState.resource;
         const isParamsChanged = JSON.stringify(nextProps.parameters) !== JSON.stringify(prevState.parameters);
 
@@ -78,27 +80,29 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     constructor(props: RestfulRenderProps<T>) {
         super(props);
 
-        const { children, render } = props;
+        const { children, render, defaultData } = props;
 
         if (!children && !render) {
             throw new Error('`children` or `render` required!');
         }
 
         this.Component = children || render!;
+        const needsFetching = !defaultData;
 
         this.state = {
             ...props,
             fetcher: props.fetcher || global[fetcherSymbol],
-            fetching: true,
+            fetching: needsFetching,
             componentRenderProps: {
-                data: props.defaultData || null,
-                error: null
+                data: defaultData || null,
+                error: null,
+                refetch: this.fetching
             }
         };
-    }
 
-    componentDidMount() {
-        this.fetching();
+        if (needsFetching) {
+            this.fetching();
+        }
     }
 
     componentDidUpdate() {
@@ -128,7 +132,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     }
 
     async fetching() {
-        const { fetcher, resource, parameters, onFetchCompleted } = this.state;
+        const { fetcher, resource, parameters, onFetchCompleted, componentRenderProps } = this.state;
 
         try {
             const data = await fetcher!.fetchResource<T>(resource, parameters);
@@ -142,15 +146,17 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
                 fetching: false,
                 componentRenderProps: {
                     data: data,
-                    error: null
+                    error: null,
+                    refetch: this.fetching
                 }
             });
         } catch (error) {
             this.setState({
                 fetching: false,
                 componentRenderProps: {
-                    data: null,
-                    error: error
+                    data: componentRenderProps.data,
+                    error: error,
+                    refetch: this.fetching
                 }
             });
         }

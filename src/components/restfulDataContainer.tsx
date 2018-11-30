@@ -10,11 +10,13 @@ export interface RestfulDataContainerProps<T extends Record> {
     children: (data: Array<T>) => JSX.Element;
     onRecordRemove?: (record: T) => void;
     onNewRecordsMapping?: (records: T[]) => void;
+    enablePaginationMode?: boolean;
 }
 
 interface RestfulDataContainerState<T extends Record> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
+    initDataSource: Array<T>;
 }
 
 export class RestfulDataContainer<T> extends React.PureComponent<
@@ -29,6 +31,7 @@ export class RestfulDataContainer<T> extends React.PureComponent<
     private unsubscribeStore!: () => void;
 
     static getDerivedStateFromProps(
+        nextProps: RestfulDataContainerProps<{}>,
         currentState: RestfulDataContainerState<{}>
     ) {
         if (currentState.needsUpdateSource) {
@@ -38,6 +41,17 @@ export class RestfulDataContainer<T> extends React.PureComponent<
             };
         }
 
+        const { enablePaginationMode, initDataSource } = nextProps;
+
+        if (enablePaginationMode) {
+            if (initDataSource !== currentState.initDataSource) {
+                return {
+                    dataSource: initDataSource,
+                    initDataSource: initDataSource
+                };
+            }
+        }
+        
         return null;
     }
 
@@ -45,7 +59,8 @@ export class RestfulDataContainer<T> extends React.PureComponent<
         super(props);
         const { initDataSource } = props;
         this.state = {
-            dataSource: initDataSource
+            dataSource: initDataSource,
+            initDataSource: initDataSource
         };
     }
 

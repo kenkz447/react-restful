@@ -129,15 +129,25 @@ class RestfulDataContainer extends React.PureComponent {
         };
         const { initDataSource } = props;
         this.state = {
-            dataSource: initDataSource
+            dataSource: initDataSource,
+            initDataSource: initDataSource
         };
     }
-    static getDerivedStateFromProps(currentState) {
+    static getDerivedStateFromProps(nextProps, currentState) {
         if (currentState.needsUpdateSource) {
             return {
                 dataSource: currentState.dataSource,
                 needsUpdateSource: false
             };
+        }
+        const { enablePaginationMode, initDataSource } = nextProps;
+        if (enablePaginationMode) {
+            if (initDataSource !== currentState.initDataSource) {
+                return {
+                    dataSource: initDataSource,
+                    initDataSource: initDataSource
+                };
+            }
         }
         return null;
     }

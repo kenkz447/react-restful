@@ -35,78 +35,120 @@ describe('RestfulRender', () => {
 
     let paramsProps = [pathParam];
 
-    let render = jest.fn(() => null);
-
-    const onFetchCompleted = jest.fn();
-
     const mockResponseDataStr = JSON.stringify(testUserData);
 
-    mockResponse(mockResponseDataStr, {
-        headers: { 'content-type': 'application/json' }
-    });
-    
-    const defaultData: User[] = [{
-        id: 999,
-        name: 'default'
-    }];
-
-    const restfulRender = ReactTestRenderer.create(
-        <RestfulRender
-            fetcher={fetcher}
-            resource={getUserByBranchResource}
-            parameters={paramsProps}
-            onFetchCompleted={onFetchCompleted}
-            defaultData={defaultData}
-        >
-            {render}
-        </RestfulRender>
-    );
-
     describe('init props', () => {
-        it('Props as first render', () => {
+        const render = jest.fn(() => null);
+        const onFetchCompleted = jest.fn();
+
+        mockResponse(mockResponseDataStr, {
+            headers: { 'content-type': 'application/json' }
+        });
+
+        const restfulRender = ReactTestRenderer.create(
+            <RestfulRender
+                fetcher={fetcher}
+                resource={getUserByBranchResource}
+                parameters={paramsProps}
+                onFetchCompleted={onFetchCompleted}
+            >
+                {render}
+            </RestfulRender>
+        );
+
+        const restfulRenderInstance = restfulRender.root.instance as RestfulRender<User[]>;
+        const refetchFunc = restfulRenderInstance.fetching;
+
+        it('should render with init props', () => {
             expect(render.mock.calls[0][0]).toEqual({
                 error: null,
-                data: defaultData,
-                fetching: true
+                data: null,
+                fetching: true,
+                refetch: refetchFunc
             });
+        });
+
+        it('should re-render when fetch complete', () => {
             expect(render.mock.calls[1][0]).toEqual({
                 error: null,
                 data: testUserData,
-                fetching: false
+                fetching: false,
+                refetch: refetchFunc
             });
             expect(onFetchCompleted).toBeCalledWith(testUserData);
         });
-    });
 
-    describe('fails', () => {
         const error = new Error('Fetch mock failed');
+        it('should re-render when params change', () => {
+            render.mockClear();
+            fetch.mockClear();
 
-        beforeAll(() => {
             fetch.mockRejectOnce(error);
             restfulRender.update(
                 <RestfulRender
                     fetcher={fetcher}
                     resource={getUserByBranchResource}
-                    parameters={[pathParam]}
                     onFetchCompleted={onFetchCompleted}
                 >
                     {render}
                 </RestfulRender>
             );
+
+            expect(render).toBeCalledWith(
+                {
+                    error: null,
+                    data: testUserData,
+                    fetching: true,
+                    refetch: refetchFunc
+                },
+                {}
+            );
+            render.mockClear();
         });
 
-        // it('fetch failed', () => {
-        //     expect(render.mock.calls[2][0]).toEqual({
-        //         error: null,
-        //         data: testUserData,
-        //         fetching: true
-        //     });
+        it('should re-render with error when fetch fail', () => {
+            expect(render).toBeCalledWith(
+                {
+                    error: error,
+                    data: testUserData,
+                    fetching: false,
+                    refetch: refetchFunc
+                },
+                {}
+            );
+        });
+    });
 
-        //     expect(render.mock.calls[3][0]).toEqual({
-        //         error: error,
-        //         data: null,
-        //         fetching: false
-        //     });
-        // });
+    describe('default data props', () => {
+        const defaultDataRender = jest.fn(() => null);
+        const defaultDataOnFetchCompleted = jest.fn();
+
+        const restfulRender = ReactTestRenderer.create(
+            <RestfulRender
+                fetcher={fetcher}
+                resource={getUserByBranchResource}
+                parameters={paramsProps}
+                onFetchCompleted={defaultDataOnFetchCompleted}
+                defaultData={testUserData}
+            >
+                {defaultDataRender}
+            </RestfulRender>
+        );
+
+        const restfulRenderInstance = restfulRender.root.instance as RestfulRender<User[]>;
+        const refetchFunc = restfulRenderInstance.fetching;
+
+        it('should render with default data without fetch', () => {
+            expect(defaultDataRender).toBeCalledWith(
+                {
+                    error: null,
+                    data: testUserData,
+                    fetching: false,
+                    refetch: refetchFunc
+                },
+                {}
+            );
+            expect(defaultDataOnFetchCompleted).not.toBeCalled();
+        });
     });
 });

@@ -9,10 +9,12 @@ export interface RestfulDataContainerProps<T extends Record> {
     children: (data: Array<T>) => JSX.Element;
     onRecordRemove?: (record: T) => void;
     onNewRecordsMapping?: (records: T[]) => void;
+    enablePaginationMode?: boolean;
 }
 interface RestfulDataContainerState<T extends Record> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
+    initDataSource: Array<T>;
 }
 export declare class RestfulDataContainer<T> extends React.PureComponent<RestfulDataContainerProps<T>, RestfulDataContainerState<T>> {
     static defaultProps: {
@@ -21,9 +23,14 @@ export declare class RestfulDataContainer<T> extends React.PureComponent<Restful
     private isUnmounting;
     private store;
     private unsubscribeStore;
-    static getDerivedStateFromProps(currentState: RestfulDataContainerState<{}>): {
+    static getDerivedStateFromProps(nextProps: RestfulDataContainerProps<{}>, currentState: RestfulDataContainerState<{}>): {
         dataSource: {}[];
         needsUpdateSource: boolean;
+        initDataSource?: undefined;
+    } | {
+        dataSource: {}[];
+        initDataSource: {}[];
+        needsUpdateSource?: undefined;
     } | null;
     constructor(props: RestfulDataContainerProps<T>);
     componentDidMount(): void;

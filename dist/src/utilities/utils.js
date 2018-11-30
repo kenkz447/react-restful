@@ -23,3 +23,12 @@ exports.upsertRequestParams = (params, type, parameter, value) => {
     }
     return nextParams;
 };
+exports.getParamsValue = (params, type, parameter) => {
+    if (!params) {
+        return null;
+    }
+    if (Array.isArray(params)) {
+        return params.find(o => o.parameter === parameter && o.type === type) || null;
+    }
+    return params.value;
+};

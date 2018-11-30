@@ -22,6 +22,7 @@ class ResourceType {
                 name: props,
                 keyProperty: 'id'
             };
+            this.registerToStore();
         }
         else {
             const { store } = props;

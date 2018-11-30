@@ -20,15 +20,20 @@ const utilities_1 = require("../utilities");
 class RestfulRender extends React.Component {
     constructor(props) {
         super(props);
-        const { children, render } = props;
+        const { children, render, defaultData } = props;
         if (!children && !render) {
             throw new Error('`children` or `render` required!');
         }
         this.Component = children || render;
-        this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: true, componentRenderProps: {
-                data: props.defaultData || null,
-                error: null
+        const needsFetching = !defaultData;
+        this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: needsFetching, componentRenderProps: {
+                data: defaultData || null,
+                error: null,
+                refetch: this.fetching
             } });
+        if (needsFetching) {
+            this.fetching();
+        }
     }
     static getDerivedStateFromProps(nextProps, prevState) {
         const isResourceChanged = nextProps.resource !== prevState.resource;
@@ -37,9 +42,6 @@ class RestfulRender extends React.Component {
             return Object.assign({}, nextProps, { prevParams: prevState.parameters, componentRenderProps: prevState.componentRenderProps, needsUpdate: true, fetching: true });
         }
         return null;
-    }
-    componentDidMount() {
-        this.fetching();
     }
     componentDidUpdate() {
         const { needsUpdate, fetching } = this.state;
@@ -58,7 +60,7 @@ class RestfulRender extends React.Component {
     }
     fetching() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { fetcher, resource, parameters, onFetchCompleted } = this.state;
+            const { fetcher, resource, parameters, onFetchCompleted, componentRenderProps } = this.state;
             try {
                 const data = yield fetcher.fetchResource(resource, parameters);
                 if (onFetchCompleted) {
@@ -69,7 +71,8 @@ class RestfulRender extends React.Component {
                     fetching: false,
                     componentRenderProps: {
                         data: data,
-                        error: null
+                        error: null,
+                        refetch: this.fetching
                     }
                 });
             }
@@ -77,8 +80,9 @@ class RestfulRender extends React.Component {
                 this.setState({
                     fetching: false,
                     componentRenderProps: {
-                        data: null,
-                        error: error
+                        data: componentRenderProps.data,
+                        error: error,
+                        refetch: this.fetching
                     }
                 });
             }
