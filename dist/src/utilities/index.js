@@ -7,6 +7,7 @@ __export(require("./Fetcher"));
 __export(require("./RecordTable"));
 __export(require("./Resource"));
 __export(require("./ResourceType"));
+__export(require("./SchemaError"));
 __export(require("./Store"));
 __export(require("./setupEnvironment"));
 __export(require("./utils"));

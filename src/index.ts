@@ -22,5 +22,6 @@ export {
     RequestParams,
     RequestConfirmInfo,
     upsertRequestParams,
-    getParamsValue
+    getParamsValue,
+    SchemaError
 } from './utilities';

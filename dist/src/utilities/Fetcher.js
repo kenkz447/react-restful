@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = require("./utils");
+const SchemaError_1 = require("./SchemaError");
 class Fetcher {
     constructor(props) {
         this.createDefaultRequestInit = () => ({ headers: new Headers() });
@@ -29,7 +29,7 @@ class Fetcher {
          */
         this.fetchResource = (resource, params, meta) => __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.validate(resource, params);
+                yield SchemaError_1.SchemaError.requestValidate(resource, params);
             }
             catch (error) {
                 throw error;
@@ -103,24 +103,6 @@ class Fetcher {
                 }
             }
             return responseData;
-        });
-        this.validate = (resource, params) => __awaiter(this, void 0, void 0, function* () {
-            if (!resource.props.bodySchema) {
-                return;
-            }
-            if (!params) {
-                throw Error('Resource bodySchema found but missing request params!');
-            }
-            const body = utils_1.getParamsValue(params, 'body');
-            if (!body) {
-                throw Error('Resource bodySchema found but missing request body!');
-            }
-            try {
-                yield resource.props.bodySchema.validate(body, { abortEarly: false });
-            }
-            catch (validationError) {
-                throw validationError;
-            }
         });
         this.props = Object.assign({}, props);
         if (!props.defaultMapDataToProps) {

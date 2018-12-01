@@ -5,6 +5,7 @@ import { Resource } from '../Resource';
 import { Store } from '../Store';
 
 import { userResourceType, User } from '../../test-resources';
+import { SchemaError } from '../SchemaError';
 
 describe('Fetcher', () => {
     const newUser: User = {
@@ -90,7 +91,7 @@ describe('Fetcher', () => {
                     value: postBody
                 });
             } catch (error) {
-                expect(error).toBeInstanceOf(yup.ValidationError);
+                expect(error).toBeInstanceOf(SchemaError);
             }
         });
     });

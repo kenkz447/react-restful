@@ -12,3 +12,4 @@ exports.Resource = utilities_1.Resource;
 exports.setupEnvironment = utilities_1.setupEnvironment;
 exports.upsertRequestParams = utilities_1.upsertRequestParams;
 exports.getParamsValue = utilities_1.getParamsValue;
+exports.SchemaError = utilities_1.SchemaError;
