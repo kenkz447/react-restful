@@ -31,5 +31,5 @@ export declare class RestfulRender<T> extends React.Component<RestfulRenderProps
     constructor(props: RestfulRenderProps<T>);
     componentDidUpdate(): void;
     render(): JSX.Element | null;
-    fetching(): Promise<void>;
+    fetching: () => Promise<void>;
 }

@@ -130,7 +130,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         );
     }
 
-    async fetching() {
+    fetching = async () => {
         const { fetcher, resource, parameters, onFetchCompleted, componentRenderProps } = this.state;
 
         try {

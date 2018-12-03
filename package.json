@@ -1,6 +1,6 @@
 {
     "name": "react-restful",
-    "version": "2.0.0-alpha.27",
+    "version": "2.0.0-alpha.30",
     "description": "Another liblary for restful resources management for React app.",
     "main": "dist/index.js",
     "repository": "github:kenkz447/react-restful",
@@ -37,6 +37,8 @@
         "typescript": "^3.1.6"
     },
     "dependencies": {
+        "@types/lodash": "^4.14.118",
+        "lodash": "^4.17.11",
         "react": "^16.6.1",
         "yup": "^0.26.6"
     }

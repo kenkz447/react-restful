@@ -53,7 +53,7 @@ export class Resource<DataModel, Meta = {}> {
 
     mixinWithDefaultParams = (requestParams: RequestParameter[]) => {
         let params = this.props.getDefaultParams!(requestParams);
-
+        
         if (Array.isArray(params)) {
             return [...requestParams, ...params];
         }

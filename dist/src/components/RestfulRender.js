@@ -20,6 +20,36 @@ const utilities_1 = require("../utilities");
 class RestfulRender extends React.Component {
     constructor(props) {
         super(props);
+        this.fetching = () => __awaiter(this, void 0, void 0, function* () {
+            const { fetcher, resource, parameters, onFetchCompleted, componentRenderProps } = this.state;
+            try {
+                const data = yield fetcher.fetchResource(resource, parameters);
+                if (onFetchCompleted) {
+                    onFetchCompleted(data);
+                }
+                this.setState({
+                    needsUpdate: false,
+                    fetching: false,
+                    componentRenderProps: {
+                        data: data,
+                        error: null,
+                        refetch: this.fetching,
+                        fetching: false
+                    }
+                });
+            }
+            catch (error) {
+                this.setState({
+                    fetching: false,
+                    componentRenderProps: {
+                        data: componentRenderProps.data,
+                        error: error,
+                        refetch: this.fetching,
+                        fetching: false
+                    }
+                });
+            }
+        });
         const { children, render, initData } = props;
         if (!children && !render) {
             throw new Error('`children` or `render` are required!');
@@ -57,38 +87,6 @@ class RestfulRender extends React.Component {
             return null;
         }
         return (React.createElement(Component, Object.assign({}, componentRenderProps)));
-    }
-    fetching() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { fetcher, resource, parameters, onFetchCompleted, componentRenderProps } = this.state;
-            try {
-                const data = yield fetcher.fetchResource(resource, parameters);
-                if (onFetchCompleted) {
-                    onFetchCompleted(data);
-                }
-                this.setState({
-                    needsUpdate: false,
-                    fetching: false,
-                    componentRenderProps: {
-                        data: data,
-                        error: null,
-                        refetch: this.fetching,
-                        fetching: false
-                    }
-                });
-            }
-            catch (error) {
-                this.setState({
-                    fetching: false,
-                    componentRenderProps: {
-                        data: componentRenderProps.data,
-                        error: error,
-                        refetch: this.fetching,
-                        fetching: false
-                    }
-                });
-            }
-        });
     }
 }
 RestfulRender.defaultProps = {
