@@ -120,18 +120,18 @@ describe('RestfulRender', () => {
     });
 
     describe('default data props', () => {
-        const defaultDataRender = jest.fn(() => null);
-        const defaultDataOnFetchCompleted = jest.fn();
+        const initDataRender = jest.fn(() => null);
+        const initDataOnFetchCompleted = jest.fn();
 
         const restfulRender = ReactTestRenderer.create(
             <RestfulRender
                 fetcher={fetcher}
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
-                onFetchCompleted={defaultDataOnFetchCompleted}
-                defaultData={testUserData}
+                onFetchCompleted={initDataOnFetchCompleted}
+                initData={testUserData}
             >
-                {defaultDataRender}
+                {initDataRender}
             </RestfulRender>
         );
 
@@ -139,7 +139,7 @@ describe('RestfulRender', () => {
         const refetchFunc = restfulRenderInstance.fetching;
 
         it('should render with default data without fetch', () => {
-            expect(defaultDataRender).toBeCalledWith(
+            expect(initDataRender).toBeCalledWith(
                 {
                     error: null,
                     data: testUserData,
@@ -148,7 +148,7 @@ describe('RestfulRender', () => {
                 },
                 {}
             );
-            expect(defaultDataOnFetchCompleted).not.toBeCalled();
+            expect(initDataOnFetchCompleted).not.toBeCalled();
         });
     });
 });

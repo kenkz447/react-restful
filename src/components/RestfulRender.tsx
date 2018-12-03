@@ -39,7 +39,7 @@ export interface RestfulRenderProps<DataModel> {
 
     onFetchCompleted?: (data: DataModel) => void;
 
-    defaultData?: DataModel;
+    initData?: DataModel | undefined;
 }
 
 export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
@@ -83,21 +83,21 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     constructor(props: RestfulRenderProps<T>) {
         super(props);
 
-        const { children, render, defaultData } = props;
+        const { children, render, initData } = props;
 
         if (!children && !render) {
             throw new Error('`children` or `render` are required!');
         }
 
         this.Component = children || render!;
-        const needsFetching = !defaultData;
+        const needsFetching = !initData;
 
         this.state = {
             ...props,
             fetcher: props.fetcher || global[fetcherSymbol],
             fetching: needsFetching,
             componentRenderProps: {
-                data: defaultData || null,
+                data: initData || null,
                 error: null,
                 refetch: this.fetching,
                 fetching: needsFetching

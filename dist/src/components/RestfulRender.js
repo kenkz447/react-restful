@@ -20,14 +20,14 @@ const utilities_1 = require("../utilities");
 class RestfulRender extends React.Component {
     constructor(props) {
         super(props);
-        const { children, render, defaultData } = props;
+        const { children, render, initData } = props;
         if (!children && !render) {
             throw new Error('`children` or `render` are required!');
         }
         this.Component = children || render;
-        const needsFetching = !defaultData;
+        const needsFetching = !initData;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: needsFetching, componentRenderProps: {
-                data: defaultData || null,
+                data: initData || null,
                 error: null,
                 refetch: this.fetching,
                 fetching: needsFetching
