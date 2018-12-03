@@ -11,7 +11,7 @@ export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requ
     requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
-    bodySchema?: ObjectSchema<DataModel>;
+    bodySchema?: ObjectSchema<any>;
 }
 export declare class Resource<DataModel, Meta = {}> {
     props: ResourceProps<DataModel, Meta>;

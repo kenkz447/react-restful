@@ -20,7 +20,8 @@ export interface ResourceProps<DataModel, Meta> extends
 
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
-    bodySchema?: ObjectSchema<DataModel>;
+    // tslint:disable-next-line:no-any
+    bodySchema?: ObjectSchema<any>;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
