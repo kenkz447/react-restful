@@ -7,24 +7,26 @@ import { Record, RecordTable } from './RecordTable';
 import { Store } from './Store';
 import { storeSymbol } from './setupEnvironment';
 
-interface ResourceTypeProps {
+interface ResourceTypeProps<T> {
     name: string;
     keyProperty?: string;
     store?: Store;
+    getRecordKey?: (record: T) => string | number | null;
 }
 
-export class ResourceType<T extends Record> {
-    static unRegisterTypes: ResourceType<{}>[] = [];
+export class ResourceType<T> {
+    // tslint:disable-next-line:no-any
+    static unRegisterTypes: ResourceType<any>[] = [];
 
-    readonly props: ResourceTypeProps;
+    readonly props: ResourceTypeProps<T>;
 
-    constructor(props: ResourceTypeProps | string) {
+    constructor(props: ResourceTypeProps<T> | string) {
         if (typeof props === 'string') {
             this.props = {
                 name: props,
                 keyProperty: 'id'
             };
-            
+
             this.registerToStore();
         } else {
             const { store } = props;
@@ -58,6 +60,11 @@ export class ResourceType<T extends Record> {
     }
 
     getRecordKey(record: T) {
-        return record[this.props.keyProperty!] || null;
+        const { getRecordKey, keyProperty } = this.props;
+        if (getRecordKey) {
+            return getRecordKey(record);
+        }
+
+        return record[keyProperty!] || null;
     }
 }

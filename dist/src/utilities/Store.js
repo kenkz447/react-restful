@@ -19,6 +19,7 @@ class Store {
         this.subscribe = this.subscribe.bind(this);
         this.getRecordTable = this.getRecordTable.bind(this);
     }
+    // tslint:disable-next-line:no-any
     subscribe(resourceTypes, callback) {
         const subscribeId = Symbol();
         this.subscribeStacks.push({

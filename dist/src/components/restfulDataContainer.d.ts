@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Record, ResourceType } from '../utilities';
-export interface RestfulDataContainerProps<T extends Record> {
+import { ResourceType } from '../utilities';
+export interface RestfulDataContainerProps<T> {
     resourceType: ResourceType<T>;
     initDataSource: Array<T>;
     shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
@@ -11,7 +11,7 @@ export interface RestfulDataContainerProps<T extends Record> {
     onNewRecordsMapping?: (records: T[]) => void;
     enablePaginationMode?: boolean;
 }
-interface RestfulDataContainerState<T extends Record> {
+interface RestfulDataContainerState<T> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
     initDataSource: Array<T>;

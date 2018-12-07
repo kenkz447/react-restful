@@ -4,7 +4,7 @@
 import { RecordTable, Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 export interface RecordTables {
-    [key: string]: RecordTable<{}>;
+    [key: string]: RecordTable<any>;
 }
 export interface SubscribeEvent<T> {
     type: 'mapping' | 'remove';
@@ -18,7 +18,7 @@ export declare class Store {
     private recordTables;
     private subscribeStacks;
     constructor();
-    subscribe<T>(resourceTypes: ResourceType<{}>[], callback: SubscribeCallback<T>): () => void;
+    subscribe(resourceTypes: ResourceType<any>[], callback: SubscribeCallback<any>): () => void;
     unSubscribe(subscribeId: Symbol): void;
     resourceTypeHasRegistered(resourceTypeName: string): boolean;
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;

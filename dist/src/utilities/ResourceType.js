@@ -37,8 +37,13 @@ class ResourceType {
         return result;
     }
     getRecordKey(record) {
-        return record[this.props.keyProperty] || null;
+        const { getRecordKey, keyProperty } = this.props;
+        if (getRecordKey) {
+            return getRecordKey(record);
+        }
+        return record[keyProperty] || null;
     }
 }
+// tslint:disable-next-line:no-any
 ResourceType.unRegisterTypes = [];
 exports.ResourceType = ResourceType;

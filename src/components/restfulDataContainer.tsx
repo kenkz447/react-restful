@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Record, ResourceType, storeSymbol, Store, SubscribeEvent } from '../utilities';
 
-export interface RestfulDataContainerProps<T extends Record> {
+export interface RestfulDataContainerProps<T> {
     resourceType: ResourceType<T>;
     initDataSource: Array<T>;
     shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
@@ -13,7 +13,7 @@ export interface RestfulDataContainerProps<T extends Record> {
     enablePaginationMode?: boolean;
 }
 
-interface RestfulDataContainerState<T extends Record> {
+interface RestfulDataContainerState<T> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
     initDataSource: Array<T>;
@@ -66,7 +66,6 @@ export class RestfulDataContainer<T> extends React.PureComponent<
 
     componentDidMount() {
         const { resourceType } = this.props;
-
         this.unsubscribeStore = this.store.subscribe([resourceType], this.onStoreEvent);
     }
 

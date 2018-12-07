@@ -6,7 +6,8 @@ import { RecordTable, Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 
 export interface RecordTables {
-    [key: string]: RecordTable<{}>;
+    // tslint:disable-next-line:no-any
+    [key: string]: RecordTable<any>;
 }
 
 export interface SubscribeEvent<T> {
@@ -26,7 +27,8 @@ interface SubscribeStack<T> {
 }
 
 export class Store {
-    private resourceTypes: Array<ResourceType<{}>>;
+    // tslint:disable-next-line:no-any
+    private resourceTypes: Array<ResourceType<any>>;
     private recordTables: RecordTables;
 
     // tslint:disable-next-line:no-any
@@ -41,7 +43,8 @@ export class Store {
         this.getRecordTable = this.getRecordTable.bind(this);
     }
 
-    subscribe<T>(resourceTypes: ResourceType<{}>[], callback: SubscribeCallback<T>) {
+    // tslint:disable-next-line:no-any
+    subscribe(resourceTypes: ResourceType<any>[], callback: SubscribeCallback<any>) {
         const subscribeId = Symbol();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
@@ -180,7 +183,7 @@ export class Store {
         }
     }
 
-    private doSubcribleCallbacks(event: SubscribeEvent<Record>) {
+    private doSubcribleCallbacks<T>(event: SubscribeEvent<T>) {
         for (const subscribeStack of this.subscribeStacks) {
             if (subscribeStack.resourceTypes.includes(event.resourceType)) {
                 subscribeStack.callback(event);
