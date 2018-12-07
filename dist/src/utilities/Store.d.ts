@@ -24,13 +24,13 @@ export declare class Store {
     getRegisteredResourceType(resourceTypeName: string): ResourceType<{}>;
     getRecordTable<T>(resourceType: ResourceType<T>): RecordTable<T>;
     registerResourceType<T>(resourceType: ResourceType<T>): void;
-    mapRecord<T>(resourceType: ResourceType<T>, record: T): boolean;
-    mapRecords<T>(resourceType: ResourceType<T>, records: Array<T>): void;
     removeRecord<T>(resourceType: ResourceType<T>, record: T): boolean;
     findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number): T | null;
     findOneRecord<T extends Record>(resourceType: ResourceType<T>, specs: findRecordPredicate<T> | T | string | number): T | null;
     findManyRecords: <T extends Record>(resourceType: ResourceType<T>, predicate: findRecordPredicate<T>) => T[];
-    dataMapping<T>(resourceType: ResourceType<T>, data: T | Array<T>): void;
+    dataMapping<T>(resourceType: ResourceType<T>, data: T | Array<T>): undefined;
+    private mapRecords;
+    private mapRecord;
     private doSubcribleCallbacks;
 }
 export {};

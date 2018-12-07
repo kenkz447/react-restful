@@ -93,7 +93,7 @@ export interface FetcherProps {
      * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
-    requestFailed?: (requestInfo: RequestInfo) => void;
+    requestFailed?: (requestInfo: RequestInfo) => any;
     unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
     defaultMapDataToProps?: (data: {} | Array<{}>, resource: Resource<any, {}>, resourceType: ResourceType<{}>, store: Store) => void;
     onSchemaError?: (error: SchemaError, resource: Resource<any>) => void;

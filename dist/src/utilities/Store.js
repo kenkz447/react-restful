@@ -58,31 +58,6 @@ class Store {
         this.recordTables[resourceType.props.name] = newRecordTable;
         this.resourceTypes.push(resourceType);
     }
-    mapRecord(resourceType, record) {
-        const table = this.recordTables[resourceType.props.name];
-        const upsertResult = table.upsert(record);
-        if (!upsertResult) {
-            throw new Error('upsert not working!');
-        }
-        this.doSubcribleCallbacks({
-            type: 'mapping',
-            resourceType: resourceType,
-            value: record
-        });
-        return true;
-    }
-    mapRecords(resourceType, records) {
-        if (!Array.isArray(records)) {
-            return;
-        }
-        const table = this.recordTables[resourceType.props.name];
-        records.forEach(record => table.upsert(record));
-        this.doSubcribleCallbacks({
-            type: 'mapping',
-            resourceType: resourceType,
-            value: records
-        });
-    }
     removeRecord(resourceType, record) {
         const table = this.recordTables[resourceType.props.name];
         table.remove(record);
@@ -117,11 +92,36 @@ class Store {
     }
     dataMapping(resourceType, data) {
         if (Array.isArray(data)) {
-            this.mapRecords(resourceType, data);
+            return void this.mapRecords(resourceType, data);
         }
-        else {
-            this.mapRecord(resourceType, data);
+        this.mapRecord(resourceType, data);
+    }
+    mapRecords(resourceType, records) {
+        const table = this.recordTables[resourceType.props.name];
+        records.forEach(record => {
+            const upsertResult = table.upsert(record);
+            if (upsertResult !== true) {
+                throw new Error(upsertResult);
+            }
+        });
+        this.doSubcribleCallbacks({
+            type: 'mapping',
+            resourceType: resourceType,
+            value: records
+        });
+    }
+    mapRecord(resourceType, record) {
+        const table = this.recordTables[resourceType.props.name];
+        const upsertResult = table.upsert(record);
+        if (upsertResult !== true) {
+            throw new Error(upsertResult);
         }
+        this.doSubcribleCallbacks({
+            type: 'mapping',
+            resourceType: resourceType,
+            value: record
+        });
+        return true;
     }
     doSubcribleCallbacks(event) {
         for (const subscribeStack of this.subscribeStacks) {

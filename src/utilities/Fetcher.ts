@@ -111,7 +111,7 @@ export interface FetcherProps {
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
 
-    requestFailed?: (requestInfo: RequestInfo) => void;
+    requestFailed?: (requestInfo: RequestInfo) => any;
 
     unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
 
@@ -249,8 +249,13 @@ export class Fetcher {
                 resourceProps.requestFailed(requestInfo);
             }
 
+            let customError = null;
             if (requestFailed) {
-                requestFailed(requestInfo);
+                customError = requestFailed(requestInfo);
+            }
+
+            if (customError) {
+                throw customError;
             }
 
             throw response;

@@ -75,8 +75,12 @@ class Fetcher {
                 if (resourceProps.requestFailed) {
                     resourceProps.requestFailed(requestInfo);
                 }
+                let customError = null;
                 if (requestFailed) {
-                    requestFailed(requestInfo);
+                    customError = requestFailed(requestInfo);
+                }
+                if (customError) {
+                    throw customError;
                 }
                 throw response;
             }

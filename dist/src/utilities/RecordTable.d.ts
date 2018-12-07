@@ -13,7 +13,7 @@ export declare class RecordTable<T extends Record> {
     readonly records: T[];
     constructor(props: RecordTableProps<T>);
     findByKey(key: string | number): T | null;
-    upsert(record: T): boolean;
+    upsert(record: T): true | "No key found!";
     remove(record: T): void;
 }
 export {};
