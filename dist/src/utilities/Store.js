@@ -98,12 +98,12 @@ class Store {
     }
     mapRecords(resourceType, records) {
         const table = this.recordTables[resourceType.props.name];
-        records.forEach(record => {
+        for (const record of records) {
             const upsertResult = table.upsert(record);
             if (upsertResult !== true) {
                 throw new Error(upsertResult);
             }
-        });
+        }
         this.doSubcribleCallbacks({
             type: 'mapping',
             resourceType: resourceType,

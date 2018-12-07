@@ -34,7 +34,7 @@ export class RecordTable<T extends Record> {
         const recordKey = resourceType.getRecordKey(record);
         
         if (!recordKey) {
-            return 'No key found!';
+            return `[${resourceType.props.name}] Upsert error: no key found!`;
         }
 
         this.recordMap.set(recordKey, record);

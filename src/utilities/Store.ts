@@ -152,12 +152,13 @@ export class Store {
 
     private mapRecords<T>(resourceType: ResourceType<T>, records: Array<T>) {
         const table = this.recordTables[resourceType.props.name];
-        records.forEach(record => {
+
+        for (const record of records) {
             const upsertResult = table.upsert(record);
             if (upsertResult !== true) {
                 throw new Error(upsertResult);
             }
-        });
+        }
 
         this.doSubcribleCallbacks({
             type: 'mapping',
