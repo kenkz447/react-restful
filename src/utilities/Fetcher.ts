@@ -121,6 +121,8 @@ export interface FetcherProps {
         resourceType: ResourceType<{}>,
         store: Store
     ) => void;
+
+    onSchemaError?: (error: SchemaError, resource: Resource<any>) => void;
 }
 
 export class Fetcher {
@@ -176,6 +178,11 @@ export class Fetcher {
         try {
             await SchemaError.requestValidate(resource, params);
         } catch (error) {
+            const { onSchemaError } = this.props;
+            if (onSchemaError) {
+                onSchemaError(error, resource);
+            }
+
             throw error;
         }
 
@@ -224,11 +231,7 @@ export class Fetcher {
                 throw unexpectedErrorCatched(url, modifiedRequestInit, error);
             }
 
-            if (error instanceof Error) {
-                throw error;
-            }
-
-            throw new Error(error);
+            throw error;
         }
 
         const requestMeta = resourceProps.getDefaultMeta ?

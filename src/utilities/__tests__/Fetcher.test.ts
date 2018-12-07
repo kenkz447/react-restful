@@ -1,5 +1,5 @@
-import  * as yup from 'yup';
-import { mockResponseOnce } from 'jest-fetch-mock';
+import * as yup from 'yup';
+import * as fetchMock from 'jest-fetch-mock';
 import { Fetcher, RequestParameter } from '../Fetcher';
 import { Resource } from '../Resource';
 import { Store } from '../Store';
@@ -23,11 +23,13 @@ describe('Fetcher', () => {
     });
 
     const store = new Store();
+    const onSchemaError = jest.fn();
 
     const fetcher = new Fetcher({
         store: store,
         beforeFetch: jest.fn((url: string, requestInit: RequestInit) => requestInit),
         afterFetch: jest.fn((response: Response) => void 0),
+        onSchemaError: onSchemaError
     });
 
     describe('instance methods', () => {
@@ -36,7 +38,7 @@ describe('Fetcher', () => {
 
             const mockResponseData = newUser;
             const mockResponseDataStr = JSON.stringify(mockResponseData);
-            mockResponseOnce(mockResponseDataStr, {
+            fetchMock.mockResponseOnce(mockResponseDataStr, {
                 headers: { 'content-type': 'application/json' }
             });
 
@@ -67,13 +69,20 @@ describe('Fetcher', () => {
     });
 
     describe('validate', () => {
+        const branchSchema = yup.object().shape({
+            name: yup.string().required(),
+            email: yup.string().email().required()
+        });
+
         const validateResource = new Resource({
             method: 'POST',
             url: '/api/users',
             bodySchema: yup.object().shape({
                 username: yup.string().required(),
                 age: yup.number().min(18),
-                email: yup.string().email()
+                email: yup.string().email(),
+                branch: branchSchema.required(),
+                branchs: yup.array(branchSchema).required()
             })
         });
 
@@ -81,17 +90,74 @@ describe('Fetcher', () => {
             id: 1,
             username: 'test',
             age: 11,
-            email: 'abc'
+            email: 'abc',
+            branchs: [{
+                name: 10000
+            }]
         };
-
-        it('should validation fail', async () => {
+        let schemaError: SchemaError;
+        it('should catch with SchemaError instance', async () => {
+            expect.assertions(3);
             try {
                 await fetcher.fetchResource(validateResource, {
                     type: 'body',
                     value: postBody
                 });
             } catch (error) {
-                expect(error).toBeInstanceOf(SchemaError);
+                schemaError = error;
+                expect(schemaError).toBeInstanceOf(SchemaError);
+                expect(schemaError.source).toBeInstanceOf(yup.ValidationError);
+                expect(schemaError.errors).toBeDefined();
+            }
+        });
+
+        it('should calling onSchemaError', async () => {
+            expect(onSchemaError).toBeCalledWith(schemaError, validateResource);
+        });
+    });
+
+    describe('network error', () => {
+        const fetchMethod = async () => {
+            throw new Error('Fetch failed!');
+        };
+
+        it('should throw Error instance', async () => {
+            const networkErrorFetcher = new Fetcher({
+                store: store,
+                fetchMethod: fetchMethod
+            });
+
+            expect.assertions(1);
+
+            try {
+                await networkErrorFetcher.fetchResource(createUserResource, {
+                    type: 'body',
+                    value: {}
+                });
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+            }
+        });
+
+        it('should silent with custom error handler', async () => {
+            const error = 'silent!';
+            const unexpectedErrorCatched = jest.fn(() => error);
+
+            const networkErrorFetcher = new Fetcher({
+                store: store,
+                fetchMethod: fetchMethod,
+                unexpectedErrorCatched: unexpectedErrorCatched
+            });
+
+            expect.assertions(1);
+
+            try {
+                await networkErrorFetcher.fetchResource(createUserResource, {
+                    type: 'body',
+                    value: {}
+                });
+            } catch (error) {
+                expect(error).toBe(error);
             }
         });
     });

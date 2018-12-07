@@ -32,6 +32,10 @@ class Fetcher {
                 yield SchemaError_1.SchemaError.requestValidate(resource, params);
             }
             catch (error) {
+                const { onSchemaError } = this.props;
+                if (onSchemaError) {
+                    onSchemaError(error, resource);
+                }
                 throw error;
             }
             const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed, unexpectedErrorCatched, fetchMethod, defaultMapDataToProps } = this.props;
@@ -57,10 +61,7 @@ class Fetcher {
                 if (unexpectedErrorCatched) {
                     throw unexpectedErrorCatched(url, modifiedRequestInit, error);
                 }
-                if (error instanceof Error) {
-                    throw error;
-                }
-                throw new Error(error);
+                throw error;
             }
             const requestMeta = resourceProps.getDefaultMeta ?
                 resourceProps.getDefaultMeta(requestParams) :
