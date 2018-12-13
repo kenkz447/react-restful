@@ -23,12 +23,12 @@ export interface ResourceProps<T, R = T, M = {}> extends
         resourceType: ResourceType<T>,
         store: Store
     ) => void;
-    requestSuccess?: (requestInfo: RequestInfo<M>) => void;
-    requestFailed?: (requestInfo: RequestInfo<M>) => void;
+    onRequestSuccess?: (requestInfo: RequestInfo<M>) => void;
+    onRequestFailed?: (requestInfo: RequestInfo<M>) => void;
 
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
-    bodySchema?: ObjectSchema<R>;
+    bodySchema?: ObjectSchema<{}>;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>

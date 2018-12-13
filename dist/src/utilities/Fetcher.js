@@ -72,15 +72,11 @@ class Fetcher {
                 response
             };
             if (!response.ok) {
-                if (resourceProps.requestFailed) {
-                    resourceProps.requestFailed(requestInfo);
+                if (resourceProps.onRequestFailed) {
+                    throw yield resourceProps.onRequestFailed(requestInfo);
                 }
-                let customError = null;
                 if (onRequestFailed) {
-                    customError = onRequestFailed(requestInfo);
-                }
-                if (customError) {
-                    throw customError;
+                    throw yield onRequestFailed(requestInfo);
                 }
                 throw response;
             }
@@ -96,8 +92,8 @@ class Fetcher {
             const responseData = usedGetResponseData ?
                 yield usedGetResponseData(requestInfo) :
                 yield response.json();
-            if (resourceProps.requestSuccess) {
-                resourceProps.requestSuccess(requestInfo);
+            if (resourceProps.onRequestSuccess) {
+                resourceProps.onRequestSuccess(requestInfo);
             }
             if (resourceProps.resourceType) {
                 if (resourceProps.mapDataToStore) {

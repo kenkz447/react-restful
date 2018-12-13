@@ -15,11 +15,11 @@ export interface ResourceProps<T, R = T, M = {}> extends Pick<FetcherProps, 'req
     url: string;
     method?: string;
     mapDataToStore?: (data: R, resourceType: ResourceType<T>, store: Store) => void;
-    requestSuccess?: (requestInfo: RequestInfo<M>) => void;
-    requestFailed?: (requestInfo: RequestInfo<M>) => void;
+    onRequestSuccess?: (requestInfo: RequestInfo<M>) => void;
+    onRequestFailed?: (requestInfo: RequestInfo<M>) => void;
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
-    bodySchema?: ObjectSchema<R>;
+    bodySchema?: ObjectSchema<{}>;
 }
 export declare class Resource<T, R = T, M = {}> {
     props: ResourceProps<T, R, M>;

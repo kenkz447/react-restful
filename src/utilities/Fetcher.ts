@@ -226,17 +226,12 @@ export class Fetcher {
         };
 
         if (!response.ok) {
-            if (resourceProps.requestFailed) {
-                resourceProps.requestFailed(requestInfo);
+            if (resourceProps.onRequestFailed) {
+                throw await resourceProps.onRequestFailed(requestInfo);
             }
 
-            let customError = null;
             if (onRequestFailed) {
-                customError = onRequestFailed(requestInfo);
-            }
-
-            if (customError) {
-                throw customError;
+                throw await onRequestFailed(requestInfo);
             }
 
             throw response;
@@ -259,8 +254,8 @@ export class Fetcher {
             await usedGetResponseData(requestInfo) :
             await response.json();
 
-        if (resourceProps.requestSuccess) {
-            resourceProps.requestSuccess(requestInfo);
+        if (resourceProps.onRequestSuccess) {
+            resourceProps.onRequestSuccess(requestInfo);
         }
 
         if (resourceProps.resourceType) {
