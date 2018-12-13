@@ -95,14 +95,23 @@ export interface FetcherProps {
 
     /**
      * Excute after fetch process
-     * It is suitable for side-effect processing when the request fails.
      * @param {RequestInfo} requestInfo
      */
-    onRequestSuccess?: (requestInfo: RequestInfo) => void;
+    onRequestSuccess?: (requestInfo: RequestInfo) => Promise<void>;
 
-    onRequestFailed?: (requestInfo: RequestInfo) => any;
+    /**
+     * Excute after fetch failed
+     * @param {RequestInfo} requestInfo
+     */
+    onRequestFailed?: (requestInfo: RequestInfo) => Promise<any>;
 
-    onRequestError?: (url: string, requestInit: RequestInit, error: Error) => any;
+    /**
+     * Excute after unexpected error
+     * @param {string} url
+     * @param {RequestInit} requestInit
+     * @param {Error} error
+     */
+    onRequestError?: (url: string, requestInit: RequestInit, error: Error) => Promise<any>;
 
     /**
      * If used RequestHelper, your have option to make a confirmation message before perform the request.
@@ -112,7 +121,7 @@ export interface FetcherProps {
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
 
-    defaultMapDataToProps?: <T, R = T, M = {}>(
+    defaultMapDataToStore?: <T, R = T, M = {}>(
         data: R,
         resource: Resource<T, R, M>,
         resourceType: ResourceType<T>,
@@ -175,7 +184,7 @@ export class Fetcher {
             onRequestFailed,
             onRequestError,
             fetchMethod,
-            defaultMapDataToProps,
+            defaultMapDataToStore,
             requestUrlParamParser
         } = this.props;
 
@@ -261,8 +270,8 @@ export class Fetcher {
         if (resourceProps.resourceType) {
             if (resourceProps.mapDataToStore) {
                 resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
-            } else if (defaultMapDataToProps) {
-                defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
+            } else if (defaultMapDataToStore) {
+                defaultMapDataToStore(responseData, resource, resourceProps.resourceType, store);
             }
         }
 

@@ -67,10 +67,11 @@ Example:
 
 Excute before making a request. We can modify any request at this point
 
-Example: Inject bearer token into request headers.
+Example: 
 
 ```tsx
  {
+     // Inject bearer token into request headers.
      beforeFetch: (url: string, requestInit: RequestInit) => {
         const token = getToken();
         if (token && requestInit.headers instanceof Headers) {
@@ -81,15 +82,15 @@ Example: Inject bearer token into request headers.
  }
 ```
 
-### **afterFetch** - *optional*
+### **onRequestSuccess** - *optional*
 
-Excute after success request.
+Excute after request success.
 
 Example:
 
 ```tsx
  {
-    afterFetch: async (requestInfo: RequestInfo) => {
+    onRequestSuccess: async (requestInfo: RequestInfo) => {
         const { response } = requestInfo
         console.error(response);
     }
@@ -98,15 +99,71 @@ Example:
 
 ### **requestFailed** - *optional*
 
-Execute after a failed request.
+Execute after request fail.
 
 Example:
 
 ```tsx
  {
     requestFailed: async (requestInfo: RequestInfo) => {
-        const { response } = requestInfo
-        console.error(response);
+        const { response } = requestInfo;
+        const json = await response.json();
+        console.error(json);
+    }
+ }
+```
+
+### **requestError** - *optional*
+
+Excute after unexpected error.
+
+Example:
+
+```tsx
+ {
+    requestError: async (url: string, requestInit: RequestInit, error: Error) => {
+        console.error(error);
+    }
+ }
+```
+
+### **defaultMapDataToStore** - *optional*
+
+Default method to map response data to store or remove from store.
+
+Example:
+
+```tsx
+ {
+    defaultMapDataToStore: (
+        data: any,
+        resource: Resource<{}>,
+        resourceType: ResourceType<{}>,
+        store: Store
+    ) => {
+       try {
+            if (resource.props.method === 'DELETE') {
+                return void store.removeRecord(resourceType, response);
+            }
+
+            store.dataMapping(resourceType, response.data);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+ }
+```
+
+### **onSchemaError** - *optional*
+
+Excute when request body validation failed.
+
+Example:
+
+```tsx
+ {
+    onSchemaError: async (error: SchemaError, resource: Resource<{}>) => {
+        console.error(error);
     }
  }
 ```

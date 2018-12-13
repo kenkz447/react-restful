@@ -2,6 +2,74 @@
 name: request
 ---
 
-# Hello world
+# Request
+`request` is wrapper of `fetch` API, and  a brief call of Fetcher's `fetchResource`. 
 
-Hello, I'm a mdx file!
+## Intro
+In `react-restful`, `request` is a common method to sending requests, usually used to send POST, PUT or DELETE. With GET, only use `request` when you need to send multiple requests at a time. For example, we will send a POST request to create a Pet:
+
+## Expample
+
+First, export your request from setup file:
+
+```tsx
+import { setupEnvironment } from 'react-restful';
+
+const restfulEnv = setupEnvironment({
+    // ...
+});
+
+export {
+    request: restfulEnv.request
+};
+```
+
+Own`pet` resources :
+
+```ts
+import { Resource, Record } from 'react-restful';
+
+export interface Pet extends Record {
+    id: number;
+    name: string;
+}
+
+export const createPetResource = new Resource<Pet>({
+    url: '/pet',
+    method: 'POST'
+});
+```
+
+`request` returned a promise, so you can use async and await like this:
+
+```tsx
+async function createPet(pet: Pet) {
+    const requestParam = { type: 'body', value: pet };
+    try {
+        const newPet = await request(
+            createPetResource, 
+            requestParam,
+        );
+        return newPet as Pet;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+// somewhere in your app...
+const newPet = await createPet({name: 'tom'});
+
+```
+Type definition:
+
+```tsx
+type request = <DataModel, Meta = {}>(
+    resource: Resource<DataModel>, 
+    params?: RequestParameter | RequestParameter[], 
+    meta?: Meta
+) => Promise<DataModel>
+```
+
+## About Meta object
+
+Meta is optional, it can be anything you pass at the beginning of your request, and you can get it back at the end. For example, if you want to display a specific message to a user when a request completes (including success or failure), you need to put the message in the meta, and the message will be displayed at `requestSuccess` (or `requestFailed`) as the example above. My opinion here is that we should separate the business logic and the side-effect to make things clearer.
