@@ -79,6 +79,12 @@ export interface FetcherProps {
     requestBodyParser?: (bodyKey: string, value: any) => any;
 
     /**
+     * Convert your request param value before send
+     * @param {any} value - body member value, pair with key
+     */
+    requestUrlParamParser?: (value: any, params: RequestParameter) => any;
+
+    /**
      * Excute before making a request. 
      * You can put your header e.g: 'Authorization - Bearer eyJhbGc...' into requestInit at this point.
      * @param {string} url - Request URL.
@@ -169,7 +175,8 @@ export class Fetcher {
             onRequestFailed,
             onRequestError,
             fetchMethod,
-            defaultMapDataToProps
+            defaultMapDataToProps,
+            requestUrlParamParser
         } = this.props;
 
         const resourceProps = resource.props;
@@ -178,9 +185,10 @@ export class Fetcher {
             params :
             (params && [params]);
 
-        let url = resource.urlReslover(requestParams);
-        if (entry && url.startsWith('/')) {
-            url = entry + url;
+        let requestUrl = resource.urlReslover(requestParams, requestUrlParamParser);
+
+        if (entry && requestUrl.startsWith('/')) {
+            requestUrl = entry + requestUrl;
         }
 
         const usedRequestBodyParser = resourceProps.requestBodyParser || requestBodyParser;
@@ -191,17 +199,17 @@ export class Fetcher {
 
         requestInit.method = resourceProps.method;
 
-        const modifiedRequestInit = beforeFetch ? await beforeFetch(url, requestInit) : requestInit;
+        const modifiedRequestInit = beforeFetch ? await beforeFetch(requestUrl, requestInit) : requestInit;
 
         let response!: Response;
 
         const useFetchMethod = fetchMethod || fetch;
 
         try {
-            response = await useFetchMethod(url, modifiedRequestInit);
+            response = await useFetchMethod(requestUrl, modifiedRequestInit);
         } catch (error) {
             if (onRequestError) {
-                throw onRequestError(url, modifiedRequestInit, error);
+                throw onRequestError(requestUrl, modifiedRequestInit, error);
             }
 
             throw error;

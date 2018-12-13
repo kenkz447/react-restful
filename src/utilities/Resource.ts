@@ -68,7 +68,10 @@ export class Resource<T, R = T, M = {}> {
         return [...requestParams, params];
     }
 
-    urlReslover(params: Array<RequestParameter> = []): string {
+    urlReslover = (
+        params: Array<RequestParameter> = [],
+        parser?: FetcherProps['requestUrlParamParser']
+    ): string => {
         const { getDefaultParams, url } = this.props;
 
         let uRL: string = url;
@@ -82,10 +85,12 @@ export class Resource<T, R = T, M = {}> {
                 continue;
             }
 
+            const paramValue = parser ? parser(param.value, param) : param.value;
+
             if (param.type === 'path') {
-                uRL = uRL.replace(`/:${param.parameter}`, `/${param.value}`);
+                uRL = uRL.replace(`/:${param.parameter}`, `/${paramValue}`);
             } else {
-                searchs.append(param.parameter!, param.value as string);
+                searchs.append(param.parameter!, paramValue as string);
             }
         }
 

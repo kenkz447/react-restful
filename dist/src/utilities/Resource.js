@@ -10,6 +10,27 @@ class Resource {
             }
             return [...requestParams, params];
         };
+        this.urlReslover = (params = [], parser) => {
+            const { getDefaultParams, url } = this.props;
+            let uRL = url;
+            const searchs = new URLSearchParams();
+            const mixedRequestParams = getDefaultParams ? this.mixinWithDefaultParams(params) : params;
+            for (const param of mixedRequestParams) {
+                const ignore = shouldParmeterIgnore(param);
+                if (ignore) {
+                    continue;
+                }
+                const paramValue = parser ? parser(param.value, param) : param.value;
+                if (param.type === 'path') {
+                    uRL = uRL.replace(`/:${param.parameter}`, `/${paramValue}`);
+                }
+                else {
+                    searchs.append(param.parameter, paramValue);
+                }
+            }
+            const searchString = searchs.toString();
+            return searchString ? `${uRL}?${searchString}` : uRL;
+        };
         if (typeof props === 'string') {
             this.props = {
                 url: Resource.getUrl(props),
@@ -19,26 +40,6 @@ class Resource {
         else {
             this.props = Object.assign({}, props, { resourceType: props.resourceType, url: Resource.getUrl(props.url), method: props.method || 'GET' });
         }
-    }
-    urlReslover(params = []) {
-        const { getDefaultParams, url } = this.props;
-        let uRL = url;
-        const searchs = new URLSearchParams();
-        const mixedRequestParams = getDefaultParams ? this.mixinWithDefaultParams(params) : params;
-        for (const param of mixedRequestParams) {
-            const ignore = shouldParmeterIgnore(param);
-            if (ignore) {
-                continue;
-            }
-            if (param.type === 'path') {
-                uRL = uRL.replace(`/:${param.parameter}`, `/${param.value}`);
-            }
-            else {
-                searchs.append(param.parameter, param.value);
-            }
-        }
-        const searchString = searchs.toString();
-        return searchString ? `${uRL}?${searchString}` : uRL;
     }
     requestInitReslover(params = [], requestBodyParser) {
         const bodyParam = params.find(param => param.type === 'body');

@@ -65,6 +65,11 @@ export interface FetcherProps {
      */
     requestBodyParser?: (bodyKey: string, value: any) => any;
     /**
+     * Convert your request param value before send
+     * @param {any} value - body member value, pair with key
+     */
+    requestUrlParamParser?: (value: any, params: RequestParameter) => any;
+    /**
      * Excute before making a request.
      * You can put your header e.g: 'Authorization - Bearer eyJhbGc...' into requestInit at this point.
      * @param {string} url - Request URL.

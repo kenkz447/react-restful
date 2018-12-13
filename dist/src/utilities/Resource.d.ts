@@ -29,6 +29,6 @@ export declare class Resource<T, R = T, M = {}> {
     static getUrl: (url: string) => string;
     constructor(props: ResourceProps<T, R, M> | string);
     mixinWithDefaultParams: (requestParams: RequestParameter[]) => RequestParameter[];
-    urlReslover(params?: Array<RequestParameter>): string;
+    urlReslover: (params?: RequestParameter[], parser?: ((value: any, params: RequestParameter) => any) | undefined) => string;
     requestInitReslover(params?: Array<RequestParameter>, requestBodyParser?: FetcherProps['requestBodyParser']): RequestInit | null;
 }

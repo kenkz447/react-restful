@@ -38,13 +38,10 @@ export class Store {
         this.resourceTypes = [];
         this.recordTables = {};
         this.subscribeStacks = [];
-
-        this.subscribe = this.subscribe.bind(this);
-        this.getRecordTable = this.getRecordTable.bind(this);
     }
 
     // tslint:disable-next-line:no-any
-    subscribe(resourceTypes: ResourceType<any>[], callback: SubscribeCallback<any>) {
+    subscribe = (resourceTypes: ResourceType<any>[], callback: SubscribeCallback<any>) => {
         const subscribeId = Symbol();
         this.subscribeStacks.push({
             resourceTypes: resourceTypes,
@@ -56,16 +53,16 @@ export class Store {
         };
     }
 
-    unSubscribe(subscribeId: Symbol) {
+    unSubscribe = (subscribeId: Symbol) => {
         this.subscribeStacks = this.subscribeStacks.filter(o => o.subscribeId !== subscribeId);
     }
 
-    resourceTypeHasRegistered(resourceTypeName: string) {
+    resourceTypeHasRegistered = (resourceTypeName: string) => {
         const found = this.resourceTypes.find(o => o.props.name === resourceTypeName);
         return found !== undefined;
     }
 
-    getRegisteredResourceType(resourceTypeName: string): ResourceType<{}> {
+    getRegisteredResourceType = (resourceTypeName: string): ResourceType<{}> => {
         const resourceType = this.resourceTypes.find(o => o.props.name === resourceTypeName);
         if (!resourceType) {
             throw new Error(`Not found any resource type with name ${resourceTypeName}!`);
@@ -74,11 +71,11 @@ export class Store {
         return resourceType;
     }
 
-    getRecordTable<T>(resourceType: ResourceType<T>) {
+    getRecordTable = <T>(resourceType: ResourceType<T>) => {
         return this.recordTables[resourceType.props.name] as RecordTable<T>;
     }
 
-    registerResourceType<T>(resourceType: ResourceType<T>) {
+    registerResourceType = <T>(resourceType: ResourceType<T>) => {
         if (this.recordTables[resourceType.props.name]) {
             return;
         }
@@ -92,7 +89,7 @@ export class Store {
         this.resourceTypes.push(resourceType);
     }
 
-    removeRecord<T>(resourceType: ResourceType<T>, record: T) {
+    removeRecord = <T>(resourceType: ResourceType<T>, record: T) => {
         const table = this.recordTables[resourceType.props.name];
         table.remove(record);
         this.doSubcribleCallbacks({
@@ -103,15 +100,16 @@ export class Store {
         return true;
     }
 
-    findRecordByKey<T extends Record>(resourceType: ResourceType<T>, key: string | number) {
+    findRecordByKey = <T extends Record>(resourceType: ResourceType<T>, key: string | number) => {
         const table = this.getRecordTable<T>(resourceType);
         const resultByKey = table.findByKey(key);
         return resultByKey;
     }
 
-    findOneRecord<T extends Record>(
+    findOneRecord = <T extends Record>(
         resourceType: ResourceType<T>,
-        specs: findRecordPredicate<T> | T | string | number): T | null {
+        specs: findRecordPredicate<T> | T | string | number
+    ): T | null => {
         if (!specs) {
             return null;
         }
@@ -142,7 +140,7 @@ export class Store {
         return table.records.filter(predicate);
     }
 
-    dataMapping<T>(resourceType: ResourceType<T>, data: T | Array<T>) {
+    dataMapping = <T>(resourceType: ResourceType<T>, data: T | Array<T>) => {
         if (Array.isArray(data)) {
             return void this.mapRecords(resourceType, data);
         }
