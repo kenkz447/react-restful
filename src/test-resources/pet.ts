@@ -18,7 +18,7 @@ export const petResources = {
         method: 'PUT',
         url: '/pet'
     }),
-    findByStatus: new Resource<Pet[]>({
+    findByStatus: new Resource<Pet, Pet[]>({
         resourceType: petResourceType,
         url: '/pet/findByStatus'
     }),

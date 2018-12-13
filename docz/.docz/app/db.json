@@ -1,0 +1,169 @@
+{
+  "config": {
+    "title": "React Restful Docz",
+    "description": "My awesome app using docz",
+    "menu": [],
+    "ordering": "descending",
+    "version": "1.0.0",
+    "repository": null,
+    "native": false,
+    "codeSandbox": true,
+    "themeConfig": {}
+  },
+  "entries": {
+    "docs/components/RestfulRender.mdx": {
+      "name": "<RestfulRender />",
+      "id": "7987576c45a92f60a82e731f9ddb8eee",
+      "filepath": "docs/components/RestfulRender.mdx",
+      "link": null,
+      "slug": "docs-components-restful-render",
+      "route": "/docs-components-restful-render",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "hello-world",
+          "value": "Hello world"
+        }
+      ]
+    },
+    "docs/components/RestfulDataContainer.mdx": {
+      "name": "<RestfulDataContainer />",
+      "id": "3cdc3ee8d978f3b388565c2b03bf9f30",
+      "filepath": "docs/components/RestfulDataContainer.mdx",
+      "link": null,
+      "slug": "docs-components-restful-data-container",
+      "route": "/docs-components-restful-data-container",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "hello-world",
+          "value": "Hello world"
+        }
+      ]
+    },
+    "docs/instances/Resource.mdx": {
+      "name": "Resource",
+      "id": "d8b0af09045142061bc0bd2f985a84bb",
+      "filepath": "docs/instances/Resource.mdx",
+      "link": null,
+      "slug": "docs-instances-resource",
+      "route": "/docs-instances-resource",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "hello-world",
+          "value": "Hello world"
+        }
+      ]
+    },
+    "docs/instances/ResourceType.mdx": {
+      "name": "ResourceType",
+      "id": "9d939b1e0a5cc2bdd743b055f6626d2f",
+      "filepath": "docs/instances/ResourceType.mdx",
+      "link": null,
+      "slug": "docs-instances-resource-type",
+      "route": "/docs-instances-resource-type",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "hello-world",
+          "value": "Hello world"
+        }
+      ]
+    },
+    "docs/instances/Store.mdx": {
+      "name": "Store",
+      "id": "8546dbbd04aa0d449eada87b3f404337",
+      "filepath": "docs/instances/Store.mdx",
+      "link": null,
+      "slug": "docs-instances-store",
+      "route": "/docs-instances-store",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "hello-world",
+          "value": "Hello world"
+        }
+      ]
+    },
+    "docs/methods/request.mdx": {
+      "name": "request",
+      "id": "f6510a048044714a7232477b4ee0b02b",
+      "filepath": "docs/methods/request.mdx",
+      "link": null,
+      "slug": "docs-methods-request",
+      "route": "/docs-methods-request",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "hello-world",
+          "value": "Hello world"
+        }
+      ]
+    },
+    "docs/methods/setupEnvironment.mdx": {
+      "name": "setupEnvironment",
+      "id": "224df2eb6b525101d49a71bb7fbd9f10",
+      "filepath": "docs/methods/setupEnvironment.mdx",
+      "link": null,
+      "slug": "docs-methods-setup-environment",
+      "route": "/docs-methods-setup-environment",
+      "order": 0,
+      "menu": null,
+      "headings": [
+        {
+          "depth": 1,
+          "slug": "setupenvironment",
+          "value": "setupEnvironment"
+        },
+        {
+          "depth": 2,
+          "slug": "options",
+          "value": "Options"
+        },
+        {
+          "depth": 3,
+          "slug": "fetchmethod---optional",
+          "value": "fetchMethod  -  optional"
+        },
+        {
+          "depth": 3,
+          "slug": "store---required",
+          "value": "store  -  required"
+        },
+        {
+          "depth": 3,
+          "slug": "entry---optional",
+          "value": "entry  -  optional"
+        },
+        {
+          "depth": 3,
+          "slug": "beforefetch---optional",
+          "value": "beforeFetch  -  optional"
+        },
+        {
+          "depth": 3,
+          "slug": "afterfetch---optional",
+          "value": "afterFetch  -  optional"
+        },
+        {
+          "depth": 3,
+          "slug": "requestfailed---optional",
+          "value": "requestFailed  -  optional"
+        }
+      ]
+    }
+  }
+}

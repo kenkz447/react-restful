@@ -1,33 +1,33 @@
 import * as React from 'react';
 import { Resource, Fetcher, RequestParams } from '../utilities';
-export interface RestfulRenderChildProps<DataModel> {
-    data: DataModel | null;
+export interface RestfulRenderChildProps<R> {
+    data: R | null;
     error: Error | null;
     fetching: boolean;
     refetch: () => void;
 }
-export declare type RestfulRenderChildType<DataModel> = React.ComponentType<RestfulRenderChildProps<DataModel>>;
-export interface RestfulRenderProps<DataModel> {
+export declare type RestfulRenderChildType<R> = React.ComponentType<RestfulRenderChildProps<R>>;
+export interface RestfulRenderProps<R> {
     fetcher?: Fetcher;
-    resource: Resource<DataModel>;
+    resource: Resource<any, R>;
     parameters?: RequestParams;
-    render?: RestfulRenderChildType<DataModel>;
-    children?: RestfulRenderChildType<DataModel>;
-    onFetchCompleted?: (data: DataModel) => void;
-    initData?: DataModel | undefined;
+    render?: RestfulRenderChildType<R>;
+    children?: RestfulRenderChildType<R>;
+    onFetchCompleted?: (data: R) => void;
+    initData?: R | undefined;
 }
-export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
+export interface RestfulRenderState<R> extends RestfulRenderProps<R> {
     prevParams?: RequestParams;
     needsUpdate?: boolean;
     fetching: boolean;
-    componentRenderProps: RestfulRenderChildProps<DataModel>;
+    componentRenderProps: RestfulRenderChildProps<R>;
 }
 export declare class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
     static defaultProps: {
         parameters: never[];
     };
     Component: RestfulRenderChildType<T>;
-    static getDerivedStateFromProps<DataModel>(nextProps: RestfulRenderProps<DataModel>, prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null;
+    static getDerivedStateFromProps<R>(nextProps: RestfulRenderProps<R>, prevState: RestfulRenderState<R>): RestfulRenderState<R> | null;
     constructor(props: RestfulRenderProps<T>);
     componentDidUpdate(): void;
     render(): JSX.Element | null;

@@ -13,7 +13,7 @@ describe('RestfulRender', () => {
     });
     restfulStore.registerResourceType(userResourceType);
 
-    let getUserByBranchResource = new Resource<User[]>({
+    let getUserByBranchResource = new Resource<User, User[]>({
         resourceType: userResourceType,
         method: 'GET',
         url: '/api/users/{branch}',

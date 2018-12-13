@@ -10,7 +10,7 @@ describe('ResourceType', () => {
         name: 'user'
     });
 
-    restfulStore.mapRecord = jest.fn(restfulStore.mapRecord);
+    restfulStore.dataMapping = jest.fn(restfulStore.dataMapping);
 
     const testUser: User = {
         id: 1,
@@ -19,7 +19,7 @@ describe('ResourceType', () => {
 
     describe('instance', () => {
         beforeAll(() => {
-            restfulStore.mapRecord(userResourceType, testUser);
+            restfulStore.dataMapping(userResourceType, testUser);
         });
 
         it('map relateds record to store', () => {

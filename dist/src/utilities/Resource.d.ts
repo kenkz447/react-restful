@@ -2,24 +2,32 @@ import { ResourceType } from './ResourceType';
 import { Store } from './Store';
 import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
 import { ObjectSchema } from 'yup';
-export interface ResourceProps<DataModel, Meta> extends Pick<FetcherProps, 'requestBodyParser'>, Pick<FetcherProps, 'getResponseData'>, Pick<FetcherProps, 'onConfirm'> {
-    resourceType?: ResourceType<{}>;
+export interface ResourceProps<T, R = T, M = {}> extends Pick<FetcherProps, 'requestBodyParser'>, Pick<FetcherProps, 'onConfirm'> {
+    /**
+     * Get json data form Response instance after fetch.
+     * Will not used if Resource has own getResponseData method.
+     * If this props has not set and no Resource's getResponseData, `await response.json()` will be use.
+     * @param {Response} response - fetch Response instance.
+     * @param {RequestInfo} requestInfo - object contains helpful infomation
+     */
+    getResponseData?: (requestInfo: RequestInfo) => Promise<any>;
+    resourceType?: ResourceType<T>;
     url: string;
     method?: string;
-    mapDataToStore?: (data: DataModel, resourceType: ResourceType<{}>, store: Store) => void;
-    requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
-    requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
+    mapDataToStore?: (data: R, resourceType: ResourceType<T>, store: Store) => void;
+    requestSuccess?: (requestInfo: RequestInfo<M>) => void;
+    requestFailed?: (requestInfo: RequestInfo<M>) => void;
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
-    bodySchema?: ObjectSchema<any>;
+    bodySchema?: ObjectSchema<R>;
 }
-export declare class Resource<DataModel, Meta = {}> {
-    props: ResourceProps<DataModel, Meta>;
+export declare class Resource<T, R = T, M = {}> {
+    props: ResourceProps<T, R, M>;
     /**
      * Ensure url will start with '/'
      */
     static getUrl: (url: string) => string;
-    constructor(props: ResourceProps<DataModel, Meta> | string);
+    constructor(props: ResourceProps<T, R, M> | string);
     mixinWithDefaultParams: (requestParams: RequestParameter[]) => RequestParameter[];
     urlReslover(params?: Array<RequestParameter>): string;
     requestInitReslover(params?: Array<RequestParameter>, requestBodyParser?: FetcherProps['requestBodyParser']): RequestInit | null;

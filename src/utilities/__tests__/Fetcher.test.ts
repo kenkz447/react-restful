@@ -28,7 +28,7 @@ describe('Fetcher', () => {
     const fetcher = new Fetcher({
         store: store,
         beforeFetch: jest.fn((url: string, requestInit: RequestInit) => requestInit),
-        afterFetch: jest.fn((response: Response) => void 0),
+        onRequestSuccess: jest.fn(),
         onSchemaError: onSchemaError
     });
 
@@ -58,7 +58,7 @@ describe('Fetcher', () => {
                 requestInit
             );
 
-            expect(fetcher.props.afterFetch).toBeCalled();
+            expect(fetcher.props.onRequestSuccess).toBeCalled();
         });
     });
 
@@ -146,7 +146,7 @@ describe('Fetcher', () => {
             const networkErrorFetcher = new Fetcher({
                 store: store,
                 fetchMethod: fetchMethod,
-                unexpectedErrorCatched: unexpectedErrorCatched
+                onRequestError: unexpectedErrorCatched
             });
 
             expect.assertions(1);

@@ -3,39 +3,46 @@ import { Store } from './Store';
 import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
 import { ObjectSchema } from 'yup';
 
-export interface ResourceProps<DataModel, Meta> extends
+export interface ResourceProps<T, R = T, M = {}> extends
     Pick<FetcherProps, 'requestBodyParser'>,
-    Pick<FetcherProps, 'getResponseData'>,
     Pick<FetcherProps, 'onConfirm'> {
-    resourceType?: ResourceType<{}>;
+    /**
+     * Get json data form Response instance after fetch.
+     * Will not used if Resource has own getResponseData method.
+     * If this props has not set and no Resource's getResponseData, `await response.json()` will be use.
+     * @param {Response} response - fetch Response instance.
+     * @param {RequestInfo} requestInfo - object contains helpful infomation
+     */
+    // tslint:disable-next-line:no-any
+    getResponseData?: (requestInfo: RequestInfo) => Promise<any>;
+    resourceType?: ResourceType<T>;
     url: string;
     method?: string;
     mapDataToStore?: (
-        data: DataModel,
-        resourceType: ResourceType<{}>,
+        data: R,
+        resourceType: ResourceType<T>,
         store: Store
     ) => void;
-    requestSuccess?: (requestInfo: RequestInfo<Meta>) => void;
-    requestFailed?: (requestInfo: RequestInfo<Meta>) => void;
+    requestSuccess?: (requestInfo: RequestInfo<M>) => void;
+    requestFailed?: (requestInfo: RequestInfo<M>) => void;
 
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
-    // tslint:disable-next-line:no-any
-    bodySchema?: ObjectSchema<any>;
+    bodySchema?: ObjectSchema<R>;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
     !param || param.type === 'body' || param.value === undefined || param.value === '';
 
-export class Resource<DataModel, Meta = {}> {
-    props: ResourceProps<DataModel, Meta>;
+export class Resource<T, R = T, M = {}> {
+    props: ResourceProps<T, R, M>;
 
     /**
      * Ensure url will start with '/'
      */
     static getUrl = (url: string) => url.startsWith('http') ? url : (url.startsWith('/') ? url : `/${url}`);
 
-    constructor(props: ResourceProps<DataModel, Meta> | string) {
+    constructor(props: ResourceProps<T, R, M> | string) {
         if (typeof props === 'string') {
             this.props = {
                 url: Resource.getUrl(props),
@@ -53,7 +60,7 @@ export class Resource<DataModel, Meta = {}> {
 
     mixinWithDefaultParams = (requestParams: RequestParameter[]) => {
         let params = this.props.getDefaultParams!(requestParams);
-        
+
         if (Array.isArray(params)) {
             return [...requestParams, ...params];
         }

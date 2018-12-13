@@ -19,3 +19,10 @@ jest.config.json
 tsconfig.json
 tslint.json
 coverage
+
+docz
+__mocks__
+
+**/*.test.ts
+**/*.test.tsx
+**/test-resources/*

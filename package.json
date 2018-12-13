@@ -1,12 +1,12 @@
 {
     "name": "react-restful",
-    "version": "2.0.0-alpha.34",
+    "version": "2.0.0-alpha.35",
     "description": "Another liblary for restful resources management for React app.",
     "main": "dist/index.js",
     "repository": "github:kenkz447/react-restful",
     "scripts": {
         "build:before": "rimraf ./dist",
-        "build": "npm run build:before && tsc",
+        "build": "npm run build:before && tsc --p ./tsconfig.build.json",
         "test": "jest --coverage --config ./jest.config.json"
     },
     "keywords": [

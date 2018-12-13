@@ -16,7 +16,7 @@ export declare class SchemaError extends Error {
     source: ValidationError;
     static setIn(obj: ErrorValue, path: string, value: unknown): ErrorValue;
     static yupToErrors: (yupError: ValidationError) => ErrorValue;
-    static requestValidate<T>(resource: Resource<T>, params?: RequestParams): Promise<void>;
+    static requestValidate<T, R, M>(resource: Resource<T, R, M>, params?: RequestParams): Promise<void>;
     constructor(props: SchemaErrorProps);
 }
 export {};

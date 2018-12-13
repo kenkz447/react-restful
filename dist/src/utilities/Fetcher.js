@@ -38,7 +38,7 @@ class Fetcher {
                 }
                 throw error;
             }
-            const { entry, store, beforeFetch, afterFetch, requestBodyParser, getResponseData, requestFailed, unexpectedErrorCatched, fetchMethod, defaultMapDataToProps } = this.props;
+            const { entry, store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToProps } = this.props;
             const resourceProps = resource.props;
             const requestParams = Array.isArray(params) ?
                 params :
@@ -58,8 +58,8 @@ class Fetcher {
                 response = yield useFetchMethod(url, modifiedRequestInit);
             }
             catch (error) {
-                if (unexpectedErrorCatched) {
-                    throw unexpectedErrorCatched(url, modifiedRequestInit, error);
+                if (onRequestError) {
+                    throw onRequestError(url, modifiedRequestInit, error);
                 }
                 throw error;
             }
@@ -76,23 +76,23 @@ class Fetcher {
                     resourceProps.requestFailed(requestInfo);
                 }
                 let customError = null;
-                if (requestFailed) {
-                    customError = requestFailed(requestInfo);
+                if (onRequestFailed) {
+                    customError = onRequestFailed(requestInfo);
                 }
                 if (customError) {
                     throw customError;
                 }
                 throw response;
             }
-            if (afterFetch) {
-                afterFetch(requestInfo);
+            if (onRequestSuccess) {
+                onRequestSuccess(requestInfo);
             }
             const responseContentType = response.headers.get('content-type');
             if (!responseContentType || !responseContentType.startsWith('application/json')) {
                 const text = yield response.text();
                 return { text };
             }
-            const usedGetResponseData = resourceProps.getResponseData || getResponseData;
+            const usedGetResponseData = resourceProps.getResponseData;
             const responseData = usedGetResponseData ?
                 yield usedGetResponseData(requestInfo) :
                 yield response.json();
@@ -110,17 +110,6 @@ class Fetcher {
             return responseData;
         });
         this.props = Object.assign({}, props);
-        if (!props.defaultMapDataToProps) {
-            this.props.defaultMapDataToProps = Fetcher.defaultMapDataToStore;
-        }
     }
 }
-Fetcher.defaultMapDataToStore = (data, resource, resourceType, store) => {
-    if (resource.props.method === 'DELETE') {
-        store.removeRecord(resourceType, data);
-    }
-    else {
-        store.dataMapping(resourceType, data);
-    }
-};
 exports.Fetcher = Fetcher;

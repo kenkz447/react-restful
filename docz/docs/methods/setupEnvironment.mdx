@@ -1,0 +1,112 @@
+---
+name: setupEnvironment
+---
+
+# setupEnvironment
+
+Before you want to start with react-restful, the first thing to do is call the `setupEnvironment`:
+
+```tsx
+import { setupEnvironment } from 'react-restful';
+ 
+const restfulEnv = setupEnvironment({
+    // options...
+});
+
+export { 
+    restfulRequest: restfulEnv.request, 
+    restfulStore: restfulEnv.store
+};
+```
+This returned a object contains:
+- request: method to call restful APIs
+- store: Store instance
+
+And we export both with `restful` prefixes to avoid conflict with orther components of the appication.
+
+## Options
+
+### **fetchMethod** - *optional*
+
+Description: method to fetching resources.
+
+Default: `window.fetch`
+
+Type definition:
+
+```tsx
+type fetchMethod = (url: string, requestInit: RequestInit) => Promise<{}>;
+```
+
+### **store** - *required*
+
+Description: Store instance
+
+Example:
+
+```tsx
+ {
+     entry: new Store()
+ }
+```
+
+### **entry** - *optional*
+
+Base endpoint URI, will be grafted to the beginning of Resource's URL before request.
+Only used when Resource's URL start with '/'. 
+
+Example:
+
+```tsx
+ {
+     entry: 'https://api.domain.com/'
+ }
+```
+
+### **beforeFetch** - *optional*
+
+Excute before making a request. We can modify any request at this point
+
+Example: Inject bearer token into request headers.
+
+```tsx
+ {
+     beforeFetch: (url: string, requestInit: RequestInit) => {
+        const token = getToken();
+        if (token && requestInit.headers instanceof Headers) {
+            requestInit.headers.append('Authorization', `Bearer ${token}`);
+        }
+        return requestInit;
+    }
+ }
+```
+
+### **afterFetch** - *optional*
+
+Excute after success request.
+
+Example:
+
+```tsx
+ {
+    afterFetch: async (requestInfo: RequestInfo) => {
+        const { response } = requestInfo
+        console.error(response);
+    }
+ }
+```
+
+### **requestFailed** - *optional*
+
+Execute after a failed request.
+
+Example:
+
+```tsx
+ {
+    requestFailed: async (requestInfo: RequestInfo) => {
+        const { response } = requestInfo
+        console.error(response);
+    }
+ }
+```

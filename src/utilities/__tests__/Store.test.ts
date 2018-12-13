@@ -16,7 +16,7 @@ describe('Store', () => {
         }
     });
 
-    let table: RecordTable<{}>;
+    let table: RecordTable<User>;
     const testUser: User = {
         id: 1,
         name: 'test'
@@ -33,11 +33,7 @@ describe('Store', () => {
         });
 
         it('map record to table', () => {
-            const mappingResult = store.mapRecord(userResourceType, testUser);
-            expect(mappingResult).toBe(true);
-        });
-
-        it('find one record by key', () => {
+            store.dataMapping(userResourceType, testUser);
             const storedUser = store.findRecordByKey(userResourceType, testUser.id);
             expect(storedUser).toEqual(testUser);
         });

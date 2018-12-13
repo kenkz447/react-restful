@@ -88,20 +88,15 @@ export interface FetcherProps {
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
 
     /**
-     * Get json data form Response instance after fetch.
-     * Will not used if Resource has own getResponseData method.
-     * If this props has not set and no Resource's getResponseData, `await response.json()` will be use.
-     * @param {Response} response - fetch Response instance.
-     * @param {RequestInfo} requestInfo - object contains helpful infomation
-     */
-    getResponseData?: (requestInfo: RequestInfo) => Promise<any>;
-
-    /**
      * Excute after fetch process
      * It is suitable for side-effect processing when the request fails.
      * @param {RequestInfo} requestInfo
      */
-    afterFetch?: (requestInfo: RequestInfo) => void;
+    onRequestSuccess?: (requestInfo: RequestInfo) => void;
+
+    onRequestFailed?: (requestInfo: RequestInfo) => any;
+
+    onRequestError?: (url: string, requestInit: RequestInit, error: Error) => any;
 
     /**
      * If used RequestHelper, your have option to make a confirmation message before perform the request.
@@ -111,35 +106,18 @@ export interface FetcherProps {
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
 
-    requestFailed?: (requestInfo: RequestInfo) => any;
-
-    unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
-
-    defaultMapDataToProps?: (
-        data: {} | Array<{}>,
-        resource: Resource<any, {}>,
-        resourceType: ResourceType<{}>,
+    defaultMapDataToProps?: <T, R = T, M = {}>(
+        data: R,
+        resource: Resource<T, R, M>,
+        resourceType: ResourceType<T>,
         store: Store
     ) => void;
 
-    onSchemaError?: (error: SchemaError, resource: Resource<any>) => void;
+    onSchemaError?: <T, R, M>(error: SchemaError, resource: Resource<T, R, M>) => void;
 }
 
 export class Fetcher {
     props: FetcherProps;
-
-    static defaultMapDataToStore = (
-        data: {} | Array<{}>,
-        resource: Resource<{}>,
-        resourceType: ResourceType<{}>,
-        store: Store
-    ) => {
-        if (resource.props.method === 'DELETE') {
-            store.removeRecord(resourceType, data);
-        } else {
-            store.dataMapping(resourceType, data);
-        }
-    }
 
     createDefaultRequestInit = () => ({ headers: new Headers() });
 
@@ -147,10 +125,6 @@ export class Fetcher {
         this.props = {
             ...props
         };
-
-        if (!props.defaultMapDataToProps) {
-            this.props.defaultMapDataToProps = Fetcher.defaultMapDataToStore;
-        }
     }
 
     onRequestConfirm = async (confirmInfo: RequestConfirmInfo<any>) => {
@@ -170,11 +144,11 @@ export class Fetcher {
      * @param {RequestParams} [params] - Array or a single RequestParameter object,
      * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
      */
-    fetchResource = async <DataModel, Meta = {}>(
-        resource: Resource<DataModel>,
+    fetchResource = async <T, R = T, M = {}>(
+        resource: Resource<T, R, M>,
         params?: RequestParams,
-        meta?: Meta
-    ): Promise<DataModel> => {
+        meta?: M
+    ): Promise<R> => {
         try {
             await SchemaError.requestValidate(resource, params);
         } catch (error) {
@@ -190,11 +164,10 @@ export class Fetcher {
             entry,
             store,
             beforeFetch,
-            afterFetch,
+            onRequestSuccess,
             requestBodyParser,
-            getResponseData,
-            requestFailed,
-            unexpectedErrorCatched,
+            onRequestFailed,
+            onRequestError,
             fetchMethod,
             defaultMapDataToProps
         } = this.props;
@@ -227,18 +200,18 @@ export class Fetcher {
         try {
             response = await useFetchMethod(url, modifiedRequestInit);
         } catch (error) {
-            if (unexpectedErrorCatched) {
-                throw unexpectedErrorCatched(url, modifiedRequestInit, error);
+            if (onRequestError) {
+                throw onRequestError(url, modifiedRequestInit, error);
             }
 
             throw error;
         }
 
         const requestMeta = resourceProps.getDefaultMeta ?
-            resourceProps.getDefaultMeta(requestParams) as Meta :
+            resourceProps.getDefaultMeta(requestParams) as M :
             meta;
 
-        const requestInfo: RequestInfo<Meta> = {
+        const requestInfo: RequestInfo<M> = {
             meta: requestMeta,
             params: requestParams,
             response
@@ -250,8 +223,8 @@ export class Fetcher {
             }
 
             let customError = null;
-            if (requestFailed) {
-                customError = requestFailed(requestInfo);
+            if (onRequestFailed) {
+                customError = onRequestFailed(requestInfo);
             }
 
             if (customError) {
@@ -261,8 +234,8 @@ export class Fetcher {
             throw response;
         }
 
-        if (afterFetch) {
-            afterFetch(requestInfo);
+        if (onRequestSuccess) {
+            onRequestSuccess(requestInfo);
         }
 
         const responseContentType = response.headers.get('content-type');
@@ -272,7 +245,7 @@ export class Fetcher {
             return { text } as any;
         }
 
-        const usedGetResponseData = resourceProps.getResponseData || getResponseData;
+        const usedGetResponseData = resourceProps.getResponseData;
 
         const responseData = usedGetResponseData ?
             await usedGetResponseData(requestInfo) :

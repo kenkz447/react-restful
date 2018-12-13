@@ -6,9 +6,9 @@ import {
     RequestParams
 } from '../utilities';
 
-export interface RestfulRenderChildProps<DataModel> {
+export interface RestfulRenderChildProps<R> {
     // Resonse result, default: null
-    data: DataModel | null;
+    data: R | null;
 
     // Request catched error, default: null
     error: Error | null;
@@ -19,34 +19,35 @@ export interface RestfulRenderChildProps<DataModel> {
     refetch: () => void;
 }
 
-export type RestfulRenderChildType<DataModel> = React.ComponentType<RestfulRenderChildProps<DataModel>>;
+export type RestfulRenderChildType<R> = React.ComponentType<RestfulRenderChildProps<R>>;
 
-// RestfulRender's props, don't care about <DataModel>
+// RestfulRender's props, don't care about <R>
 // Pick one of render or children (based on your interests) for Presenter component
-export interface RestfulRenderProps<DataModel> {
+export interface RestfulRenderProps<R> {
     // For user who don't wants use default Fetcher, others: don't use it
     fetcher?: Fetcher;
 
-    resource: Resource<DataModel>;
+    // tslint:disable-next-line:no-any
+    resource: Resource<any, R>;
 
     parameters?: RequestParams;
 
     // Presenter component
-    render?: RestfulRenderChildType<DataModel>;
+    render?: RestfulRenderChildType<R>;
 
     // Like `render` prop but in children style
-    children?: RestfulRenderChildType<DataModel>;
+    children?: RestfulRenderChildType<R>;
 
-    onFetchCompleted?: (data: DataModel) => void;
+    onFetchCompleted?: (data: R) => void;
 
-    initData?: DataModel | undefined;
+    initData?: R | undefined;
 }
 
-export interface RestfulRenderState<DataModel> extends RestfulRenderProps<DataModel> {
+export interface RestfulRenderState<R> extends RestfulRenderProps<R> {
     prevParams?: RequestParams;
     needsUpdate?: boolean;
     fetching: boolean;
-    componentRenderProps: RestfulRenderChildProps<DataModel>;
+    componentRenderProps: RestfulRenderChildProps<R>;
 }
 
 export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, RestfulRenderState<T>> {
@@ -57,9 +58,9 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     // tslint:disable-next-line:no-any
     Component: RestfulRenderChildType<T>;
 
-    static getDerivedStateFromProps<DataModel>(
-        nextProps: RestfulRenderProps<DataModel>,
-        prevState: RestfulRenderState<DataModel>): RestfulRenderState<DataModel> | null {
+    static getDerivedStateFromProps<R>(
+        nextProps: RestfulRenderProps<R>,
+        prevState: RestfulRenderState<R>): RestfulRenderState<R> | null {
 
         const isResourceChanged = nextProps.resource !== prevState.resource;
         const isParamsChanged = JSON.stringify(nextProps.parameters) !== JSON.stringify(prevState.parameters);
@@ -134,7 +135,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         const { fetcher, resource, parameters, onFetchCompleted, componentRenderProps } = this.state;
 
         try {
-            const data = await fetcher!.fetchResource<T>(resource, parameters);
+            const data = await fetcher!.fetchResource(resource, parameters);
 
             if (onFetchCompleted) {
                 onFetchCompleted(data);

@@ -17,7 +17,7 @@ const isInteger = (obj: unknown): boolean =>
 
 const getIn = (obj: {}, key: string | string[], def?: unknown, p: number = 0) => {
     const path = toPath(key);
-    
+
     while (obj && p < path.length) {
         obj = obj[path[p++]];
     }
@@ -88,7 +88,7 @@ export class SchemaError extends Error {
         return errors;
     }
 
-    static async requestValidate<T>(resource: Resource<T>, params?: RequestParams) {
+    static async requestValidate<T, R, M>(resource: Resource<T, R, M>, params?: RequestParams) {
         if (!resource.props.bodySchema) {
             return;
         }
@@ -97,7 +97,7 @@ export class SchemaError extends Error {
             throw Error('Resource bodySchema found but missing request params!');
         }
 
-        const body = getParamsValue<T>(params, 'body');
+        const body = getParamsValue<R>(params, 'body');
 
         if (!body) {
             throw Error('Resource bodySchema found but missing request body!');

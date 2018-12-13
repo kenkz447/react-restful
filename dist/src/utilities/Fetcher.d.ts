@@ -73,19 +73,13 @@ export interface FetcherProps {
      */
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     /**
-     * Get json data form Response instance after fetch.
-     * Will not used if Resource has own getResponseData method.
-     * If this props has not set and no Resource's getResponseData, `await response.json()` will be use.
-     * @param {Response} response - fetch Response instance.
-     * @param {RequestInfo} requestInfo - object contains helpful infomation
-     */
-    getResponseData?: (requestInfo: RequestInfo) => Promise<any>;
-    /**
      * Excute after fetch process
      * It is suitable for side-effect processing when the request fails.
      * @param {RequestInfo} requestInfo
      */
-    afterFetch?: (requestInfo: RequestInfo) => void;
+    onRequestSuccess?: (requestInfo: RequestInfo) => void;
+    onRequestFailed?: (requestInfo: RequestInfo) => any;
+    onRequestError?: (url: string, requestInit: RequestInit, error: Error) => any;
     /**
      * If used RequestHelper, your have option to make a confirmation message before perform the request.
      * Using onConfirm to allow you setup a defaul confirm method for every request.
@@ -93,14 +87,11 @@ export interface FetcherProps {
      * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
-    requestFailed?: (requestInfo: RequestInfo) => any;
-    unexpectedErrorCatched?: (url: string, requestInit: RequestInit, error: Error) => any;
-    defaultMapDataToProps?: (data: {} | Array<{}>, resource: Resource<any, {}>, resourceType: ResourceType<{}>, store: Store) => void;
-    onSchemaError?: (error: SchemaError, resource: Resource<any>) => void;
+    defaultMapDataToProps?: <T, R = T, M = {}>(data: R, resource: Resource<T, R, M>, resourceType: ResourceType<T>, store: Store) => void;
+    onSchemaError?: <T, R, M>(error: SchemaError, resource: Resource<T, R, M>) => void;
 }
 export declare class Fetcher {
     props: FetcherProps;
-    static defaultMapDataToStore: (data: {} | {}[], resource: Resource<{}, {}>, resourceType: ResourceType<{}>, store: Store) => void;
     createDefaultRequestInit: () => {
         headers: Headers;
     };
@@ -112,5 +103,5 @@ export declare class Fetcher {
      * @param {RequestParams} [params] - Array or a single RequestParameter object,
      * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
      */
-    fetchResource: <DataModel, Meta = {}>(resource: Resource<DataModel, {}>, params?: RequestParameter | RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<DataModel>;
+    fetchResource: <T, R = T, M = {}>(resource: Resource<T, R, M>, params?: RequestParameter | RequestParameter[] | undefined, meta?: M | undefined) => Promise<R>;
 }

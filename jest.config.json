@@ -14,7 +14,7 @@
         }
     },
     "testMatch": [
-        "**/__tests__/*.+(ts|tsx|js)"
+        "**/__tests__/*.+(ts|tsx)"
     ],
     "setupFiles": [
         "./__mocks__/client.js",
