@@ -47,27 +47,21 @@ class Resource {
             return null;
         }
         const body = bodyParam.value;
-        let convertedBody = null;
+        let requestBody = Object.assign({}, body);
         if (requestBodyParser) {
-            convertedBody = {};
-            for (const key in body) {
-                if (body.hasOwnProperty(key)) {
-                    const element = body[key];
-                    convertedBody[key] = requestBodyParser(key, element);
-                }
-            }
+            const bodyKeys = Object.keys(body);
+            bodyKeys.forEach(bodyKey => {
+                const element = body[bodyKey];
+                requestBody[bodyKey] = requestBodyParser(bodyKey, element);
+            });
         }
         const requestInit = {
             headers: new Headers({
-                'Content-Type': bodyParam.contentType
+                'Content-Type': bodyParam.contentType || 'application/json'
             }),
-            body: JSON.stringify(convertedBody || body),
+            body: JSON.stringify(requestBody),
             method: this.props.method
         };
-        if (!bodyParam.contentType &&
-            requestInit.headers instanceof Headers) {
-            requestInit.headers.set('Content-Type', 'application/json');
-        }
         return requestInit;
     }
 }

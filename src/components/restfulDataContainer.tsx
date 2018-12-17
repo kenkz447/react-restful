@@ -154,8 +154,6 @@ export class RestfulDataContainer<T> extends React.PureComponent<
     }
 
     private getEventRecords = (e: SubscribeEvent<T>) => {
-        const { shouldAppendNewRecord } = this.props;
-
         const isSingleRecord = !Array.isArray(e.value);
 
         if (isSingleRecord) {

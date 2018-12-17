@@ -12,7 +12,7 @@ export interface RestfulRenderProps<R> {
     resource: Resource<any, R>;
     parameters?: RequestParams;
     render?: RestfulRenderChildType<R>;
-    children?: RestfulRenderChildType<R>;
+    children?: (renderProps: RestfulRenderChildProps<R>) => React.ReactNode;
     onFetchCompleted?: (data: R) => void;
     initData?: R | undefined;
 }
@@ -26,10 +26,10 @@ export declare class RestfulRender<T> extends React.Component<RestfulRenderProps
     static defaultProps: {
         parameters: never[];
     };
-    Component: RestfulRenderChildType<T>;
+    Component?: RestfulRenderChildType<T>;
     static getDerivedStateFromProps<R>(nextProps: RestfulRenderProps<R>, prevState: RestfulRenderState<R>): RestfulRenderState<R> | null;
     constructor(props: RestfulRenderProps<T>);
     componentDidUpdate(): void;
-    render(): JSX.Element | null;
+    render(): {} | null | undefined;
     fetching: () => Promise<void>;
 }

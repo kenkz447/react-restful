@@ -5,6 +5,7 @@ import { Store } from './Store';
 import { Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 import { SchemaError } from './SchemaError';
+import { string } from 'yup';
 
 export type RequestParams = RequestParameter[] | RequestParameter;
 
@@ -69,7 +70,7 @@ export interface FetcherProps {
      * It will be grafted to the beginning of Resource's URL before request.
      * Only used when Resource's URL start with '/'. 
      */
-    entry?: string;
+    entry?: string | ((url: string, requestInit: RequestInit) => string);
 
     /**
      * Convert your request body before send
@@ -153,6 +154,25 @@ export class Fetcher {
         return await confirmer(confirmInfo);
     }
 
+    getRequestUrl = (
+        resource: Resource<any, any, any>,
+        requestParams: RequestParameter[] | undefined,
+        requestInit: RequestInit
+    ) => {
+        const { entry, requestUrlParamParser } = this.props;
+        let requestUrl = resource.urlReslover(requestParams, requestUrlParamParser);
+
+        if (entry && requestUrl.startsWith('/')) {
+            let entryURL = typeof entry === 'function' ?
+                entry(requestUrl, requestInit) :
+                entry;
+
+            requestUrl = entryURL + requestUrl;
+        }
+
+        return requestUrl;
+    }
+
     /**
      * Function to make request by fetch method.
      * @param resource - Resource instance
@@ -176,7 +196,6 @@ export class Fetcher {
         }
 
         const {
-            entry,
             store,
             beforeFetch,
             onRequestSuccess,
@@ -184,8 +203,7 @@ export class Fetcher {
             onRequestFailed,
             onRequestError,
             fetchMethod,
-            defaultMapDataToStore,
-            requestUrlParamParser
+            defaultMapDataToStore
         } = this.props;
 
         const resourceProps = resource.props;
@@ -194,12 +212,6 @@ export class Fetcher {
             params :
             (params && [params]);
 
-        let requestUrl = resource.urlReslover(requestParams, requestUrlParamParser);
-
-        if (entry && requestUrl.startsWith('/')) {
-            requestUrl = entry + requestUrl;
-        }
-
         const usedRequestBodyParser = resourceProps.requestBodyParser || requestBodyParser;
 
         const requestInit: RequestInit =
@@ -207,6 +219,8 @@ export class Fetcher {
             this.createDefaultRequestInit();
 
         requestInit.method = resourceProps.method;
+
+        const requestUrl = this.getRequestUrl(resource, requestParams, requestInit);
 
         const modifiedRequestInit = beforeFetch ? await beforeFetch(requestUrl, requestInit) : requestInit;
 

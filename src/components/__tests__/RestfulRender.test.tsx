@@ -51,9 +51,8 @@ describe('RestfulRender', () => {
                 resource={getUserByBranchResource}
                 parameters={paramsProps}
                 onFetchCompleted={onFetchCompleted}
-            >
-                {render}
-            </RestfulRender>
+                render={render}
+            />
         );
 
         const restfulRenderInstance = restfulRender.root.instance as RestfulRender<User[]>;
@@ -130,9 +129,8 @@ describe('RestfulRender', () => {
                 parameters={paramsProps}
                 onFetchCompleted={initDataOnFetchCompleted}
                 initData={testUserData}
-            >
-                {initDataRender}
-            </RestfulRender>
+                render={initDataRender}
+            />
         );
 
         const restfulRenderInstance = restfulRender.root.instance as RestfulRender<User[]>;
@@ -149,6 +147,53 @@ describe('RestfulRender', () => {
                 {}
             );
             expect(initDataOnFetchCompleted).not.toBeCalled();
+        });
+    });
+
+    describe('render props as children', () => {
+        const render = jest.fn(() => null);
+
+        const restfulRender = ReactTestRenderer.create(
+            <RestfulRender
+                fetcher={fetcher}
+                resource={getUserByBranchResource}
+                parameters={paramsProps}
+                initData={testUserData}
+            >
+                {render}
+            </RestfulRender>
+        );
+
+        const restfulRenderInstance = restfulRender.root.instance as RestfulRender<User[]>;
+        const refetchFunc = restfulRenderInstance.fetching;
+
+        it('should render with default data without fetch', () => {
+            expect(render).toBeCalledWith({
+                error: null,
+                data: testUserData,
+                fetching: false,
+                refetch: refetchFunc
+            });
+        });
+    });
+
+    describe('without render props', () => {
+        it('should given an error', () => {
+            expect.assertions(2);
+
+            try {
+                ReactTestRenderer.create(
+                    <RestfulRender
+                        fetcher={fetcher}
+                        resource={getUserByBranchResource}
+                        parameters={paramsProps}
+                        initData={testUserData}
+                    />
+                );
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+                expect(error.message).toBe('Missing render!');
+            }
         });
     });
 });

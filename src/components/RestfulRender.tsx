@@ -36,7 +36,7 @@ export interface RestfulRenderProps<R> {
     render?: RestfulRenderChildType<R>;
 
     // Like `render` prop but in children style
-    children?: RestfulRenderChildType<R>;
+    children?: (renderProps: RestfulRenderChildProps<R>) => React.ReactNode;
 
     onFetchCompleted?: (data: R) => void;
 
@@ -56,7 +56,7 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     };
 
     // tslint:disable-next-line:no-any
-    Component: RestfulRenderChildType<T>;
+    Component?: RestfulRenderChildType<T>;
 
     static getDerivedStateFromProps<R>(
         nextProps: RestfulRenderProps<R>,
@@ -84,13 +84,10 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     constructor(props: RestfulRenderProps<T>) {
         super(props);
 
-        const { children, render, initData } = props;
+        const { render, initData } = props;
 
-        if (!children && !render) {
-            throw new Error('`children` or `render` are required!');
-        }
+        this.Component = render;
 
-        this.Component = children || render!;
         const needsFetching = !initData;
 
         this.state = {
@@ -119,16 +116,18 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
 
     render() {
         const { componentRenderProps } = this.state;
-
+        const { children } = this.props;
         const { Component } = this;
 
-        if (!Component) {
-            return null;
+        if (Component) {
+            return <Component {...componentRenderProps} />;
+        }
+        
+        if (children) {
+            return children(componentRenderProps);
         }
 
-        return (
-            <Component {...componentRenderProps} />
-        );
+        throw new Error('Missing render!');
     }
 
     fetching = async () => {

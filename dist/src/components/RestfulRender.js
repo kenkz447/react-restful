@@ -50,11 +50,8 @@ class RestfulRender extends React.Component {
                 });
             }
         });
-        const { children, render, initData } = props;
-        if (!children && !render) {
-            throw new Error('`children` or `render` are required!');
-        }
-        this.Component = children || render;
+        const { render, initData } = props;
+        this.Component = render;
         const needsFetching = !initData;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: needsFetching, componentRenderProps: {
                 data: initData || null,
@@ -82,11 +79,15 @@ class RestfulRender extends React.Component {
     }
     render() {
         const { componentRenderProps } = this.state;
+        const { children } = this.props;
         const { Component } = this;
-        if (!Component) {
-            return null;
+        if (Component) {
+            return React.createElement(Component, Object.assign({}, componentRenderProps));
         }
-        return (React.createElement(Component, Object.assign({}, componentRenderProps)));
+        if (children) {
+            return children(componentRenderProps);
+        }
+        throw new Error('Missing render!');
     }
 }
 RestfulRender.defaultProps = {

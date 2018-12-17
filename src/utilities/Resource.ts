@@ -110,31 +110,23 @@ export class Resource<T, R = T, M = {}> {
 
         const body = bodyParam.value as object;
 
-        let convertedBody = null;
+        let requestBody = { ...body };
+
         if (requestBodyParser) {
-            convertedBody = {};
-            for (const key in body) {
-                if (body.hasOwnProperty(key)) {
-                    const element = body[key];
-                    convertedBody[key] = requestBodyParser(key, element);
-                }
-            }
+            const bodyKeys = Object.keys(body);
+            bodyKeys.forEach(bodyKey => {
+                const element = body[bodyKey];
+                requestBody[bodyKey] = requestBodyParser(bodyKey, element);
+            });
         }
 
         const requestInit: RequestInit = {
             headers: new Headers({
-                'Content-Type': bodyParam.contentType as string
+                'Content-Type': bodyParam.contentType || 'application/json'
             }),
-            body: JSON.stringify(convertedBody || body),
+            body: JSON.stringify(requestBody),
             method: this.props.method
         };
-
-        if (
-            !bodyParam.contentType &&
-            requestInit.headers instanceof Headers
-        ) {
-            requestInit.headers.set('Content-Type', 'application/json');
-        }
 
         return requestInit;
     }

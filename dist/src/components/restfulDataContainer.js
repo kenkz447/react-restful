@@ -73,7 +73,6 @@ class RestfulDataContainer extends React.PureComponent {
             });
         };
         this.getEventRecords = (e) => {
-            const { shouldAppendNewRecord } = this.props;
             const isSingleRecord = !Array.isArray(e.value);
             if (isSingleRecord) {
                 const record = e.value;

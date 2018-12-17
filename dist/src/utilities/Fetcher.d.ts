@@ -57,7 +57,7 @@ export interface FetcherProps {
      * It will be grafted to the beginning of Resource's URL before request.
      * Only used when Resource's URL start with '/'.
      */
-    entry?: string;
+    entry?: string | ((url: string, requestInit: RequestInit) => string);
     /**
      * Convert your request body before send
      * @param {string} bodyKey - body member key
@@ -79,12 +79,21 @@ export interface FetcherProps {
     beforeFetch?: (url: string, requestInit: RequestInit) => RequestInit;
     /**
      * Excute after fetch process
-     * It is suitable for side-effect processing when the request fails.
      * @param {RequestInfo} requestInfo
      */
-    onRequestSuccess?: (requestInfo: RequestInfo) => void;
-    onRequestFailed?: (requestInfo: RequestInfo) => any;
-    onRequestError?: (url: string, requestInit: RequestInit, error: Error) => any;
+    onRequestSuccess?: (requestInfo: RequestInfo) => Promise<void>;
+    /**
+     * Excute after fetch failed
+     * @param {RequestInfo} requestInfo
+     */
+    onRequestFailed?: (requestInfo: RequestInfo) => Promise<any>;
+    /**
+     * Excute after unexpected error
+     * @param {string} url
+     * @param {RequestInit} requestInit
+     * @param {Error} error
+     */
+    onRequestError?: (url: string, requestInit: RequestInit, error: Error) => Promise<any>;
     /**
      * If used RequestHelper, your have option to make a confirmation message before perform the request.
      * Using onConfirm to allow you setup a defaul confirm method for every request.
@@ -92,7 +101,7 @@ export interface FetcherProps {
      * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.
      */
     onConfirm?: (confirmInfo: RequestConfirmInfo<{}>) => Promise<boolean>;
-    defaultMapDataToProps?: <T, R = T, M = {}>(data: R, resource: Resource<T, R, M>, resourceType: ResourceType<T>, store: Store) => void;
+    defaultMapDataToStore?: <T, R = T, M = {}>(data: R, resource: Resource<T, R, M>, resourceType: ResourceType<T>, store: Store) => void;
     onSchemaError?: <T, R, M>(error: SchemaError, resource: Resource<T, R, M>) => void;
 }
 export declare class Fetcher {
@@ -102,6 +111,7 @@ export declare class Fetcher {
     };
     constructor(props: FetcherProps);
     onRequestConfirm: (confirmInfo: RequestConfirmInfo<any>) => Promise<boolean>;
+    getRequestUrl: (resource: Resource<any, any, any>, requestParams: RequestParameter[] | undefined, requestInit: RequestInit) => string;
     /**
      * Function to make request by fetch method.
      * @param resource - Resource instance

@@ -26,6 +26,7 @@ export const upsertRequestParams = (
     });
 
     const isParamExist = params.find(o => o.parameter === parameter);
+    
     if (!isParamExist) {
         nextParams.push({
             type: type,

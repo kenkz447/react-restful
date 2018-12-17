@@ -3,7 +3,7 @@ import * as ReactTestRenderer from 'react-test-renderer';
 
 import { RestfulDataContainer } from '../RestfulDataContainer';
 import { User, userResourceType } from '../../test-resources';
-import { setupEnvironment, Store } from '../../utilities';
+import { setupEnvironment, Store, ResourceType } from '../../utilities';
 
 describe('RestfulDataContainer', () => {
     const initDataSource: User[] = [{
@@ -25,7 +25,42 @@ describe('RestfulDataContainer', () => {
     store.registerResourceType(userResourceType);
     store.dataMapping(userResourceType, initDataSource);
 
-    describe('Multi record', () => {
+    describe('Empty initial data', () => {
+        const userResourceType2 = new ResourceType('userResourceType2');
+
+        const render = jest.fn(() => null);
+
+        ReactTestRenderer.create(
+            <RestfulDataContainer
+                initDataSource={[]}
+                resourceType={userResourceType2}
+                children={render}
+            />
+        );
+
+        const record = { id: 999, name: 'user 999' };
+        it('should render with new mapping record', () => {
+            store.dataMapping(userResourceType2, record);
+
+            expect(render).toBeCalledWith([record]);
+        });
+
+        it('should re-render when record remove', () => {
+            render.mockClear();
+            store.removeRecord(userResourceType2, { id: 88 });
+
+            expect(render).not.toBeCalled();
+        });
+
+        it('should re-render when record remove', () => {
+            render.mockClear();
+            store.removeRecord(userResourceType2, record);
+
+            expect(render).toBeCalledWith([]);
+        });
+    });
+
+    describe('with initial records', () => {
         const render = jest.fn(() => null);
 
         ReactTestRenderer.create(
@@ -59,7 +94,7 @@ describe('RestfulDataContainer', () => {
         });
     });
 
-    describe('single record', () => {
+    describe('with single record', () => {
         const initSingleRecord = { id: 99, name: 'user 99' };
         const singleInitDataSource = [initSingleRecord];
         const singleRecordRenderer = jest.fn(() => null);
@@ -119,6 +154,6 @@ describe('RestfulDataContainer', () => {
             );
 
             expect(paginationRenderer).toBeCalledWith([user102]);
-        });   
+        });
     });
 });

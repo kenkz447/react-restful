@@ -21,6 +21,17 @@ class Fetcher {
             const confirmer = confirmInfo.resource.props.onConfirm || onConfirm;
             return yield confirmer(confirmInfo);
         });
+        this.getRequestUrl = (resource, requestParams, requestInit) => {
+            const { entry, requestUrlParamParser } = this.props;
+            let requestUrl = resource.urlReslover(requestParams, requestUrlParamParser);
+            if (entry && requestUrl.startsWith('/')) {
+                let entryURL = typeof entry === 'function' ?
+                    entry(requestUrl, requestInit) :
+                    entry;
+                requestUrl = entryURL + requestUrl;
+            }
+            return requestUrl;
+        };
         /**
          * Function to make request by fetch method.
          * @param resource - Resource instance
@@ -38,19 +49,16 @@ class Fetcher {
                 }
                 throw error;
             }
-            const { entry, store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToProps, requestUrlParamParser } = this.props;
+            const { store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToStore } = this.props;
             const resourceProps = resource.props;
             const requestParams = Array.isArray(params) ?
                 params :
                 (params && [params]);
-            let requestUrl = resource.urlReslover(requestParams, requestUrlParamParser);
-            if (entry && requestUrl.startsWith('/')) {
-                requestUrl = entry + requestUrl;
-            }
             const usedRequestBodyParser = resourceProps.requestBodyParser || requestBodyParser;
             const requestInit = resource.requestInitReslover(requestParams, usedRequestBodyParser) ||
                 this.createDefaultRequestInit();
             requestInit.method = resourceProps.method;
+            const requestUrl = this.getRequestUrl(resource, requestParams, requestInit);
             const modifiedRequestInit = beforeFetch ? yield beforeFetch(requestUrl, requestInit) : requestInit;
             let response;
             const useFetchMethod = fetchMethod || fetch;
@@ -99,8 +107,8 @@ class Fetcher {
                 if (resourceProps.mapDataToStore) {
                     resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
                 }
-                else if (defaultMapDataToProps) {
-                    defaultMapDataToProps(responseData, resource, resourceProps.resourceType, store);
+                else if (defaultMapDataToStore) {
+                    defaultMapDataToStore(responseData, resource, resourceProps.resourceType, store);
                 }
             }
             return responseData;
