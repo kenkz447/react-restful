@@ -77,7 +77,8 @@ class Fetcher {
             const requestInfo = {
                 meta: requestMeta,
                 params: requestParams,
-                response
+                response,
+                resource
             };
             if (!response.ok) {
                 if (resourceProps.onRequestFailed) {

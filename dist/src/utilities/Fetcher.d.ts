@@ -15,6 +15,7 @@ export interface RequestInfo<Meta = {}> {
     meta?: Meta;
     params?: RequestParameter[];
     response: Response;
+    resource: Resource<any, any, Meta>;
 }
 export interface RequestParameter {
     /**

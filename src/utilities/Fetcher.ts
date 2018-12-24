@@ -21,6 +21,7 @@ export interface RequestInfo<Meta = {}> {
     meta?: Meta;
     params?: RequestParameter[];
     response: Response;
+    resource: Resource<any, any, Meta>;
 }
 
 export interface RequestParameter {
@@ -245,7 +246,8 @@ export class Fetcher {
         const requestInfo: RequestInfo<M> = {
             meta: requestMeta,
             params: requestParams,
-            response
+            response,
+            resource
         };
 
         if (!response.ok) {
