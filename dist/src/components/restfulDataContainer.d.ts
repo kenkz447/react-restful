@@ -6,7 +6,7 @@ export interface RestfulDataContainerProps<T> {
     shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
     sort?: (first: T, second: T) => number;
     filter?: (record: T, index: number, dataSource: T[]) => boolean;
-    children: (data: Array<T>) => JSX.Element;
+    children: (data: Array<T>) => React.ReactNode;
     onRecordRemove?: (record: T) => void;
     onNewRecordsMapping?: (records: T[]) => void;
     enablePaginationMode?: boolean;
@@ -42,7 +42,7 @@ export declare class RestfulDataContainer<T> extends React.PureComponent<Restful
     private getEventRecords;
     private shouldAppendRecord;
     private replaceRecord;
-    render(): JSX.Element | null;
+    render(): {} | null | undefined;
     private getRenderDataSource;
 }
 export {};
