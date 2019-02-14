@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Record, ResourceType, storeSymbol, Store, SubscribeEvent } from '../utilities';
+import { ResourceType, storeSymbol, Store, SubscribeEvent } from '../utilities';
 
 export interface RestfulDataContainerProps<T> {
     resourceType: ResourceType<T>;
@@ -7,7 +7,7 @@ export interface RestfulDataContainerProps<T> {
     shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
     sort?: (first: T, second: T) => number;
     filter?: (record: T, index: number, dataSource: T[]) => boolean;
-    children: (data: Array<T>) => JSX.Element;
+    children: (data: Array<T>) => React.ReactNode;
     onRecordRemove?: (record: T) => void;
     onNewRecordsMapping?: (records: T[]) => void;
     enablePaginationMode?: boolean;

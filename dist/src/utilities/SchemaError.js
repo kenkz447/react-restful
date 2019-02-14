@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("./utils");
 const toPath_1 = __importDefault(require("lodash/toPath"));
-const clonedeep_1 = __importDefault(require("lodash/clonedeep"));
+const lodash_clonedeep_1 = __importDefault(require("lodash.clonedeep"));
 const isInteger = (obj) => String(Math.floor(Number(obj))) === obj;
 const getIn = (obj, key, def, p = 0) => {
     const path = toPath_1.default(key);
@@ -42,7 +42,7 @@ class SchemaError extends Error {
             }
             else if (currentObj) {
                 // tslint:disable-next-line:no-any
-                resVal = resVal[currentPath] = clonedeep_1.default(currentObj);
+                resVal = resVal[currentPath] = lodash_clonedeep_1.default(currentObj);
             }
             else {
                 const nextPath = pathArray[i + 1];

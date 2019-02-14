@@ -4,7 +4,7 @@ import { RequestParams } from './Fetcher';
 import { getParamsValue } from './utils';
 
 import toPath from 'lodash/toPath';
-import cloneDeep from 'lodash/clonedeep';
+import cloneDeep from 'lodash.clonedeep';
 
 interface SchemaErrorProps {
     message: string;
