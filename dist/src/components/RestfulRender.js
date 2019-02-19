@@ -50,9 +50,9 @@ class RestfulRender extends React.Component {
                 });
             }
         });
-        const { render, initData } = props;
+        const { render, initData, initFetch } = props;
         this.Component = render;
-        const needsFetching = !initData;
+        const needsFetching = initFetch || !initData;
         this.state = Object.assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: needsFetching, componentRenderProps: {
                 data: initData || null,
                 error: null,

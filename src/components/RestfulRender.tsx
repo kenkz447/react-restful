@@ -41,6 +41,7 @@ export interface RestfulRenderProps<R> {
     onFetchCompleted?: (data: R) => void;
 
     initData?: R | undefined;
+    initFetch?: boolean;
 }
 
 export interface RestfulRenderState<R> extends RestfulRenderProps<R> {
@@ -84,11 +85,11 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
     constructor(props: RestfulRenderProps<T>) {
         super(props);
 
-        const { render, initData } = props;
+        const { render, initData, initFetch } = props;
 
         this.Component = render;
 
-        const needsFetching = !initData;
+        const needsFetching = initFetch || !initData;
 
         this.state = {
             ...props,

@@ -15,6 +15,7 @@ export interface RestfulRenderProps<R> {
     children?: (renderProps: RestfulRenderChildProps<R>) => React.ReactNode;
     onFetchCompleted?: (data: R) => void;
     initData?: R | undefined;
+    initFetch?: boolean;
 }
 export interface RestfulRenderState<R> extends RestfulRenderProps<R> {
     prevParams?: RequestParams;
