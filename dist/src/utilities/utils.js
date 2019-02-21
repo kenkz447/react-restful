@@ -5,7 +5,7 @@ exports.upsertRequestParams = (params, type, parameter, value) => {
         return [];
     }
     if (value === undefined) {
-        return params.filter(o => o.type !== type && o.parameter !== parameter);
+        return params.filter(o => `${type}_${o.parameter}` !== `${type}_${parameter}`);
     }
     const nextParams = params.map(param => {
         if (param.type === type && param.parameter === parameter) {
