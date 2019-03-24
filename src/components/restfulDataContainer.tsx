@@ -230,7 +230,7 @@ export class RestfulDataContainer<T> extends React.PureComponent<
         }
 
         if (sort) {
-            renderDataSource = dataSource.sort(sort);
+            renderDataSource = renderDataSource.sort(sort);
         }
 
         return renderDataSource;

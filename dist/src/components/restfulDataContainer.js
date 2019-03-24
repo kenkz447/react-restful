@@ -122,7 +122,7 @@ class RestfulDataContainer extends React.PureComponent {
                 renderDataSource = renderDataSource.filter(filter, this);
             }
             if (sort) {
-                renderDataSource = dataSource.sort(sort);
+                renderDataSource = renderDataSource.sort(sort);
             }
             return renderDataSource;
         };
