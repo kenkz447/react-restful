@@ -4,32 +4,37 @@
  * The same structure of data will be stored in a RecordTable
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-class RecordTable {
-    constructor(props) {
+var RecordTable = /** @class */ (function () {
+    function RecordTable(props) {
         this.props = props;
         this.recordMap = new Map();
     }
-    get records() {
-        const recordValue = this.recordMap.values();
-        return Array.from(recordValue);
-    }
-    findByKey(key) {
-        const result = this.recordMap.get(key);
+    Object.defineProperty(RecordTable.prototype, "records", {
+        get: function () {
+            var recordValue = this.recordMap.values();
+            return Array.from(recordValue);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    RecordTable.prototype.findByKey = function (key) {
+        var result = this.recordMap.get(key);
         return result || null;
-    }
-    upsert(record) {
-        const { resourceType } = this.props;
-        const recordKey = resourceType.getRecordKey(record);
+    };
+    RecordTable.prototype.upsert = function (record) {
+        var resourceType = this.props.resourceType;
+        var recordKey = resourceType.getRecordKey(record);
         if (!recordKey) {
-            return `[${resourceType.props.name}] Upsert error: no key found!`;
+            return "[" + resourceType.props.name + "] Upsert error: no key found!";
         }
         this.recordMap.set(recordKey, record);
         return true;
-    }
-    remove(record) {
-        const { resourceType } = this.props;
-        const recordKey = resourceType.getRecordKey(record);
+    };
+    RecordTable.prototype.remove = function (record) {
+        var resourceType = this.props.resourceType;
+        var recordKey = resourceType.getRecordKey(record);
         this.recordMap.delete(recordKey);
-    }
-}
+    };
+    return RecordTable;
+}());
 exports.RecordTable = RecordTable;
