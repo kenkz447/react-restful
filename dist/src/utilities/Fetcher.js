@@ -85,7 +85,7 @@ var Fetcher = /** @class */ (function () {
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = function (resource, params, meta) { return __awaiter(_this, void 0, void 0, function () {
-            var error_1, onSchemaError, _a, store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToStore, resourceProps, requestParams, usedRequestBodyParser, requestInit, requestUrl, modifiedRequestInit, _b, response, useFetchMethod, error_2, requestMeta, requestInfo, responseContentType, text, usedGetResponseData, responseData, _c;
+            var error_1, onSchemaError, _a, store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToStore, resourceProps, requestParams, usedRequestBodyParser, requestInit, requestUrl, modifiedRequestInit, _b, response, useFetchMethod, error_2, requestMeta, requestInfo, responseContentType, text, usedGetResponseData, responseData, _c, innerKey, innerValue, innerMapper;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -187,6 +187,21 @@ var Fetcher = /** @class */ (function () {
                             }
                             else if (defaultMapDataToStore) {
                                 defaultMapDataToStore(responseData, resource, resourceProps.resourceType, store);
+                            }
+                            if (resource.props.innerMapping) {
+                                for (innerKey in responseData) {
+                                    if (responseData.hasOwnProperty(innerKey)) {
+                                        innerValue = responseData[innerKey];
+                                        if (typeof innerValue !== 'object') {
+                                            continue;
+                                        }
+                                        innerMapper = resource.props.innerMapping[innerKey];
+                                        if (!innerMapper) {
+                                            continue;
+                                        }
+                                        innerMapper(innerValue, store);
+                                    }
+                                }
                             }
                         }
                         return [2 /*return*/, responseData];

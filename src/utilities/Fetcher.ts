@@ -6,6 +6,7 @@ import { Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 import { SchemaError } from './SchemaError';
 import { string } from 'yup';
+import { object } from 'prop-types';
 
 export type RequestParams = RequestParameter[] | RequestParameter;
 
@@ -288,6 +289,24 @@ export class Fetcher {
                 resourceProps.mapDataToStore(responseData, resourceProps.resourceType, store);
             } else if (defaultMapDataToStore) {
                 defaultMapDataToStore(responseData, resource, resourceProps.resourceType, store);
+            }
+
+            if (resource.props.innerMapping) {
+                for (const innerKey in responseData) {
+                    if (responseData.hasOwnProperty(innerKey)) {
+                        const innerValue = responseData[innerKey];
+                        if (typeof innerValue !== 'object') {
+                            continue;
+                        }
+
+                        const innerMapper = resource.props.innerMapping[innerKey];
+                        if (!innerMapper) {
+                            continue;
+                        }
+
+                        innerMapper(innerValue, store);
+                    }
+                }
             }
         }
 
