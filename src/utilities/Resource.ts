@@ -29,7 +29,7 @@ export interface ResourceProps<T, R = T, M = {}> extends
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
     bodySchema?: ObjectSchema<{}>;
-    innerMapping?: { [K in keyof R]: (value: R[K], store: Store ) => void };
+    innerMapping?: Partial<{ [K in keyof R]: (value: R[K], store: Store ) => void }>;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>

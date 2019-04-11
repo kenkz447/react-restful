@@ -20,9 +20,9 @@ export interface ResourceProps<T, R = T, M = {}> extends Pick<FetcherProps, 'req
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
     bodySchema?: ObjectSchema<{}>;
-    innerMapping?: {
+    innerMapping?: Partial<{
         [K in keyof R]: (value: R[K], store: Store) => void;
-    };
+    }>;
 }
 export declare class Resource<T, R = T, M = {}> {
     props: ResourceProps<T, R, M>;
