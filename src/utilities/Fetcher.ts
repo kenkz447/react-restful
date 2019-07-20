@@ -185,7 +185,7 @@ export class Fetcher {
         resource: Resource<T, R, M>,
         params?: RequestParams,
         meta?: M
-    ): Promise<R> => {
+    ): Promise<R > => {
         try {
             await SchemaError.requestValidate(resource, params);
         } catch (error) {
@@ -270,8 +270,7 @@ export class Fetcher {
         const responseContentType = response.headers.get('content-type');
 
         if (!responseContentType || !responseContentType.startsWith('application/json')) {
-            const text = await response.text();
-            return { text } as any;
+            return response as any as R;
         }
 
         const usedGetResponseData = resourceProps.getResponseData;

@@ -56,8 +56,8 @@ var Resource = /** @class */ (function () {
         };
         this.urlReslover = function (params, parser) {
             if (params === void 0) { params = []; }
-            var e_1, _a;
-            var _b = _this.props, getDefaultParams = _b.getDefaultParams, url = _b.url;
+            var e_1, _a, e_2, _b;
+            var _c = _this.props, getDefaultParams = _c.getDefaultParams, url = _c.url;
             var uRL = url;
             var searchs = new URLSearchParams();
             var mixedRequestParams = getDefaultParams ? _this.mixinWithDefaultParams(params) : params;
@@ -73,7 +73,24 @@ var Resource = /** @class */ (function () {
                         uRL = uRL.replace("/:" + param.parameter, "/" + paramValue);
                     }
                     else {
-                        searchs.append(param.parameter, paramValue);
+                        if (Array.isArray(paramValue)) {
+                            try {
+                                for (var paramValue_1 = __values(paramValue), paramValue_1_1 = paramValue_1.next(); !paramValue_1_1.done; paramValue_1_1 = paramValue_1.next()) {
+                                    var paramValueItem = paramValue_1_1.value;
+                                    searchs.append(param.parameter, paramValueItem);
+                                }
+                            }
+                            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                            finally {
+                                try {
+                                    if (paramValue_1_1 && !paramValue_1_1.done && (_b = paramValue_1.return)) _b.call(paramValue_1);
+                                }
+                                finally { if (e_2) throw e_2.error; }
+                            }
+                        }
+                        else {
+                            searchs.append(param.parameter, paramValue);
+                        }
                     }
                 }
             }

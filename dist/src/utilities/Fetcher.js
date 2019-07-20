@@ -85,7 +85,7 @@ var Fetcher = /** @class */ (function () {
          * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
          */
         this.fetchResource = function (resource, params, meta) { return __awaiter(_this, void 0, void 0, function () {
-            var error_1, onSchemaError, _a, store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToStore, resourceProps, requestParams, usedRequestBodyParser, requestInit, requestUrl, modifiedRequestInit, _b, response, useFetchMethod, error_2, requestMeta, requestInfo, responseContentType, text, usedGetResponseData, responseData, _c, innerKey, innerValue, innerMapper;
+            var error_1, onSchemaError, _a, store, beforeFetch, onRequestSuccess, requestBodyParser, onRequestFailed, onRequestError, fetchMethod, defaultMapDataToStore, resourceProps, requestParams, usedRequestBodyParser, requestInit, requestUrl, modifiedRequestInit, _b, response, useFetchMethod, error_2, requestMeta, requestInfo, responseContentType, usedGetResponseData, responseData, _c, innerKey, innerValue, innerMapper;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -160,23 +160,20 @@ var Fetcher = /** @class */ (function () {
                             onRequestSuccess(requestInfo);
                         }
                         responseContentType = response.headers.get('content-type');
-                        if (!(!responseContentType || !responseContentType.startsWith('application/json'))) return [3 /*break*/, 17];
-                        return [4 /*yield*/, response.text()];
-                    case 16:
-                        text = _d.sent();
-                        return [2 /*return*/, { text: text }];
-                    case 17:
+                        if (!responseContentType || !responseContentType.startsWith('application/json')) {
+                            return [2 /*return*/, response];
+                        }
                         usedGetResponseData = resourceProps.getResponseData;
-                        if (!usedGetResponseData) return [3 /*break*/, 19];
+                        if (!usedGetResponseData) return [3 /*break*/, 17];
                         return [4 /*yield*/, usedGetResponseData(requestInfo)];
+                    case 16:
+                        _c = _d.sent();
+                        return [3 /*break*/, 19];
+                    case 17: return [4 /*yield*/, response.json()];
                     case 18:
                         _c = _d.sent();
-                        return [3 /*break*/, 21];
-                    case 19: return [4 /*yield*/, response.json()];
-                    case 20:
-                        _c = _d.sent();
-                        _d.label = 21;
-                    case 21:
+                        _d.label = 19;
+                    case 19:
                         responseData = _c;
                         if (resourceProps.onRequestSuccess) {
                             resourceProps.onRequestSuccess(requestInfo);

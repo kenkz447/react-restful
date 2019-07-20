@@ -29,7 +29,7 @@ export interface ResourceProps<T, R = T, M = {}> extends
     getDefaultMeta?: (requestParams?: RequestParameter[]) => {};
     getDefaultParams?: (requestParams: RequestParameter[]) => RequestParams;
     bodySchema?: ObjectSchema<{}>;
-    innerMapping?: Partial<{ [K in keyof R]: (value: R[K], store: Store ) => void }>;
+    innerMapping?: Partial<{ [K in keyof R]: (value: R[K], store: Store) => void }>;
 }
 
 const shouldParmeterIgnore = (param: RequestParameter) =>
@@ -91,7 +91,13 @@ export class Resource<T, R = T, M = {}> {
             if (param.type === 'path') {
                 uRL = uRL.replace(`/:${param.parameter}`, `/${paramValue}`);
             } else {
-                searchs.append(param.parameter!, paramValue as string);
+                if (Array.isArray(paramValue)) {
+                    for (const paramValueItem of paramValue) {
+                        searchs.append(param.parameter!, paramValueItem);
+                    }
+                } else {
+                    searchs.append(param.parameter!, paramValue as string);
+                }
             }
         }
 
