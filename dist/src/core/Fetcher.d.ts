@@ -35,7 +35,7 @@ export interface RequestParameter {
      * - Case 'query': this is 'value' of query string (?key=value)
      * - Case 'path': this is replace with Resource' URL (replace with 'parameter' above)
      */
-    value: Object | string | number;
+    value: Object | string | number | undefined | null;
     /**
      * A 'Content-Type' header, used for submit POST/PUT request.
      * Default: 'application/json'
