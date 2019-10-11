@@ -2,15 +2,16 @@
 /**
  * Store is where data is stored from the API.
  */
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var RecordTable_1 = require("./RecordTable");
@@ -43,7 +44,7 @@ var Store = /** @class */ (function () {
             }
             return resourceType;
         };
-        this.getRecordTable = function (resourceType) {
+        this.getTable = function (resourceType) {
             return _this.recordTables[resourceType.props.name];
         };
         this.registerResourceType = function (resourceType) {
@@ -56,7 +57,7 @@ var Store = /** @class */ (function () {
             _this.recordTables[resourceType.props.name] = newRecordTable;
             _this.resourceTypes.push(resourceType);
         };
-        this.removeRecord = function (resourceType, record) {
+        this.removeOne = function (resourceType, record) {
             var table = _this.recordTables[resourceType.props.name];
             table.remove(record);
             _this.doSubcribleCallbacks({
@@ -66,12 +67,7 @@ var Store = /** @class */ (function () {
             });
             return true;
         };
-        this.findRecordByKey = function (resourceType, key) {
-            var table = _this.getRecordTable(resourceType);
-            var resultByKey = table.findByKey(key);
-            return resultByKey;
-        };
-        this.findOneRecord = function (resourceType, specs) {
+        this.findOne = function (resourceType, specs) {
             if (!specs) {
                 return null;
             }
@@ -84,12 +80,12 @@ var Store = /** @class */ (function () {
                     var recordKey = resourceType.getRecordKey(specs);
                     return _this.findRecordByKey(resourceType, recordKey);
                 default:
-                    var table = _this.getRecordTable(resourceType);
+                    var table = _this.getTable(resourceType);
                     return table.records.find(specs) || null;
             }
         };
-        this.findManyRecords = function (resourceType, predicate) {
-            var table = _this.getRecordTable(resourceType);
+        this.findMany = function (resourceType, predicate) {
+            var table = _this.getTable(resourceType);
             if (!table) {
                 return [];
             }
@@ -100,6 +96,11 @@ var Store = /** @class */ (function () {
                 return void _this.mapRecords(resourceType, data);
             }
             _this.mapRecord(resourceType, data);
+        };
+        this.findRecordByKey = function (resourceType, key) {
+            var table = _this.getTable(resourceType);
+            var resultByKey = table.findByKey(key);
+            return resultByKey;
         };
         this.resourceTypes = [];
         this.recordTables = {};

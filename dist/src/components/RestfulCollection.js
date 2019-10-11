@@ -5,22 +5,23 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -51,13 +52,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __importStar(require("react"));
-var utilities_1 = require("../utilities");
-var RestfulDataContainer = /** @class */ (function (_super) {
-    __extends(RestfulDataContainer, _super);
-    function RestfulDataContainer(props) {
+var core_1 = require("../core");
+var RestfulCollection = /** @class */ (function (_super) {
+    __extends(RestfulCollection, _super);
+    function RestfulCollection(props) {
         var _this = _super.call(this, props) || this;
         _this.isUnmounting = false;
-        _this.store = global[utilities_1.storeSymbol];
+        _this.store = global[core_1.storeSymbol];
         _this.onStoreEvent = function (e) {
             if (e.type === 'remove') {
                 return _this.onDataRemove(e.value);
@@ -201,7 +202,7 @@ var RestfulDataContainer = /** @class */ (function (_super) {
         };
         return _this;
     }
-    RestfulDataContainer.getDerivedStateFromProps = function (nextProps, currentState) {
+    RestfulCollection.getDerivedStateFromProps = function (nextProps, currentState) {
         if (currentState.needsUpdateSource) {
             return {
                 dataSource: currentState.dataSource,
@@ -219,15 +220,15 @@ var RestfulDataContainer = /** @class */ (function (_super) {
         }
         return null;
     };
-    RestfulDataContainer.prototype.componentDidMount = function () {
+    RestfulCollection.prototype.componentDidMount = function () {
         var resourceType = this.props.resourceType;
         this.unsubscribeStore = this.store.subscribe([resourceType], this.onStoreEvent);
     };
-    RestfulDataContainer.prototype.componentWillUnmount = function () {
+    RestfulCollection.prototype.componentWillUnmount = function () {
         this.isUnmounting = true;
         this.unsubscribeStore();
     };
-    RestfulDataContainer.prototype.render = function () {
+    RestfulCollection.prototype.render = function () {
         var children = this.props.children;
         if (!children) {
             return null;
@@ -235,9 +236,9 @@ var RestfulDataContainer = /** @class */ (function (_super) {
         var dataSource = this.getRenderDataSource();
         return children(dataSource);
     };
-    RestfulDataContainer.defaultProps = {
+    RestfulCollection.defaultProps = {
         shouldAppendNewRecord: true
     };
-    return RestfulDataContainer;
+    return RestfulCollection;
 }(React.PureComponent));
-exports.RestfulDataContainer = RestfulDataContainer;
+exports.RestfulCollection = RestfulCollection;

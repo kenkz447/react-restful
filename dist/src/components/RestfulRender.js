@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -24,10 +24,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -67,7 +68,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __importStar(require("react"));
-var utilities_1 = require("../utilities");
+var core_1 = require("../core");
 var RestfulRender = /** @class */ (function (_super) {
     __extends(RestfulRender, _super);
     function RestfulRender(props) {
@@ -116,14 +117,14 @@ var RestfulRender = /** @class */ (function (_super) {
         }); };
         var render = props.render, initData = props.initData, initFetch = props.initFetch;
         _this.Component = render;
-        var needsFetching = initFetch || !initData;
-        _this.state = __assign({}, props, { fetcher: props.fetcher || global[utilities_1.fetcherSymbol], fetching: needsFetching, componentRenderProps: {
+        var needsFetch = initFetch || !initData;
+        _this.state = __assign(__assign({}, props), { fetcher: props.fetcher || global[core_1.fetcherSymbol], fetching: needsFetch, componentRenderProps: {
                 data: initData || null,
                 error: null,
                 refetch: _this.fetching,
-                fetching: needsFetching
+                fetching: needsFetch
             } });
-        if (needsFetching) {
+        if (needsFetch) {
             _this.fetching();
         }
         return _this;
@@ -132,7 +133,7 @@ var RestfulRender = /** @class */ (function (_super) {
         var isResourceChanged = nextProps.resource !== prevState.resource;
         var isParamsChanged = JSON.stringify(nextProps.parameters) !== JSON.stringify(prevState.parameters);
         if (isResourceChanged || isParamsChanged) {
-            return __assign({}, nextProps, { prevParams: prevState.parameters, componentRenderProps: __assign({}, prevState.componentRenderProps, { fetching: true }), needsUpdate: true, fetching: true });
+            return __assign(__assign({}, nextProps), { prevParams: prevState.parameters, componentRenderProps: __assign(__assign({}, prevState.componentRenderProps), { fetching: true }), needsUpdate: true, fetching: true });
         }
         return null;
     };
@@ -152,7 +153,7 @@ var RestfulRender = /** @class */ (function (_super) {
         if (children) {
             return children(componentRenderProps);
         }
-        throw new Error('Missing render!');
+        return null;
     };
     RestfulRender.defaultProps = {
         parameters: []

@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -13,10 +13,11 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -56,10 +57,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __importStar(require("react"));
-var utilities_1 = require("../utilities");
-var RequestHelper = /** @class */ (function (_super) {
-    __extends(RequestHelper, _super);
-    function RequestHelper(props) {
+var core_1 = require("../core");
+var RestfulMutate = /** @class */ (function (_super) {
+    __extends(RestfulMutate, _super);
+    function RestfulMutate(props) {
         var _this = _super.call(this, props) || this;
         _this.sendRequest = function (params, meta) { return __awaiter(_this, void 0, void 0, function () {
             var _a, resource, defaultRequestParams, defaultRequestMeta, needsConfirm, confirmMessage, confirmDescription, globalFetcher, fetchResource, onRequestConfirm, requestParams, requestMeta, confirmed, data, error_1;
@@ -70,7 +71,7 @@ var RequestHelper = /** @class */ (function (_super) {
                             return [2 /*return*/, false];
                         }
                         _a = this.props, resource = _a.resource, defaultRequestParams = _a.defaultRequestParams, defaultRequestMeta = _a.defaultRequestMeta, needsConfirm = _a.needsConfirm, confirmMessage = _a.confirmMessage, confirmDescription = _a.confirmDescription;
-                        globalFetcher = global[utilities_1.fetcherSymbol];
+                        globalFetcher = global[core_1.fetcherSymbol];
                         fetchResource = globalFetcher.fetchResource, onRequestConfirm = globalFetcher.onRequestConfirm;
                         requestParams = params || defaultRequestParams;
                         requestMeta = meta || defaultRequestMeta;
@@ -116,12 +117,12 @@ var RequestHelper = /** @class */ (function (_super) {
         };
         return _this;
     }
-    RequestHelper.prototype.render = function () {
+    RestfulMutate.prototype.render = function () {
         var children = this.props.children;
         var sending = this.state.sending;
         var ChildComponent = children;
         return (React.createElement(ChildComponent, { sendRequest: this.sendRequest, sending: sending }));
     };
-    return RequestHelper;
+    return RestfulMutate;
 }(React.PureComponent));
-exports.RequestHelper = RequestHelper;
+exports.RestfulMutate = RestfulMutate;

@@ -5,8 +5,6 @@ import { Store } from './Store';
 import { Record } from './RecordTable';
 import { ResourceType } from './ResourceType';
 import { SchemaError } from './SchemaError';
-import { string } from 'yup';
-import { object } from 'prop-types';
 
 export type RequestParams = RequestParameter[] | RequestParameter;
 
@@ -60,7 +58,7 @@ export interface FetcherProps {
      * Fetch method
      * Default: window.fetch
      */
-    fetchMethod?: GlobalFetch['fetch'];
+    fetchMethod?: WindowOrWorkerGlobalScope['fetch'];
 
     /**
      * Store instance

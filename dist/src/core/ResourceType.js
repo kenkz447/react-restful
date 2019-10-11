@@ -43,8 +43,8 @@ var ResourceType = /** @class */ (function () {
         }
     }
     ResourceType.prototype.getAllRecords = function (store, predicate) {
-        var getRecordTable = store.getRecordTable;
-        var recordTable = getRecordTable(this);
+        var getTable = store.getTable;
+        var recordTable = getTable(this);
         var result = predicate ? recordTable.records.filter(predicate) : recordTable.records;
         return result;
     };

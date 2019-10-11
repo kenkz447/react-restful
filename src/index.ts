@@ -21,8 +21,6 @@ export {
     RequestInfo,
     RequestParams,
     RequestConfirmInfo,
-    upsertRequestParams,
-    getParamsValue,
     SchemaError
 } from './core';
 

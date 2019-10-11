@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Resource, Fetcher, RequestParams } from '../utilities';
+import { Resource, Fetcher, RequestParams } from '../core';
 export interface RestfulRenderChildProps<R> {
     data: R | null;
     error: Error | null;

@@ -13,8 +13,8 @@ var __assign = (this && this.__assign) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Fetcher_1 = require("./Fetcher");
 var ResourceType_1 = require("./ResourceType");
-exports.storeSymbol = Symbol();
-exports.fetcherSymbol = Symbol();
+exports.storeSymbol = 'Symbol' in global ? Symbol() : 'REACT_RESTFUL_STORE';
+exports.fetcherSymbol = 'Symbol' in global ? Symbol() : 'REACT_RESTFUL_FETCHER';
 exports.setupEnvironment = function (options) {
     var store = options.store;
     ResourceType_1.ResourceType.unRegisterTypes.map(function (o) { return store.registerResourceType(o); });

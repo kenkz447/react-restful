@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { ResourceType } from '../utilities';
-export interface RestfulDataContainerProps<T> {
+import { ResourceType } from '../core';
+export interface RestfulCollectionProps<T> {
     resourceType: ResourceType<T>;
     initDataSource: Array<T>;
     shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
@@ -11,19 +11,19 @@ export interface RestfulDataContainerProps<T> {
     onNewRecordsMapping?: (records: T[]) => void;
     enablePaginationMode?: boolean;
 }
-interface RestfulDataContainerState<T> {
+interface RestfulCollectionState<T> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
     initDataSource: Array<T>;
 }
-export declare class RestfulDataContainer<T> extends React.PureComponent<RestfulDataContainerProps<T>, RestfulDataContainerState<T>> {
+export declare class RestfulCollection<T> extends React.PureComponent<RestfulCollectionProps<T>, RestfulCollectionState<T>> {
     static defaultProps: {
         shouldAppendNewRecord: boolean;
     };
     private isUnmounting;
     private store;
     private unsubscribeStore;
-    static getDerivedStateFromProps(nextProps: RestfulDataContainerProps<{}>, currentState: RestfulDataContainerState<{}>): {
+    static getDerivedStateFromProps(nextProps: RestfulCollectionProps<{}>, currentState: RestfulCollectionState<{}>): {
         dataSource: {}[];
         needsUpdateSource: boolean;
         initDataSource?: undefined;
@@ -32,7 +32,7 @@ export declare class RestfulDataContainer<T> extends React.PureComponent<Restful
         initDataSource: {}[];
         needsUpdateSource?: undefined;
     } | null;
-    constructor(props: RestfulDataContainerProps<T>);
+    constructor(props: RestfulCollectionProps<T>);
     componentDidMount(): void;
     componentWillUnmount(): void;
     private onStoreEvent;

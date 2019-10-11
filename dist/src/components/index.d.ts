@@ -1,3 +1,3 @@
 export * from './RestfulRender';
-export * from './RestfulDataContainer';
-export * from './RequestHelper';
+export * from './RestfulCollection';
+export * from './RestfulMutate';

@@ -97,7 +97,7 @@ export class SchemaError extends Error {
             throw Error('Resource bodySchema found but missing request params!');
         }
 
-        const body = getParamsValue<R>(params, 'body');
+        const body = getParamsValue(params, 'body') as R;
 
         if (!body) {
             throw Error('Resource bodySchema found but missing request body!');

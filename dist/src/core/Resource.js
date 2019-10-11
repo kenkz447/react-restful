@@ -30,15 +30,16 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var shouldParmeterIgnore = function (param) {
@@ -55,8 +56,8 @@ var Resource = /** @class */ (function () {
             return __spread(requestParams, [params]);
         };
         this.urlReslover = function (params, parser) {
-            if (params === void 0) { params = []; }
             var e_1, _a, e_2, _b;
+            if (params === void 0) { params = []; }
             var _c = _this.props, getDefaultParams = _c.getDefaultParams, url = _c.url;
             var uRL = url;
             var searchs = new URLSearchParams();
@@ -75,7 +76,7 @@ var Resource = /** @class */ (function () {
                     else {
                         if (Array.isArray(paramValue)) {
                             try {
-                                for (var paramValue_1 = __values(paramValue), paramValue_1_1 = paramValue_1.next(); !paramValue_1_1.done; paramValue_1_1 = paramValue_1.next()) {
+                                for (var paramValue_1 = (e_2 = void 0, __values(paramValue)), paramValue_1_1 = paramValue_1.next(); !paramValue_1_1.done; paramValue_1_1 = paramValue_1.next()) {
                                     var paramValueItem = paramValue_1_1.value;
                                     searchs.append(param.parameter, paramValueItem);
                                 }
@@ -111,7 +112,7 @@ var Resource = /** @class */ (function () {
             };
         }
         else {
-            this.props = __assign({}, props, { resourceType: props.resourceType, url: Resource.getUrl(props.url), method: props.method || 'GET' });
+            this.props = __assign(__assign({}, props), { resourceType: props.resourceType, url: Resource.getUrl(props.url), method: props.method || 'GET' });
         }
     }
     Resource.prototype.requestInitReslover = function (params, requestBodyParser) {

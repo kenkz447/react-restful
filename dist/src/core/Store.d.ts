@@ -22,13 +22,13 @@ export declare class Store {
     unSubscribe: (subscribeId: Symbol) => void;
     resourceTypeHasRegistered: (resourceTypeName: string) => boolean;
     getRegisteredResourceType: (resourceTypeName: string) => ResourceType<{}>;
-    getRecordTable: <T>(resourceType: ResourceType<T>) => RecordTable<T>;
+    getTable: <T>(resourceType: ResourceType<T>) => RecordTable<T>;
     registerResourceType: <T>(resourceType: ResourceType<T>) => void;
-    removeRecord: <T>(resourceType: ResourceType<T>, record: T) => boolean;
-    findRecordByKey: <T extends Record>(resourceType: ResourceType<T>, key: string | number) => T | null;
-    findOneRecord: <T extends Record>(resourceType: ResourceType<T>, specs: string | number | T | findRecordPredicate<T>) => T | null;
-    findManyRecords: <T extends Record>(resourceType: ResourceType<T>, predicate: findRecordPredicate<T>) => T[];
+    removeOne: <T>(resourceType: ResourceType<T>, record: T) => boolean;
+    findOne: <T extends Record>(resourceType: ResourceType<T>, specs: string | number | T | findRecordPredicate<T>) => T | null;
+    findMany: <T extends Record>(resourceType: ResourceType<T>, predicate: findRecordPredicate<T>) => T[];
     dataMapping: <T>(resourceType: ResourceType<T>, data: T | T[]) => undefined;
+    private findRecordByKey;
     private mapRecords;
     private mapRecord;
     private doSubcribleCallbacks;

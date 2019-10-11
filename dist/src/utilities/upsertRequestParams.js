@@ -20,7 +20,7 @@ exports.upsertRequestParams = function (params, type, parameter, value) {
     }
     var nextParams = params.map(function (param) {
         if (param.type === type && param.parameter === parameter) {
-            return __assign({}, param, { value: value });
+            return __assign(__assign({}, param), { value: value });
         }
         return param;
     });
@@ -33,14 +33,4 @@ exports.upsertRequestParams = function (params, type, parameter, value) {
         });
     }
     return nextParams;
-};
-exports.getParamsValue = function (params, type, parameter) {
-    if (!params) {
-        return null;
-    }
-    if (Array.isArray(params)) {
-        var param = params.find(function (o) { return o.parameter === parameter && o.type === type; });
-        return param ? param.value : null;
-    }
-    return params.value;
 };
