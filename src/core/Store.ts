@@ -71,7 +71,7 @@ export class Store {
         return resourceType;
     }
 
-    getRecordTable = <T>(resourceType: ResourceType<T>) => {
+    getTable = <T>(resourceType: ResourceType<T>) => {
         return this.recordTables[resourceType.props.name] as RecordTable<T>;
     }
 
@@ -89,7 +89,7 @@ export class Store {
         this.resourceTypes.push(resourceType);
     }
 
-    removeRecord = <T>(resourceType: ResourceType<T>, record: T) => {
+    removeOne = <T>(resourceType: ResourceType<T>, record: T) => {
         const table = this.recordTables[resourceType.props.name];
         table.remove(record);
         this.doSubcribleCallbacks({
@@ -100,13 +100,7 @@ export class Store {
         return true;
     }
 
-    findRecordByKey = <T extends Record>(resourceType: ResourceType<T>, key: string | number) => {
-        const table = this.getRecordTable<T>(resourceType);
-        const resultByKey = table.findByKey(key);
-        return resultByKey;
-    }
-
-    findOneRecord = <T extends Record>(
+    findOne = <T extends Record>(
         resourceType: ResourceType<T>,
         specs: findRecordPredicate<T> | T | string | number
     ): T | null => {
@@ -123,16 +117,16 @@ export class Store {
                 const recordKey = resourceType.getRecordKey(specs as T);
                 return this.findRecordByKey(resourceType, recordKey);
             default:
-                const table = this.getRecordTable<T>(resourceType);
+                const table = this.getTable<T>(resourceType);
                 return table.records.find(specs as findRecordPredicate<T>) || null;
         }
     }
 
-    findManyRecords = <T extends Record>(
+    findMany = <T extends Record>(
         resourceType: ResourceType<T>,
         predicate: findRecordPredicate<T>
     ): T[] => {
-        const table = this.getRecordTable<T>(resourceType);
+        const table = this.getTable<T>(resourceType);
         if (!table) {
             return [];
         }
@@ -146,6 +140,12 @@ export class Store {
         }
 
         this.mapRecord(resourceType, data);
+    }
+
+    private findRecordByKey = <T extends Record>(resourceType: ResourceType<T>, key: string | number) => {
+        const table = this.getTable<T>(resourceType);
+        const resultByKey = table.findByKey(key);
+        return resultByKey;
     }
 
     private mapRecords<T>(resourceType: ResourceType<T>, records: Array<T>) {

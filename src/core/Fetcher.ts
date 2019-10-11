@@ -117,7 +117,7 @@ export interface FetcherProps {
     onRequestError?: (url: string, requestInit: RequestInit, error: Error) => Promise<any>;
 
     /**
-     * If used RequestHelper, your have option to make a confirmation message before perform the request.
+     * If used RestfulMutate, your have option to make a confirmation message before perform the request.
      * Using onConfirm to allow you setup a defaul confirm method for every request.
      * @param {RequestConfirmInfo} confirmInfo - object contains confirm message, description and request resource.
      * @returns {Promise<boolean>} Promise resolve with an boolean, true synonymous with 'yes'.

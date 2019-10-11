@@ -1,11 +1,11 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 
-import { RestfulDataContainer } from '../RestfulDataContainer';
+import { RestfulCollection } from '../RestfulCollection';
 import { User, userResourceType } from '../../test-resources';
-import { setupEnvironment, Store, ResourceType } from '../../utilities';
+import { setupEnvironment, Store, ResourceType } from '../../core';
 
-describe('RestfulDataContainer', () => {
+describe('RestfulCollection', () => {
     const initDataSource: User[] = [{
         id: 1,
         name: 'test1'
@@ -31,7 +31,7 @@ describe('RestfulDataContainer', () => {
         const render = jest.fn(() => null);
 
         ReactTestRenderer.create(
-            <RestfulDataContainer
+            <RestfulCollection
                 initDataSource={[]}
                 resourceType={userResourceType2}
                 children={render}
@@ -47,14 +47,14 @@ describe('RestfulDataContainer', () => {
 
         it('should re-render when record remove', () => {
             render.mockClear();
-            store.removeRecord(userResourceType2, { id: 88 });
+            store.removeOne(userResourceType2, { id: 88 });
 
             expect(render).not.toBeCalled();
         });
 
         it('should re-render when record remove', () => {
             render.mockClear();
-            store.removeRecord(userResourceType2, record);
+            store.removeOne(userResourceType2, record);
 
             expect(render).toBeCalledWith([]);
         });
@@ -64,7 +64,7 @@ describe('RestfulDataContainer', () => {
         const render = jest.fn(() => null);
 
         ReactTestRenderer.create(
-            <RestfulDataContainer
+            <RestfulCollection
                 initDataSource={initDataSource}
                 resourceType={userResourceType}
                 children={render}
@@ -99,7 +99,7 @@ describe('RestfulDataContainer', () => {
         const singleInitDataSource = [initSingleRecord];
         const singleRecordRenderer = jest.fn(() => null);
         ReactTestRenderer.create(
-            <RestfulDataContainer
+            <RestfulCollection
                 initDataSource={singleInitDataSource}
                 resourceType={userResourceType}
                 shouldAppendNewRecord={() => false}
@@ -129,7 +129,7 @@ describe('RestfulDataContainer', () => {
         const paginationRenderer = jest.fn(() => null);
 
         ReactTestRenderer.create(
-            <RestfulDataContainer
+            <RestfulCollection
                 initDataSource={paginationInitDataSource}
                 resourceType={userResourceType}
                 enablePaginationMode={true}
@@ -145,7 +145,7 @@ describe('RestfulDataContainer', () => {
             paginationRenderer.mockClear();
 
             ReactTestRenderer.create(
-                <RestfulDataContainer
+                <RestfulCollection
                     initDataSource={[user102]}
                     resourceType={userResourceType}
                     enablePaginationMode={true}

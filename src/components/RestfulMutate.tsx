@@ -1,30 +1,30 @@
 import * as React from 'react';
-import { Resource, RequestParams, fetcherSymbol, Fetcher, Record } from '../utilities';
+import { Resource, RequestParams, fetcherSymbol, Fetcher, Record } from '../core';
 
-interface RequestHelperChildProps<DataModel, Meta> {
+interface RestfulMutateChildProps<DataModel, Meta> {
     sendRequest: (params?: RequestParams, meta?: Meta) => Promise<DataModel | false>;
     sending: boolean;
 }
 
-export interface RequestHelperProps<DataModel, Meta = {}> {
+export interface RestfulMutateProps<DataModel, Meta = {}> {
     resource: Resource<DataModel>;
     defaultRequestParams?: RequestParams;
     defaultRequestMeta?: Meta;
     needsConfirm?: boolean;
     confirmDescription?: string;
     confirmMessage?: string;
-    children: React.ComponentType<RequestHelperChildProps<DataModel, Meta>>;
+    children: React.ComponentType<RestfulMutateChildProps<DataModel, Meta>>;
 }
 
-interface RequestHelperState<DataModel extends Record, Meta> {
+interface RestfulMutateState<DataModel extends Record, Meta> {
     sending: boolean;
 }
 
-export class RequestHelper<DataModel extends Record, Meta> extends React.PureComponent<
-    RequestHelperProps<DataModel, Meta>,
-    RequestHelperState<DataModel, Meta>> {
+export class RestfulMutate<DataModel extends Record, Meta> extends React.PureComponent<
+    RestfulMutateProps<DataModel, Meta>,
+    RestfulMutateState<DataModel, Meta>> {
 
-    constructor(props: RequestHelperProps<DataModel, Meta>) {
+    constructor(props: RestfulMutateProps<DataModel, Meta>) {
         super(props);
 
         this.state = {

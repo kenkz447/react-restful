@@ -25,7 +25,7 @@ describe('Store', () => {
     describe('instance', () => {
         it('register record type', () => {
             store.registerResourceType(userResourceType);
-            table = store.getRecordTable(userResourceType);
+            table = store.getTable(userResourceType);
             const registeredResourceType = store.getRegisteredResourceType(userResourceType.props.name);
 
             expect(table instanceof RecordTable).toBe(true);
@@ -34,27 +34,27 @@ describe('Store', () => {
 
         it('map record to table', () => {
             store.dataMapping(userResourceType, testUser);
-            const storedUser = store.findRecordByKey(userResourceType, testUser.id);
+            const storedUser = store.findOne(userResourceType, testUser.id);
             expect(storedUser).toEqual(testUser);
         });
 
         it('find one record by predicate', () => {
-            const storedUser = store.findOneRecord(userResourceType, (user) => {
+            const storedUser = store.findOne(userResourceType, (user) => {
                 return user.name.includes('tes');
             });
             expect(storedUser).toEqual(testUser);
         });
 
         it('find many records', () => {
-            const storedUser = store.findManyRecords(userResourceType, (user) => {
+            const storedUser = store.findMany(userResourceType, (user) => {
                 return user.name.includes('tes');
             });
             expect(storedUser).toEqual([testUser]);
         });
 
         it('remove record from table', () => {
-            const removeResult = store.removeRecord(userResourceType, testUser);
-            const storedUser = store.findRecordByKey(userResourceType, testUser.id);
+            const removeResult = store.removeOne(userResourceType, testUser);
+            const storedUser = store.findOne(userResourceType, testUser.id);
 
             expect(removeResult).toBe(true);
             expect(storedUser).toBe(null);

@@ -1,6 +1,6 @@
 
-import { upsertRequestParams } from '../utils';
-import { RequestParams } from '../Fetcher';
+import { upsertRequestParams } from '../upsertRequestParams';
+import { RequestParams } from '../../core';
 
 describe('Utilities', () => {
     describe('upsertRequestParams', () => {

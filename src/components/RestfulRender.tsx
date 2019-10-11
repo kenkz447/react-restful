@@ -4,7 +4,7 @@ import {
     Fetcher,
     fetcherSymbol,
     RequestParams
-} from '../utilities';
+} from '../core';
 
 export interface RestfulRenderChildProps<R> {
     // Resonse result, default: null
@@ -89,25 +89,25 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
 
         this.Component = render;
 
-        const needsFetching = initFetch || !initData;
+        const needsFetch = initFetch || !initData;
 
         this.state = {
             ...props,
             fetcher: props.fetcher || global[fetcherSymbol],
-            fetching: needsFetching,
+            fetching: needsFetch,
             componentRenderProps: {
                 data: initData || null,
                 error: null,
                 refetch: this.fetching,
-                fetching: needsFetching
+                fetching: needsFetch
             }
         };
 
-        if (needsFetching) {
+        if (needsFetch) {
             this.fetching();
         }
     }
-
+    
     componentDidUpdate() {
         const { needsUpdate, fetching } = this.state;
         if (needsUpdate && fetching) {
@@ -123,12 +123,12 @@ export class RestfulRender<T> extends React.Component<RestfulRenderProps<T>, Res
         if (Component) {
             return <Component {...componentRenderProps} />;
         }
-        
+
         if (children) {
             return children(componentRenderProps);
         }
 
-        throw new Error('Missing render!');
+        return null;
     }
 
     fetching = async () => {

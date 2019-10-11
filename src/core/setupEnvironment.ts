@@ -2,8 +2,8 @@ import { FetcherProps, Fetcher } from './Fetcher';
 import { Store } from './Store';
 import { ResourceType } from './ResourceType';
 
-export let storeSymbol = Symbol();
-export let fetcherSymbol = Symbol();
+export let storeSymbol = 'Symbol' in global ? Symbol() : 'REACT_RESTFUL_STORE';
+export let fetcherSymbol = 'Symbol' in global ? Symbol() : 'REACT_RESTFUL_FETCHER';
 
 interface RestfulEnvironment {
     store: Store;
@@ -12,7 +12,7 @@ interface RestfulEnvironment {
 
 export const setupEnvironment = (options: FetcherProps): RestfulEnvironment => {
     const { store } = options;
-    
+
     ResourceType.unRegisterTypes.map(o => store.registerResourceType(o));
 
     const fetcher = new Fetcher({

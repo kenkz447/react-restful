@@ -2,10 +2,10 @@ export {
     RestfulRenderChildProps,
     RestfulRender,
     RestfulRenderProps,
-    RequestHelper,
-    RequestHelperProps,
-    RestfulDataContainer,
-    RestfulDataContainerProps
+    RestfulMutate,
+    RestfulMutateProps,
+    RestfulCollection,
+    RestfulCollectionProps
 } from './components';
 
 export {
@@ -24,4 +24,6 @@ export {
     upsertRequestParams,
     getParamsValue,
     SchemaError
-} from './utilities';
+} from './core';
+
+export * from './utilities';

@@ -1,7 +1,7 @@
 import { ValidationError } from 'yup';
 import { Resource } from './Resource';
 import { RequestParams } from './Fetcher';
-import { getParamsValue } from './utils';
+import { getParamsValue } from '../utilities/getParamsValue';
 
 import toPath from 'lodash/toPath';
 import cloneDeep from 'lodash.clonedeep';

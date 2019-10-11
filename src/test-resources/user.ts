@@ -1,4 +1,4 @@
-import { ResourceType } from '../utilities';
+import { ResourceType } from '../core';
 export interface User {
     readonly id: number;
     readonly name: string;

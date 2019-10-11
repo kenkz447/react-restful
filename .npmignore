@@ -26,3 +26,4 @@ __mocks__
 **/*.test.ts
 **/*.test.tsx
 **/test-resources/*
+src

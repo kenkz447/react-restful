@@ -1,4 +1,4 @@
-import { Record, ResourceType, Resource } from '../utilities';
+import { Record, ResourceType, Resource } from '../core';
 
 export interface Pet extends Record {
     readonly id: number;

@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import * as testRenderer from 'react-test-renderer';
-import { RequestHelper, RequestHelperProps } from '../RequestHelper';
+import { RestfulMutate, RestfulMutateProps } from '../RestfulMutate';
 import { User } from '../../test-resources';
-import { Resource, setupEnvironment, Store } from '../../utilities';
+import { Resource, setupEnvironment, Store } from '../../core';
 
-describe('RequestHelper', () => {
+describe('RestfulMutate', () => {
     const onConfirm = jest.fn(() => true);
     setupEnvironment({
         store: new Store(),
@@ -13,7 +13,7 @@ describe('RequestHelper', () => {
     });
 
     const renderChild = jest.fn((props) => <button>button</button>);
-    const requestHelperProps: RequestHelperProps<User> = {
+    const requestHelperProps: RestfulMutateProps<User> = {
         resource: new Resource('/user'),
         children: (props) => {
             return renderChild(props);
@@ -21,13 +21,13 @@ describe('RequestHelper', () => {
     };
 
     const element = testRenderer.create(
-        <RequestHelper
+        <RestfulMutate
             {...requestHelperProps}
         />
     );
 
     // tslint:disable-next-line:no-any
-    const requestHelperInstance: RequestHelper<User, {}> = element.getInstance() as any;
+    const requestHelperInstance: RestfulMutate<User, {}> = element.getInstance() as any;
 
     it('render without error!', () => {
         expect(renderChild).toBeCalledWith({
@@ -50,7 +50,7 @@ describe('RequestHelper', () => {
         jest.clearAllMocks();
 
         element.update((
-            <RequestHelper
+            <RestfulMutate
                 {...requestHelperProps}
                 confirmMessage="confirm?"
             />

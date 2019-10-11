@@ -53,8 +53,8 @@ export class ResourceType<T> {
     }
 
     getAllRecords(store: Store, predicate?: (record: T) => boolean) {
-        const { getRecordTable } = store;
-        const recordTable: RecordTable<T> = getRecordTable(this);
+        const { getTable } = store;
+        const recordTable: RecordTable<T> = getTable(this);
         const result = predicate ? recordTable.records.filter(predicate) : recordTable.records;
         return result;
     }

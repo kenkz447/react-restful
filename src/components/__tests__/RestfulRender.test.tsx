@@ -1,7 +1,7 @@
 import fetch, { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { Resource, RequestParameter, Store, Fetcher } from '../../utilities';
+import { Resource, RequestParameter, Store, Fetcher } from '../../core';
 import { RestfulRender } from '../RestfulRender';
 
 import { userResourceType, User } from '../../test-resources';
@@ -174,26 +174,6 @@ describe('RestfulRender', () => {
                 fetching: false,
                 refetch: refetchFunc
             });
-        });
-    });
-
-    describe('without render props', () => {
-        it('should given an error', () => {
-            expect.assertions(2);
-
-            try {
-                ReactTestRenderer.create(
-                    <RestfulRender
-                        fetcher={fetcher}
-                        resource={getUserByBranchResource}
-                        parameters={paramsProps}
-                        initData={testUserData}
-                    />
-                );
-            } catch (error) {
-                expect(error).toBeInstanceOf(Error);
-                expect(error.message).toBe('Missing render!');
-            }
         });
     });
 });

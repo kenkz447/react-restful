@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { ResourceType, storeSymbol, Store, SubscribeEvent } from '../utilities';
+import { ResourceType, storeSymbol, Store, SubscribeEvent } from '../core';
 
-export interface RestfulDataContainerProps<T> {
+export interface RestfulCollectionProps<T> {
     resourceType: ResourceType<T>;
     initDataSource: Array<T>;
     shouldAppendNewRecord?: boolean | ((newRecord: T, index: number) => boolean);
@@ -13,15 +13,15 @@ export interface RestfulDataContainerProps<T> {
     enablePaginationMode?: boolean;
 }
 
-interface RestfulDataContainerState<T> {
+interface RestfulCollectionState<T> {
     needsUpdateSource?: boolean;
     dataSource: Array<T>;
     initDataSource: Array<T>;
 }
 
-export class RestfulDataContainer<T> extends React.PureComponent<
-    RestfulDataContainerProps<T>,
-    RestfulDataContainerState<T>> {
+export class RestfulCollection<T> extends React.PureComponent<
+    RestfulCollectionProps<T>,
+    RestfulCollectionState<T>> {
     static defaultProps = {
         shouldAppendNewRecord: true
     };
@@ -31,8 +31,8 @@ export class RestfulDataContainer<T> extends React.PureComponent<
     private unsubscribeStore!: () => void;
 
     static getDerivedStateFromProps(
-        nextProps: RestfulDataContainerProps<{}>,
-        currentState: RestfulDataContainerState<{}>
+        nextProps: RestfulCollectionProps<{}>,
+        currentState: RestfulCollectionState<{}>
     ) {
         if (currentState.needsUpdateSource) {
             return {
@@ -55,7 +55,7 @@ export class RestfulDataContainer<T> extends React.PureComponent<
         return null;
     }
 
-    constructor(props: RestfulDataContainerProps<T>) {
+    constructor(props: RestfulCollectionProps<T>) {
         super(props);
         const { initDataSource } = props;
         this.state = {

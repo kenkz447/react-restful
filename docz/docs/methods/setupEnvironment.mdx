@@ -143,7 +143,7 @@ Example:
     ) => {
        try {
             if (resource.props.method === 'DELETE') {
-                return void store.removeRecord(resourceType, response);
+                return void store.removeOne(resourceType, response);
             }
 
             store.dataMapping(resourceType, response.data);

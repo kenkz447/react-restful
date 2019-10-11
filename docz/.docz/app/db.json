@@ -11,10 +11,10 @@
     "themeConfig": {}
   },
   "entries": {
-    "docs/components/RestfulDataContainer.mdx": {
-      "name": "<RestfulDataContainer />",
+    "docs/components/RestfulCollection.mdx": {
+      "name": "<RestfulCollection />",
       "id": "3cdc3ee8d978f3b388565c2b03bf9f30",
-      "filepath": "docs/components/RestfulDataContainer.mdx",
+      "filepath": "docs/components/RestfulCollection.mdx",
       "link": null,
       "slug": "docs-components-restful-data-container",
       "route": "/docs-components-restful-data-container",

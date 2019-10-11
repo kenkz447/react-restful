@@ -1,6 +1,6 @@
 export const imports = {
-  'docs/components/RestfulDataContainer.mdx': () =>
-    import(/* webpackPrefetch: true, webpackChunkName: "docs-components-restful-data-container" */ 'docs/components/RestfulDataContainer.mdx'),
+  'docs/components/RestfulCollection.mdx': () =>
+    import(/* webpackPrefetch: true, webpackChunkName: "docs-components-restful-data-container" */ 'docs/components/RestfulCollection.mdx'),
   'docs/components/RestfulRender.mdx': () =>
     import(/* webpackPrefetch: true, webpackChunkName: "docs-components-restful-render" */ 'docs/components/RestfulRender.mdx'),
   'docs/methods/request.mdx': () =>
