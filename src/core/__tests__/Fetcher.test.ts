@@ -141,7 +141,7 @@ describe('Fetcher', () => {
 
         it('should silent with custom error handler', async () => {
             const error = 'silent!';
-            const unexpectedErrorCatched = jest.fn(() => error);
+            const unexpectedErrorCatched = jest.fn(() => Promise.resolve(error));
 
             const networkErrorFetcher = new Fetcher({
                 store: store,

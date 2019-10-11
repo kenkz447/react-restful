@@ -23,7 +23,7 @@ describe('ResourceType', () => {
         });
 
         it('map relateds record to store', () => {
-            const storeUser = restfulStore.findRecordByKey(userResourceType, testUser.id);
+            const storeUser = restfulStore.findOne(userResourceType, testUser.id);
             expect(storeUser).toEqual(testUser);
         });
 

@@ -6,7 +6,7 @@ export const getParamsValue = (
     parameter?: string
 ) => {
     if (!params) {
-        return null;
+        return;
     }
 
     if (Array.isArray(params)) {

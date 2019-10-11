@@ -6,7 +6,7 @@ import { User } from '../../test-resources';
 import { Resource, setupEnvironment, Store } from '../../core';
 
 describe('RestfulMutate', () => {
-    const onConfirm = jest.fn(() => true);
+    const onConfirm = jest.fn(() => new Promise<boolean>((r) => r(true)));
     setupEnvironment({
         store: new Store(),
         onConfirm: onConfirm

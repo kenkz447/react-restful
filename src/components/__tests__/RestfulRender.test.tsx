@@ -67,6 +67,19 @@ describe('RestfulRender', () => {
             });
         });
 
+        it('should render null if no render prop', () => {
+            const restfulRender2 = ReactTestRenderer.create(
+                <RestfulRender
+                    fetcher={fetcher}
+                    resource={getUserByBranchResource}
+                    parameters={paramsProps}
+                    onFetchCompleted={onFetchCompleted}
+                />
+            );
+
+            expect(restfulRender2.toJSON()).toEqual(null);
+        });
+
         it('should re-render when fetch complete', () => {
             expect(render.mock.calls[1][0]).toEqual({
                 error: null,
