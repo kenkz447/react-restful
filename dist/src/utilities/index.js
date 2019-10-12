@@ -7,3 +7,4 @@ __export(require("./createRequestParam"));
 __export(require("./getDefaultStore"));
 __export(require("./getParamsValue"));
 __export(require("./upsertRequestParams"));
+__export(require("./getDefaultFetcher"));
