@@ -1,9 +1,12 @@
 {
     "name": "react-restful",
-    "version": "3.0.0-alpha.5",
+    "version": "3.0.0-alpha.5.1",
     "description": "Another liblary for restful resources management for React app.",
     "main": "dist/index.js",
     "repository": "github:kenkz447/react-restful",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build:before": "rimraf ./dist",
         "build": "npm run build:before && tsc --p ./tsconfig.build.json",
