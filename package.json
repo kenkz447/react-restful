@@ -1,6 +1,6 @@
 {
     "name": "react-restful",
-    "version": "3.0.0-alpha.4",
+    "version": "3.0.0-alpha.5",
     "description": "Another liblary for restful resources management for React app.",
     "main": "dist/index.js",
     "repository": "github:kenkz447/react-restful",
