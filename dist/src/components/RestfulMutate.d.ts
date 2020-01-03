@@ -12,6 +12,7 @@ export interface RestfulMutateProps<DataModel, Meta = {}> {
     confirmDescription?: string;
     confirmMessage?: string;
     children: React.ComponentType<RestfulMutateChildProps<DataModel, Meta>>;
+    onSuccess?: (response: DataModel) => void;
 }
 interface RestfulMutateState<DataModel extends Record, Meta> {
     sending: boolean;

@@ -63,14 +63,14 @@ var RestfulMutate = /** @class */ (function (_super) {
     function RestfulMutate(props) {
         var _this = _super.call(this, props) || this;
         _this.sendRequest = function (params, meta) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, resource, defaultRequestParams, defaultRequestMeta, needsConfirm, confirmMessage, confirmDescription, globalFetcher, fetchResource, onRequestConfirm, requestParams, requestMeta, confirmed, data, error_1;
+            var _a, resource, defaultRequestParams, defaultRequestMeta, needsConfirm, confirmMessage, confirmDescription, onSuccess, globalFetcher, fetchResource, onRequestConfirm, requestParams, requestMeta, confirmed, data, error_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (this.state.sending) {
                             return [2 /*return*/, false];
                         }
-                        _a = this.props, resource = _a.resource, defaultRequestParams = _a.defaultRequestParams, defaultRequestMeta = _a.defaultRequestMeta, needsConfirm = _a.needsConfirm, confirmMessage = _a.confirmMessage, confirmDescription = _a.confirmDescription;
+                        _a = this.props, resource = _a.resource, defaultRequestParams = _a.defaultRequestParams, defaultRequestMeta = _a.defaultRequestMeta, needsConfirm = _a.needsConfirm, confirmMessage = _a.confirmMessage, confirmDescription = _a.confirmDescription, onSuccess = _a.onSuccess;
                         globalFetcher = global[core_1.fetcherSymbol];
                         fetchResource = globalFetcher.fetchResource, onRequestConfirm = globalFetcher.onRequestConfirm;
                         requestParams = params || defaultRequestParams;
@@ -99,6 +99,9 @@ var RestfulMutate = /** @class */ (function (_super) {
                         return [4 /*yield*/, fetchResource(resource, requestParams, requestMeta)];
                     case 4:
                         data = _b.sent();
+                        if (onSuccess) {
+                            onSuccess(data);
+                        }
                         return [2 /*return*/, data];
                     case 5:
                         error_1 = _b.sent();

@@ -14,6 +14,7 @@ export interface RestfulMutateProps<DataModel, Meta = {}> {
     confirmDescription?: string;
     confirmMessage?: string;
     children: React.ComponentType<RestfulMutateChildProps<DataModel, Meta>>;
+    onSuccess?: (response: DataModel) => void;
 }
 
 interface RestfulMutateState<DataModel extends Record, Meta> {
@@ -56,7 +57,8 @@ export class RestfulMutate<DataModel extends Record, Meta> extends React.PureCom
             defaultRequestMeta,
             needsConfirm,
             confirmMessage,
-            confirmDescription
+            confirmDescription,
+            onSuccess
         } = this.props;
 
         const globalFetcher = global[fetcherSymbol] as Fetcher;
@@ -89,6 +91,10 @@ export class RestfulMutate<DataModel extends Record, Meta> extends React.PureCom
                 requestParams,
                 requestMeta
             );
+
+            if (onSuccess) {
+                onSuccess(data);
+            }
 
             return data;
         } catch (error) {

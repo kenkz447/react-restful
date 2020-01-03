@@ -15,6 +15,7 @@ describe('RestfulMutate', () => {
     const renderChild = jest.fn((props) => <button>button</button>);
     const requestHelperProps: RestfulMutateProps<User> = {
         resource: new Resource('/user'),
+        onSuccess: jest.fn(),
         children: (props) => {
             return renderChild(props);
         }
@@ -36,10 +37,12 @@ describe('RestfulMutate', () => {
         });
     });
 
-    it('send request with default params!', () => {
+    it('send request with default params!', async () => {
         jest.clearAllMocks();
 
-        requestHelperInstance.sendRequest();
+        await requestHelperInstance.sendRequest();
+
+        expect(requestHelperProps.onSuccess).toBeCalled();
         expect(renderChild).toBeCalledWith({
             sending: true,
             sendRequest: requestHelperInstance.sendRequest
