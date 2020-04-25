@@ -1,11 +1,10 @@
 import * as yup from 'yup';
-import * as fetchMock from 'jest-fetch-mock';
+import fetchMock from 'jest-fetch-mock';
 import { Fetcher, RequestParameter } from '../Fetcher';
 import { Resource } from '../Resource';
-import { Store } from '../Store';
-
-import { userResourceType, User } from '../../test-resources';
 import { SchemaError } from '../SchemaError';
+import { Store } from '../Store';
+import { User, userResourceType } from '../../test-resources';
 
 describe('Fetcher', () => {
     const newUser: User = {

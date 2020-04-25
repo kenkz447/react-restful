@@ -20,6 +20,6 @@ interface RestfulMutateState<DataModel extends Record, Meta> {
 export declare class RestfulMutate<DataModel extends Record, Meta> extends React.PureComponent<RestfulMutateProps<DataModel, Meta>, RestfulMutateState<DataModel, Meta>> {
     constructor(props: RestfulMutateProps<DataModel, Meta>);
     render(): JSX.Element;
-    sendRequest: (params?: import("../core").RequestParameter | import("../core").RequestParameter[] | undefined, meta?: Meta | undefined) => Promise<false | DataModel>;
+    sendRequest: (params?: import("../core").RequestParameter[] | import("../core").RequestParameter | undefined, meta?: Meta | undefined) => Promise<false | DataModel>;
 }
 export {};

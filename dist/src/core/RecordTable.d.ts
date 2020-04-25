@@ -10,7 +10,7 @@ interface RecordTableProps<T> {
 export declare class RecordTable<T extends Record> {
     props: RecordTableProps<T>;
     recordMap: Map<string | number, T>;
-    readonly records: T[];
+    get records(): T[];
     constructor(props: RecordTableProps<T>);
     findByKey(key: string | number): T | null;
     upsert(record: T): string | true;

@@ -119,5 +119,5 @@ export declare class Fetcher {
      * @param {RequestParams} [params] - Array or a single RequestParameter object,
      * @param {Meta} [meta] - Anything, get it back in these hooks after fetch.
      */
-    fetchResource: <T, R = T, M = {}>(resource: Resource<T, R, M>, params?: RequestParameter | RequestParameter[] | undefined, meta?: M | undefined) => Promise<R>;
+    fetchResource: <T, R = T, M = {}>(resource: Resource<T, R, M>, params?: RequestParameter[] | RequestParameter | undefined, meta?: M | undefined) => Promise<R>;
 }

@@ -1,10 +1,15 @@
-import fetch, { mockResponse } from 'jest-fetch-mock';
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { Resource, RequestParameter, Store, Fetcher } from '../../core';
-import { RestfulRender } from '../RestfulRender';
+import fetch from 'jest-fetch-mock';
+import {
+    Fetcher,
+    RequestParameter,
+    Resource,
+    Store
+    } from '../../core';
+import { RestfulRender, RestfulRenderChildProps } from '../RestfulRender';
+import { User, userResourceType } from '../../test-resources';
 
-import { userResourceType, User } from '../../test-resources';
 
 describe('RestfulRender', () => {
     const restfulStore = new Store();
@@ -38,10 +43,10 @@ describe('RestfulRender', () => {
     const mockResponseDataStr = JSON.stringify(testUserData);
 
     describe('init props', () => {
-        const render = jest.fn(() => null);
+        const render = jest.fn<null, RestfulRenderChildProps<User[]>[]>(() => null);
         const onFetchCompleted = jest.fn();
 
-        mockResponse(mockResponseDataStr, {
+        fetch.mockResponse(mockResponseDataStr, {
             headers: { 'content-type': 'application/json' }
         });
 
