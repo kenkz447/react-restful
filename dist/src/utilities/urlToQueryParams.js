@@ -71,7 +71,12 @@ var getParamsAsObject = function (url) {
     }
     return params;
 };
-exports.urlToQueryParams = function (url) {
+exports.urlToQueryParams = function (url, paramFilters) {
     var obj = getParamsAsObject(url);
-    return objectToQueryParams_1.objectToQueryParams(obj);
+    var allParams = objectToQueryParams_1.objectToQueryParams(obj);
+    if (!paramFilters) {
+        return allParams;
+    }
+    var filteredParams = allParams.filter(function (o) { return paramFilters.includes(o.parameter); });
+    return filteredParams;
 };

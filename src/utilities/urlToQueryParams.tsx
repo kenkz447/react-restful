@@ -50,7 +50,15 @@ const getParamsAsObject = (url: string) => {
     return params;
 };
 
-export const urlToQueryParams = (url: string) => {
+export const urlToQueryParams = (url: string, paramFilters?: string[]) => {
     const obj = getParamsAsObject(url);
-    return objectToQueryParams(obj);
+    const allParams = objectToQueryParams(obj);
+    
+    if(!paramFilters) {
+        return allParams;
+    }
+    
+    const filteredParams = allParams.filter(o => paramFilters.includes(o.parameter!));
+
+    return filteredParams;
 };

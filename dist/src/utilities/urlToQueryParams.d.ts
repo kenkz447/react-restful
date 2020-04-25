@@ -1,1 +1,1 @@
-export declare const urlToQueryParams: (url: string) => import("..").RequestParameter[];
+export declare const urlToQueryParams: (url: string, paramFilters?: string[] | undefined) => import("..").RequestParameter[];
