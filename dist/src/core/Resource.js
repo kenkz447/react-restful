@@ -122,6 +122,13 @@ var Resource = /** @class */ (function () {
             return null;
         }
         var body = bodyParam.value;
+        if (body instanceof FormData) {
+            return {
+                headers: new Headers({}),
+                method: this.props.method,
+                body: body
+            };
+        }
         var requestBody = __assign({}, body);
         if (requestBodyParser) {
             var bodyKeys = Object.keys(body);

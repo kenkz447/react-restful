@@ -1,7 +1,12 @@
+import {
+    FetcherProps,
+    RequestInfo,
+    RequestParameter,
+    RequestParams
+    } from './Fetcher';
+import { ObjectSchema } from 'yup';
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
-import { ObjectSchema } from 'yup';
 
 export interface ResourceProps<T, R = T, M = {}> extends
     Pick<FetcherProps, 'requestBodyParser'>,
@@ -116,6 +121,13 @@ export class Resource<T, R = T, M = {}> {
         }
 
         const body = bodyParam.value as object;
+        if (body instanceof FormData) {
+            return {
+                headers: new Headers({}),
+                method: this.props.method,
+                body: body
+            } as RequestInit;
+        }
 
         let requestBody = { ...body };
 

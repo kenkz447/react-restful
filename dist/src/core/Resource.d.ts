@@ -1,7 +1,7 @@
+import { FetcherProps, RequestInfo, RequestParameter, RequestParams } from './Fetcher';
+import { ObjectSchema } from 'yup';
 import { ResourceType } from './ResourceType';
 import { Store } from './Store';
-import { RequestInfo, FetcherProps, RequestParameter, RequestParams } from './Fetcher';
-import { ObjectSchema } from 'yup';
 export interface ResourceProps<T, R = T, M = {}> extends Pick<FetcherProps, 'requestBodyParser'>, Pick<FetcherProps, 'onConfirm'> {
     /**
      * Get json data form Response instance after fetch.
